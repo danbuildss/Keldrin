@@ -54,3 +54,7 @@
 - 13 feeds / 36,375 rounds / 0 missing / 13 of 13 independently CONFIRMED (BACKEND_PROOF.md). The endpoint is built and **switched off** (NAV_HISTORY_PUBLIC) until the founder decides on Chainlink data rights.
 - Supabase tables are live (empty until the first scheduled run after merge).
 - Next: founder merges the PR → the scheduled run fills Supabase → founder decides on rights → enable → send MAXXAGENT the test link. Independent reviewer pass before go-live. Then Phase 6 (market-context) on approval.
+
+## Competitive review 001 (2026-11-27): Proof of Stock
+- Complementary: they do authenticity plus the live premium and sessions; Keldrin does history, corporate actions, risk and research. In their public code, none of our 8 core capabilities were found (docs/research/PROOF_OF_STOCK.md). No direction change.
+- Effect on Phase 6 (proposed): don't build DEX price or premium; keep market context focused on Chainlink round age and staleness, plus corporate actions per stock.

@@ -46,3 +46,8 @@ Full ledger with HTTP status, hashes and times: research/phase0/evidence/ledger.
 | Chainlink NAV proxies on Base (`getRoundData`, `phaseAggregators`) | NAV history | Onchain via Alchemy | **Redistribution terms not checked**: legal review |
 | B20 PolicyRegistry `0x8453…0002`, token `policyId`/`pausedFeatures` | Transfer-policy snapshot | Onchain | Public chain state |
 | NYSE holiday calendar | Market sessions | To decide (maintained file) | Facts, not copyrightable; cite the source |
+
+## Candidate source (2026-11-27; not approved)
+| Source | Use | Access | Rights |
+|---|---|---|---|
+| Proof of Stock API / MCP (proofofstock.xyz) | Live NAV/DEX premium and authenticity, instead of building our own | Free 60 units/min; x402 passes | Terms not checked; not reachable from this environment; founder decision |
