@@ -6,5 +6,8 @@
   "functions": {
     "api/index.mjs": { "maxDuration": 15 }
   },
-  "rewrites": [{ "source": "/:path*", "destination": "/api/index?__path=/:path*" }]
+  "rewrites": [
+    { "source": "/", "destination": "/api/index?__path=/" },
+    { "source": "/:path*", "destination": "/api/index?__path=/:path*" }
+  ]
 }
