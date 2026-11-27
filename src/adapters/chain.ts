@@ -110,6 +110,30 @@ export async function readMany(calls: { address: string; fn: Fn; args?: readonly
   return out;
 }
 
+/** Batched reads with any ABI (one function per call), through Multicall3 at one block. Failed sub-calls come back as null. */
+export async function readManyAbi(calls: { address: string; abi: readonly unknown[]; fn: string; args?: readonly unknown[] }[], block: bigint | "latest", batch = 150): Promise<(unknown | null)[]> {
+  const out: (unknown | null)[] = [];
+  for (let i = 0; i < calls.length; i += batch) {
+    const chunk = calls.slice(i, i + batch);
+    const data = encodeFunctionData({
+      abi: MULTICALL_ABI,
+      functionName: "aggregate3",
+      args: [chunk.map((c) => ({ target: c.address as Hex, allowFailure: true, callData: encodeFunctionData({ abi: c.abi, functionName: c.fn, args: c.args ?? [] } as never) }))],
+    });
+    const raw = await rpc<Hex>("eth_call", [{ to: MULTICALL3, data }, hexBlock(block)]);
+    const results = decodeFunctionResult({ abi: MULTICALL_ABI, functionName: "aggregate3", data: raw }) as readonly { success: boolean; returnData: Hex }[];
+    results.forEach((r, j) => {
+      if (!r.success || r.returnData === "0x") return out.push(null);
+      try {
+        out.push(decodeFunctionResult({ abi: chunk[j].abi, functionName: chunk[j].fn, data: r.returnData } as never));
+      } catch {
+        out.push(null);
+      }
+    });
+  }
+  return out;
+}
+
 export type DecodedLog = { eventName: string; args: Record<string, string>; logIndex: number; address: string; txHash: string; blockNumber: bigint };
 
 /** Decode the B20 events we care about; other logs are ignored. Values are stringified (no floats). */

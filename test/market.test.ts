@@ -66,17 +66,18 @@ test("market context: live round with age and staleness; graceful degradation; n
   await db.query("INSERT INTO nav_feeds (chain_id, token_address, feed_address, symbol, description, decimals, source) VALUES (8453,$1,$2,'NVDAc','Coinbase NVDA',8,'test')", [TOKEN, FEED]);
   const now = new Date("2026-11-28T15:00:00Z");
   const reader = async () => ({ round_id: "36893488147419105182", answer_raw: "15284717833", updated_unix: t("2026-11-27T17:55:00Z"), read_at: now.toISOString() });
+  const noDex = async () => ({ status: 200, body: { data: { main: null, unavailable_reason: "no_verified_pools" } } });
   try {
-    assert.equal((await marketContext(db, "0x1111111111111111111111111111111111111111", now, reader)).status, 404);
-    const noFeed: any = await marketContext(db, "0xb2000000000000000000002d0ba3164cc74f58b7", now, reader);
+    assert.equal((await marketContext(db, "0x1111111111111111111111111111111111111111", now, reader, noDex)).status, 404);
+    const noFeed: any = await marketContext(db, "0xb2000000000000000000002d0ba3164cc74f58b7", now, reader, noDex);
     assert.equal(noFeed.body.data.nav_unavailable_reason, "no_nav_feed");
     assert.equal(noFeed.body.data.market.session, "weekend", "the session is still answered");
-    const unverified: any = await marketContext(db, TOKEN, now, reader);
+    const unverified: any = await marketContext(db, TOKEN, now, reader, noDex);
     assert.equal(unverified.body.data.nav, null);
     assert.equal(unverified.body.data.nav_unavailable_reason, "feed_not_verified", "fails closed without a CONFIRMED review");
     await db.query("INSERT INTO nav_phases (chain_id, feed_address, phase_id, aggregator_address, aggregator_decimals, proxy_decimals, live_from_block, live_from_time, live_to_block, live_to_time, observed_block) VALUES (8453,$1,2,'0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675',8,8,49669080,'2026-08-07T18:31:47Z',NULL,NULL,1)", [FEED]);
     await insertNavReview(db, FEED, { verdict: "CONFIRMED", sampled: 1, mismatches: 0, claims: [], checked_at: "2026-11-27T19:00:00.000Z", covered: [{ phase: 2, max_round_id: "36893488147419105182", phase_observed_block: "1" }], verifier_rpc_host: "v" }, 1, { official_rounds: 1, missing_round_ids: [], max_in_session_gap_s: 3000, p99_in_session_gap_s: 1200, overlap_rounds_excluded: 0, decimals_conflict_phases: [] });
-    const ok: any = await marketContext(db, TOKEN, now, reader);
+    const ok: any = await marketContext(db, TOKEN, now, reader, noDex);
     assert.equal(ok.status, 200);
     const d = ok.body.data;
     assert.equal(d.nav.nav, "152.84717833");
@@ -84,11 +85,11 @@ test("market context: live round with age and staleness; graceful degradation; n
     assert.equal(d.nav.age_s, t("2026-11-28T15:00:00Z") - t("2026-11-27T17:55:00Z"));
     assert.equal(d.staleness.state, "expected_closed");
     assert.equal(d.staleness.threshold_s, 2400);
-    assert.equal(d.dex.price, null);
-    assert.equal(d.dex.unavailable_reason, "no_approved_dex_source");
+    assert.equal(d.dex.price_usd, null);
+    assert.equal(d.dex.unavailable_reason, "no_verified_pools");
     const down: any = await marketContext(db, TOKEN, now, async () => {
       throw new Error("timeout");
-    });
+    }, noDex);
     assert.equal(down.status, 200, "a provider failure degrades, it does not 500");
     assert.equal(down.body.data.nav_unavailable_reason, "rpc_unavailable");
     const zero: any = await marketContext(db, TOKEN, now, async () => ({ round_id: "36893488147419105182", answer_raw: "0", updated_unix: t("2026-11-27T17:55:00Z"), read_at: now.toISOString() }));

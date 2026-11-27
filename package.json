@@ -1,5 +1,6 @@
 {
   "name": "keldrin",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Keldrin: verified corporate-action intelligence for tokenized stocks on Base (Phase 1, local only).",
@@ -17,7 +18,8 @@
     "calendar": "node src/cli.ts calendar",
     "serve": "node src/cli.ts serve",
     "build:api": "esbuild src/api/vercel.ts --bundle --platform=node --format=esm --target=node22 --external:pg-native --outfile=api/index.mjs --banner:js=\"import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);\" --log-level=warning",
-    "proof": "node src/cli.ts proof"
+    "proof": "node src/cli.ts proof",
+    "build:npm": "esbuild src/npm/cli.ts --bundle --platform=node --format=esm --target=node20 --outfile=npm/cli.js --log-level=warning"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.16",

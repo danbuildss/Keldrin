@@ -16,6 +16,8 @@ import { canonicalJson } from "./lib/canonical.ts";
 import { indexAll } from "./pipeline/navIndex.ts";
 import { computeNavStats, insertNavReview, loadReviewInput } from "./pipeline/navStore.ts";
 import { verifyNavFeed } from "./verify/navVerify.ts";
+import { indexDexPools } from "./pipeline/dexPools.ts";
+import { verifyDexPools } from "./verify/dexVerify.ts";
 
 const args = process.argv.slice(2);
 const cmd = args[0];
@@ -283,6 +285,36 @@ async function navVerifyCmd() {
   if (tally.REJECTED) process.exit(1);
 }
 
+/** Phase 8: discover DEX pools (canonical factories + plain Uniswap v4 pools) for the feed-backed tokens. */
+async function dexIndexCmd() {
+  const db = await openDb(DB_DIR);
+  const res = await indexDexPools(db, flag("symbols")?.split(","));
+  for (const t of res.tokens) console.log(`  ${t.symbol.padEnd(7)} pools found ${t.found}, new ${t.added}${t.v4_scan_complete ? "" : " (v4 log scan incomplete: retried next run)"}`);
+  console.log(`dex-index: head ${res.head}; ${res.tokens.length} token(s)`);
+  await db.close();
+}
+
+/** Phase 8: independently re-derive every stored pool (public RPC) and record a review per token. */
+async function dexVerifyCmd() {
+  const db = await openDb(DB_DIR);
+  const only = flag("symbols")?.split(",");
+  const toks = (await db.query<{ token_address: string; symbol: string }>("SELECT DISTINCT p.token_address, f.symbol FROM dex_pools p JOIN nav_feeds f ON lower(f.token_address)=lower(p.token_address) ORDER BY f.symbol")).rows.filter((x) => !only || only.includes(x.symbol));
+  const tally: Record<string, number> = {};
+  for (const t of toks) {
+    const pools = (await db.query<{ venue: string; pool_ref: string; currency0: string; currency1: string; quote: string; fee: number | null; tick_spacing: number | null; hooks: string | null; stable: boolean | null }>(
+      "SELECT venue, pool_ref, currency0, currency1, quote, fee, tick_spacing, hooks, stable FROM dex_pools WHERE lower(token_address)=lower($1)", [t.token_address])).rows;
+    const review = await verifyDexPools(t.token_address, pools);
+    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ($1,8453,$2,$3,$4,$5,$6)",
+      [`dexrev:${t.token_address.toLowerCase()}:${review.checked_at}`, t.token_address, review.verdict, review.pools_checked, JSON.stringify({ claims: review.claims, covered: review.covered, verifier_rpc_host: review.verifier_rpc_host }), review.checked_at]);
+    tally[review.verdict] = (tally[review.verdict] ?? 0) + 1;
+    console.log(`  ${review.verdict.padEnd(9)} ${t.symbol.padEnd(7)} pools ${review.pools_checked} covered ${review.covered.length}`);
+    for (const c of review.claims.filter((x) => x.verdict !== "CONFIRMED").slice(0, 5)) console.log(`      ${c.verdict} ${c.claim}: ${c.evidence}`);
+  }
+  console.log(`dex-verify: ${toks.length} token(s); ${JSON.stringify(tally)}`);
+  await db.close();
+  if (tally.REJECTED) process.exit(1);
+}
+
 async function verifyFile() {
   const f = args[1];
   const doc = JSON.parse(readFileSync(f, "utf8"));
@@ -302,6 +334,8 @@ const commands: Record<string, () => Promise<void>> = {
   "verify-file": verifyFile,
   "nav-index": navIndexCmd,
   "nav-verify": navVerifyCmd,
+  "dex-index": dexIndexCmd,
+  "dex-verify": dexVerifyCmd,
   serve: async () => {
     const db = await openDb(DB_DIR);
     const port = Number(flag("port") ?? 8787);

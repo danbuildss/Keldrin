@@ -4,14 +4,19 @@
   "symbol": "NVDAc",
   "market": {
    "ny_date": "2026-11-27",
-   "ny_time": "09:21",
+   "ny_time": "09:43",
    "is_trading_day": true,
    "early_close": true,
    "calendar_version": "nyse-2026-2027.1",
-   "session": "pre",
-   "next_open": "2026-11-27T14:30:00.000Z",
+   "calendar_coverage": {
+    "from": "2026-01-01",
+    "to": "2027-12-31"
+   },
+   "session": "open",
+   "next_open": "2026-11-30T14:30:00.000Z",
    "next_close": "2026-11-27T18:00:00.000Z",
-   "last_close": "2026-11-25T21:00:00.000Z"
+   "last_close": "2026-11-25T21:00:00.000Z",
+   "note": null
   },
   "dex": {
    "price": null,
@@ -21,26 +26,27 @@
   },
   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
   "nav": {
-   "round_id": "36893488147419105183",
+   "round_id": "36893488147419105190",
    "phase_id": 2,
-   "answer_raw": "15207176143",
+   "answer_raw": "14690263224",
    "decimals": 8,
-   "nav": "152.07176143",
-   "updated_at": "2026-11-27T14:19:37.000Z",
-   "age_s": 126,
-   "read_at": "2026-11-27T14:21:43.881Z",
-   "source": "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (cached up to 30 s)",
+   "nav": "146.90263224",
+   "updated_at": "2026-11-27T14:42:10.000Z",
+   "age_s": 68,
+   "read_at": "2026-11-27T14:43:01.441Z",
+   "source": "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (reused for up to 30 s inside the server; responses are not CDN-cached)",
    "label": "Last published total-return reference per token, not a live equity price. It already includes dividends and splits."
   },
   "staleness": {
-   "state": "expected_closed",
+   "state": "fresh",
    "threshold_s": 26896,
+   "trading_seconds_since_round": 68,
    "p99_in_session_gap_s": 13448,
-   "method": "v1: threshold = max(2 × the feed's p99 in-session gap between official rounds, 30 min). Open session: stale if no round for longer than the threshold since the later of the last round and today's open. Otherwise: expected_closed if the last round is no older than the threshold before the last session close, else unexpectedly_stale."
+   "method": "v2: count only regular-session (trading) seconds between the last round and now, across days. threshold = max(2 × the feed's p99 in-session gap between official rounds, 30 min). fresh (market open) / expected_closed (market closed) while that trading time is within the threshold; unexpectedly_stale once it exceeds it, open or closed. A NAV stuck through whole sessions accumulates trading time and is flagged."
   }
  },
  "meta": {
-  "as_of": "2026-11-27T14:21:43.881Z",
+  "as_of": "2026-11-27T14:43:19.188Z",
   "schema_version": "0.2"
  }
 }

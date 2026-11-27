@@ -53,7 +53,10 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | PROPOSED | docs/research/RISK_METHODOLOGY.md |
 | T035 | P0 | `…/market-context` + sessions calendar — first MAXXAGENT test milestone | BUILT (Phase 6; not deployed) | docs/research/MARKET_SESSIONS.md |
 | T036 | P1 (proposed) | `…/transfer-policy` snapshot | PROPOSED | docs/research/B20_POLICIES.md |
-| T037 | P2 | DEX liquidity / NAV-DEX divergence | OPEN (terms check first) | — |
+| T037 | P0 | DEX price + depth + NAV gap (Phase 8) | BUILT + independently reviewed (not deployed) | BACKEND_PROOF Phase 8 |
 | T038 | P0 | Developer testing package (docs/developers/*, real examples) | BUILT (examples from the local verified store; re-capture from production after deploy) | docs/PLAN_DEVELOPER_RELEASE.md |
 | T039 | P1 (proposed) | Edge rate limit (Vercel Firewall) + documented limits | PROPOSED | Founder sets the rule |
+| T041 | P0 | Remote MCP server /mcp (Phase 9) | BUILT (not deployed) | BACKEND_PROOF Phase 9 |
+| T042 | P0 | CLI npx keldrin (Phase 10) | BUILT (founder publishes to npm) | npm/README.md |
+| T043 | P0 | x402 paid API (Phase 11) | WAITING (payout address, facilitator route, price) | docs/BREAKRA_STUDY.md |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |

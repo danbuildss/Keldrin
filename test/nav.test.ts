@@ -77,6 +77,9 @@ test("daily closes: in-session only; after-hours, pre-market, weekend and holida
   const d = dailyCloses(rows, "2026-11-24", "2026-11-30", after);
   assert.deepEqual(d.closes.map((c) => [c.session_day, c.row.answer, c.provisional]), [["2026-11-25", "100", false], ["2026-11-27", "101", false]]);
   assert.deepEqual(d.missing_trading_days, ["2026-11-24", "2026-11-30"]);
+  const lagging = dailyCloses(rows.slice(0, 4), "2026-11-24", "2026-11-30", after, Date.parse("2026-11-25T20:50:00Z") / 1000);
+  assert.deepEqual(lagging.missing_trading_days, ["2026-11-24"], "only days before the newest indexed round can be missing");
+  assert.deepEqual(lagging.not_yet_indexed_days, ["2026-11-27", "2026-11-30"]);
   const during = dailyCloses(rows, "2026-11-27", "2026-11-30", Date.parse("2026-11-27T17:00:00Z") / 1000);
   assert.equal(during.closes[0].provisional, true);
   assert.deepEqual(during.missing_trading_days, []);

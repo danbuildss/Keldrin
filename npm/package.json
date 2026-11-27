@@ -1,0 +1,33 @@
+{
+  "name": "keldrin",
+  "version": "0.6.0",
+  "description": "Keldrin CLI: verified corporate actions, Chainlink NAV history, market context and DEX prices for Coinbase tokenized stocks on Base, with onchain re-verification. Includes a stdio MCP bridge.",
+  "keywords": [
+    "tokenized-stocks",
+    "base",
+    "chainlink",
+    "nav",
+    "corporate-actions",
+    "dex",
+    "mcp",
+    "cli",
+    "b20"
+  ],
+  "homepage": "https://keldrin.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danbuildss/Keldrin.git"
+  },
+  "license": "UNLICENSED",
+  "type": "module",
+  "bin": {
+    "keldrin": "cli.js"
+  },
+  "files": [
+    "cli.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

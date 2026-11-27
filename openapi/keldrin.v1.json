@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Keldrin API",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
  },
  "servers": [
@@ -858,7 +858,7 @@
   "/v1/assets/{contract}/market-context": {
    "get": {
     "summary": "Session, latest Chainlink NAV (live, with round id and age) and staleness for one token",
-    "description": "The latest round is read live from Base's public RPC (reused up to 30 s in the server; responses are not CDN-cached) and served only if its phase was covered by the latest CONFIRMED review with matching decimals. staleness (method v2): trading (regular-session) seconds since the round, across days, against threshold = max(2 \u00d7 the feed's p99 in-session gap, 30 min): fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered. Failures degrade to nav: null with nav_unavailable_reason (no_nav_feed, feed_not_verified, rpc_unavailable, rpc_result_invalid, phase_not_reviewed, aggregator_decimals_differ_from_proxy). No DEX price. Returns 503 NAV_NOT_ENABLED until enabled.",
+    "description": "The latest round is read live from Base's public RPC (reused up to 30 s in the server; responses are not CDN-cached) and served only if its phase was covered by the latest CONFIRMED review with matching decimals. staleness (method v2): trading (regular-session) seconds since the round, across days, against threshold = max(2 \u00d7 the feed's p99 in-session gap, 30 min): fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered. Failures degrade to nav: null with nav_unavailable_reason (no_nav_feed, feed_not_verified, rpc_unavailable, rpc_result_invalid, phase_not_reviewed, aggregator_decimals_differ_from_proxy). dex: the main verified pool's price, venue, pool, block, 2% depth and nav_premium_pct (DEX vs last published NAV), with a note when the market is closed. Returns 503 NAV_NOT_ENABLED until enabled.",
     "parameters": [
      {
       "name": "contract",
@@ -945,6 +945,78 @@
         }
        }
       }
+     }
+    }
+   }
+  },
+  "/v1/assets/{contract}/dex": {
+   "get": {
+    "summary": "Live DEX price of a tokenized stock on Base (onchain, one pinned block)",
+    "description": "Reads Keldrin's independently verified pools (Uniswap v3, Aerodrome v2, Aerodrome Slipstream and plain no-hook Uniswap v4 pools against USDC, WETH or ETH) at one block from Base's public RPC. Per pool: price per token in the quote and in USD (ETH priced from the Uniswap v3 WETH/USDC 0.05% pool), estimated 2% depth in USD, status (ok, too_thin, outlier, unsupported, unreadable). main = deepest pool with depth >= $100 and price within 0.25x-4x of the median; thin_market when depth < $1,000. Never CDN-cached.",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DEX price (main may be null with unavailable_reason)"
+     },
+     "400": {
+      "description": "Bad address",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "UNKNOWN_ASSET",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/mcp": {
+   "post": {
+    "summary": "Remote MCP server (Streamable HTTP, stateless JSON; no SSE)",
+    "description": "One JSON-RPC 2.0 message per POST (max 64 KB): initialize, ping, tools/list, tools/call. Read-only tools: list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Tool results carry a plain lead sentence, the JSON, and structuredContent; API errors come back as isError with the same codes as the REST API. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "JSON-RPC response"
+     },
+     "202": {
+      "description": "Notification accepted"
+     },
+     "400": {
+      "description": "Parse error / invalid request"
+     },
+     "413": {
+      "description": "Body over 64 KB"
      }
     }
    }

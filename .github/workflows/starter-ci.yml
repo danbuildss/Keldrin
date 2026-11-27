@@ -24,3 +24,5 @@ jobs:
       - run: npm test
       # The deployed function is the committed bundle; it must match the source.
       - run: npm run build:api && git diff --exit-code -- 'api/'
+      # The published CLI (npm/cli.js) is the committed bundle; it must match src/npm/cli.ts.
+      - run: npm run build:npm && git diff --exit-code -- 'npm/'
