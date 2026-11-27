@@ -8,6 +8,14 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # A real Postgres for the role tests (writer path, reader free-try counter): PGlite alone missed a production bug.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["55432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       # Actions pinned to the commits their tags pointed to on 2026-11-27 (git ls-remote).
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -22,6 +30,8 @@ jobs:
       - run: npm ci
       # Offline: replays recorded real responses; no network secrets needed.
       - run: npm test
+        env:
+          KELDRIN_TEST_PG_ADMIN: postgres://postgres@127.0.0.1:55432/postgres
       # The deployed function is the committed bundle; it must match the source.
       - run: npm run build:api && git diff --exit-code -- 'api/'
       # The published CLI (npm/cli.js) is the committed bundle; it must match src/npm/cli.ts.

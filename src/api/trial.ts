@@ -1,5 +1,6 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { createHash } from "node:crypto";
+import { TRIAL_CONSUME_SQL } from "../db/pg.ts";
 import { assetCorporateActions } from "./assetActions.ts";
 import { navHistory } from "./nav.ts";
 import { marketContext, liveLatestRound, type DexReader, type RoundReader } from "./marketContext.ts";
@@ -42,17 +43,19 @@ export async function triesLeft(db: CounterDb, client: string, now = new Date())
   try {
     const r = await db.query<{ n: number }>("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
-  } catch {
+  } catch (e) {
+    console.warn("free-try counter read failed; using the in-memory count:", (e as Error).message);
     return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
   }
 }
 export async function useTry(db: CounterDb, client: string, now = new Date()): Promise<number> {
   const h = clientHash(client);
   try {
-    const sql = "SELECT trial_consume($1, $2::date) AS n";
+    const sql = TRIAL_CONSUME_SQL;
     const r = db.writeOne ? await db.writeOne(sql, [h, dayOf(now)]) : await db.query<{ n: number }>(sql, [h, dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number((r.rows[0] as { n?: number })?.n ?? FREE_TRIES_PER_DAY));
-  } catch {
+  } catch (e) {
+    console.warn("free-try counter write failed; using the in-memory count:", (e as Error).message);
     if (mem.size > 50_000) mem.clear();
     const k = h + dayOf(now);
     mem.set(k, (mem.get(k) ?? 0) + 1);

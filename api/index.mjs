@@ -10525,6 +10525,65 @@ async function handleMcp(db2, raw) {
 
 // src/api/trial.ts
 import { createHash } from "node:crypto";
+
+// node_modules/pg/esm/index.mjs
+var import_lib = __toESM(require_lib2(), 1);
+var Client = import_lib.default.Client;
+var Pool = import_lib.default.Pool;
+var Connection = import_lib.default.Connection;
+var types = import_lib.default.types;
+var Query = import_lib.default.Query;
+var DatabaseError = import_lib.default.DatabaseError;
+var escapeIdentifier = import_lib.default.escapeIdentifier;
+var escapeLiteral = import_lib.default.escapeLiteral;
+var Result = import_lib.default.Result;
+var TypeOverrides = import_lib.default.TypeOverrides;
+var defaults = import_lib.default.defaults;
+var esm_default = import_lib.default;
+
+// src/db/pg.ts
+function tls() {
+  return process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {} };
+}
+var TRIAL_CONSUME_SQL = "SELECT trial_consume($1, $2::date) AS n";
+function openPg(connectionString) {
+  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  const ssl = tls();
+  const pool = new esm_default.Pool({ connectionString, ssl, max: 3, idleTimeoutMillis: 1e4, connectionTimeoutMillis: 8e3, statement_timeout: 8e3 });
+  pool.on("connect", (c) => {
+    void c.query("SET search_path TO keldrin, public; SET default_transaction_read_only = on");
+  });
+  return {
+    async query(sql, params = []) {
+      const r = await pool.query(sql, params);
+      return { rows: r.rows };
+    },
+    async exec() {
+      throw new Error("read-only connection: exec is not allowed");
+    },
+    async writeOne(sql, params = []) {
+      if (sql !== TRIAL_CONSUME_SQL) throw new Error("writeOne only runs the free-try counter");
+      const c = await pool.connect();
+      try {
+        await c.query("BEGIN READ WRITE");
+        const r = await c.query(sql, params);
+        await c.query("COMMIT");
+        return { rows: r.rows };
+      } catch (e2) {
+        await c.query("ROLLBACK").catch(() => {
+        });
+        throw e2;
+      } finally {
+        c.release();
+      }
+    },
+    async close() {
+      await pool.end();
+    }
+  };
+}
+
+// src/api/trial.ts
 var FREE_TRIES_PER_DAY = 3;
 var PAID = {
   price: "0.05 USDC on Base",
@@ -10547,17 +10606,19 @@ async function triesLeft(db2, client, now = /* @__PURE__ */ new Date()) {
   try {
     const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
-  } catch {
+  } catch (e2) {
+    console.warn("free-try counter read failed; using the in-memory count:", e2.message);
     return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
   }
 }
 async function useTry(db2, client, now = /* @__PURE__ */ new Date()) {
   const h = clientHash(client);
   try {
-    const sql = "SELECT trial_consume($1, $2::date) AS n";
+    const sql = TRIAL_CONSUME_SQL;
     const r = db2.writeOne ? await db2.writeOne(sql, [h, dayOf(now)]) : await db2.query(sql, [h, dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY));
-  } catch {
+  } catch (e2) {
+    console.warn("free-try counter write failed; using the in-memory count:", e2.message);
     if (mem.size > 5e4) mem.clear();
     const k = h + dayOf(now);
     mem.set(k, (mem.get(k) ?? 0) + 1);
@@ -10896,62 +10957,6 @@ async function handle(db2, req, res) {
     console.error("keldrin api error:", e2.stack ?? e2);
     return send(res, 500, err2("INTERNAL", "internal error", "retry later; if it persists the service is degraded (see /health)"));
   }
-}
-
-// node_modules/pg/esm/index.mjs
-var import_lib = __toESM(require_lib2(), 1);
-var Client = import_lib.default.Client;
-var Pool = import_lib.default.Pool;
-var Connection = import_lib.default.Connection;
-var types = import_lib.default.types;
-var Query = import_lib.default.Query;
-var DatabaseError = import_lib.default.DatabaseError;
-var escapeIdentifier = import_lib.default.escapeIdentifier;
-var escapeLiteral = import_lib.default.escapeLiteral;
-var Result = import_lib.default.Result;
-var TypeOverrides = import_lib.default.TypeOverrides;
-var defaults = import_lib.default.defaults;
-var esm_default = import_lib.default;
-
-// src/db/pg.ts
-function tls() {
-  return process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {} };
-}
-function openPg(connectionString) {
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
-  const ssl = tls();
-  const pool = new esm_default.Pool({ connectionString, ssl, max: 3, idleTimeoutMillis: 1e4, connectionTimeoutMillis: 8e3, statement_timeout: 8e3 });
-  pool.on("connect", (c) => {
-    void c.query("SET search_path TO keldrin, public; SET default_transaction_read_only = on");
-  });
-  return {
-    async query(sql, params = []) {
-      const r = await pool.query(sql, params);
-      return { rows: r.rows };
-    },
-    async exec() {
-      throw new Error("read-only connection: exec is not allowed");
-    },
-    async writeOne(sql, params = []) {
-      if (!/^SELECT trial_consume\(\$1, \$2\)/.test(sql)) throw new Error("writeOne only runs the free-try counter");
-      const c = await pool.connect();
-      try {
-        await c.query("BEGIN READ WRITE");
-        const r = await c.query(sql, params);
-        await c.query("COMMIT");
-        return { rows: r.rows };
-      } catch (e2) {
-        await c.query("ROLLBACK").catch(() => {
-        });
-        throw e2;
-      } finally {
-        c.release();
-      }
-    },
-    async close() {
-      await pool.end();
-    }
-  };
 }
 
 // src/api/vercel.ts
