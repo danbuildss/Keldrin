@@ -1,4 +1,4 @@
-# Status | 2026-11-27 (Phase 3 in progress: API ready to deploy)
+# Status | 2026-11-27 (Phase 3: API live at https://keldrin.vercel.app)
 
 **Phase 2 gate passed** (BACKEND_PROOF.md). Nothing is deployed or published; no external users or revenue.
 
@@ -26,3 +26,8 @@ Phase 3: deploy the read-only API (Vercel), with a read-only database login, rat
 - Done: /v1/events (integrator field shape: status predicted|confirmed_onchain|verified_matched|late, confidence never guessed, warnings), /v1/changes?since= diff feed, rate limit, CDN cache headers, generic 500s, OpenAPI 0.3.0, docs/API_QUICKSTART.md, Vercel function bundle (api/index.mjs, CI checks it matches source), read-only Postgres adapter, reader role defaults pinned in Supabase. 80 tests.
 - Live check on Supabase data: 60 events (13 predicted high, 7 verified_matched, 1 late, 5 confirmed_onchain, 34 predicted without date); PMc flagged with a magnitude warning.
 - Waiting on founder: reader login password + Vercel project + DATABASE_URL (docs/DEPLOY_VERCEL.md); then preview verification; production only on approval.
+
+## Phase 3 deployment (2026-11-27)
+- LIVE: https://keldrin.vercel.app (deployed by founder; read-only DB login; TLS verified). All endpoints verified (BACKEND_PROOF.md).
+- Open decisions: confirm the public deployment is intended as production; Coinbase data rights for publicly served registry fields; Vercel plan before any charging; custom domain after brand clearance.
+- Next: Phase 4 — scheduled research (GitHub Actions) writing to Supabase so the live API stays fresh; batch Supabase writes.
