@@ -4,7 +4,7 @@
 // Verdict per claim: CONFIRMED | REJECTED | UNSURE. Any REJECTED → record REJECTED; else any UNSURE → UNSURE.
 
 import { createHash } from "node:crypto";
-import { ALLOWED_HOSTS, B20_FACTORY, COINBASE_API, RPC_URL, SEC_USER_AGENT } from "../config.ts";
+import { ALLOWED_HOSTS, B20_FACTORY, COINBASE_API, RPC_AUTH_HEADERS, RPC_URL, SEC_USER_AGENT } from "../config.ts";
 
 const T = {
   Announcement: "0xccebf8218a62875909564adef86a6f4df81503cb617221e793357d62f8e813f7",
@@ -46,7 +46,7 @@ let n = 0;
 export const liveTransport: Transport = {
   async rpc(method, params) {
     await pause(150);
-    const j = JSON.parse(await req(RPC_URL, { method: "POST", headers: { "content-type": "application/json", "user-agent": "Keldrin-Verifier/0.1" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++n, method, params }) }));
+    const j = JSON.parse(await req(RPC_URL, { method: "POST", headers: { "content-type": "application/json", "user-agent": "Keldrin-Verifier/0.1", ...RPC_AUTH_HEADERS }, body: JSON.stringify({ jsonrpc: "2.0", id: ++n, method, params }) }));
     if (j.error) throw new Error(`verifier rpc ${method}: ${j.error.message}`);
     return j.result;
   },

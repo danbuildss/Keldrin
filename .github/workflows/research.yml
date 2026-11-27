@@ -1,0 +1,48 @@
+name: Keldrin research (manual)
+# Manual dispatch only. No schedule until the founder approves one (AUTOMATION.md).
+# Disabled unless the repository variable RESEARCH_ENABLED is "true".
+on:
+  workflow_dispatch:
+    inputs:
+      symbols:
+        description: Optional comma-separated token symbols (empty = all tokens)
+        required: false
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: keldrin-research
+  cancel-in-progress: false
+jobs:
+  research:
+    if: vars.RESEARCH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: keldrin-research
+    timeout-minutes: 45
+    steps:
+      # Actions pinned to the commits their tags pointed to on 2026-11-27 (git ls-remote).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+      - name: Discover, verify and store (fresh local database)
+        run: node src/cli.ts discover ${SYMBOLS:+--symbols=$SYMBOLS}
+        env:
+          SYMBOLS: ${{ inputs.symbols }}
+          BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+      - name: Reconcile with SEC and build the calendar
+        run: node src/cli.ts reconcile && node src/cli.ts calendar
+        env:
+          BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+      # Results are a private artifact for review; nothing is committed, published or deployed.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: keldrin-records-${{ github.run_id }}
+          path: records/
+          retention-days: 14

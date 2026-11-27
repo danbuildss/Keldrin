@@ -3,6 +3,8 @@
 
 export const CHAIN_ID = 8453;
 export const RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+/** Optional RPC bearer token (e.g. an Alchemy key in CI). Sent only as a header to RPC_URL; never logged or stored. */
+export const RPC_AUTH_HEADERS: Record<string, string> = process.env.BASE_RPC_BEARER ? { authorization: `Bearer ${process.env.BASE_RPC_BEARER}` } : {};
 /** What records and logs may show for the RPC: origin only, never a path or query (keys can live there). */
 export const RPC_PUBLIC_LABEL = new URL(RPC_URL).origin;
 export const COINBASE_API = "https://api.coinbase.com/v1/tokenized-stocks";

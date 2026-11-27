@@ -1,5 +1,5 @@
 import { decodeEventLog, decodeFunctionResult, encodeFunctionData, getAddress, parseAbi, type Hex } from "viem";
-import { LIMITS, RPC_URL } from "../config.ts";
+import { LIMITS, RPC_AUTH_HEADERS, RPC_URL } from "../config.ts";
 import { fetchText } from "../lib/http.ts";
 
 // Researcher-side chain adapter. JSON-RPC goes through fetchText (allowlist, throttle, retries);
@@ -46,7 +46,7 @@ export async function rpc<T>(method: string, params: unknown[]): Promise<T> {
   const res = await fetchText(RPC_URL, {
     method: "POST",
     body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...RPC_AUTH_HEADERS },
     minIntervalMs: LIMITS.rpcMinIntervalMs,
     retryOn: (_s, body) => body.includes('"code":-32011') || body.includes('"code":-32005'),
   });
