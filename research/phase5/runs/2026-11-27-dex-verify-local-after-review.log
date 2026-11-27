@@ -1,0 +1,14 @@
+  CONFIRMED AAPLc   pools 39 covered 39
+  CONFIRMED AMZNc   pools 36 covered 36
+  CONFIRMED ANTc    pools 12 covered 12
+  CONFIRMED CRCLc   pools 8 covered 8
+  CONFIRMED GOOGLc  pools 72 covered 72
+  CONFIRMED INTCc   pools 3 covered 3
+  CONFIRMED METAc   pools 38 covered 38
+  CONFIRMED MSFTc   pools 27 covered 27
+  CONFIRMED MSTRc   pools 29 covered 29
+  CONFIRMED NVDAc   pools 80 covered 80
+  CONFIRMED SNDKc   pools 18 covered 18
+  CONFIRMED SPCXc   pools 32 covered 32
+  CONFIRMED TSLAc   pools 22 covered 22
+dex-verify: 13 token(s); {"CONFIRMED":13}

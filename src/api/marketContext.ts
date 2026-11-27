@@ -7,7 +7,7 @@ import { liveDex } from "./dex.ts";
 // GET /v1/assets/{contract}/market-context (Phase 6). The US session right now, the latest Chainlink NAV round read
 // live at request time from Base's public RPC (short cache), its age, and whether that age is normal for the
 // session ("expected_closed") or not ("unexpectedly_stale"), judged against the feed's own verified update rhythm.
-// A provider failure degrades to nav: null with a reason; it never invents a value. No DEX price is served.
+// A provider failure degrades to nav: null with a reason; it never invents a value. The DEX block comes from dex.ts (verified pools only).
 
 export const PUBLIC_RPC_URL = process.env.MARKET_RPC_URL || "https://mainnet.base.org";
 type Round = { round_id: string; answer_raw: string; updated_unix: number; read_at: string };
@@ -86,10 +86,15 @@ export async function marketContext(db: PGlite, contract: string, now = new Date
   )).rows[0];
   if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
   const st = classifyStaleness(nowSec, round.updated_unix, p99);
-  if (dex.price_usd) {
+  if (dex.price_usd && (st.state === "unexpectedly_stale" || st.state === "unknown")) {
+    // a gap against a NAV that should have updated (or whose rhythm is unknown) would mislead: withhold it
+    dex.nav_premium_pct = null;
+    dex.premium_unavailable_reason = `nav_${st.state}`;
+  } else if (dex.price_usd) {
     const navNum = Number(formatNav(round.answer_raw, feed.decimals));
     dex.nav_premium_pct = Number(((Number(dex.price_usd) / navNum - 1) * 100).toFixed(4));
-    dex.premium_note = market.session === "open" ? "DEX price vs the last published NAV during the regular session." : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing.";
+    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round.updated_unix * 1000).toISOString()}.`;
+    dex.premium_note = (market.session === "open" ? "DEX price vs the last published NAV during the regular session. " : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing. ") + when;
   }
   return {
     status: 200,

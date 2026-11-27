@@ -3,7 +3,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { decodeFunctionData, encodeFunctionResult, parseAbi, toFunctionSelector } from "viem";
 import { openDb, upsertAsset } from "../src/db/db.ts";
-import { depth2pctConcentrated, fmt18, liveDex, priceFromSqrt } from "../src/api/dex.ts";
+import { depth2pctConcentrated, fmt18, liveDex, priceFromSqrt, selectMain, type PoolQuote } from "../src/api/dex.ts";
+import { scanV4Initialize, V4_FROM_BLOCK, V4_LOG_CHUNK } from "../src/pipeline/dexPools.ts";
 import { parseV4Initialize, V4_INITIALIZE_TOPIC } from "../src/pipeline/dexPools.ts";
 import { DEX_SEL, v4PoolId, verifyDexPools } from "../src/verify/dexVerify.ts";
 import { marketContext } from "../src/api/marketContext.ts";
@@ -75,7 +76,7 @@ const v4 = { venue: "uniswap_v4", pool_ref: "0x08bc5dabb29b203a9c991865f913e973e
 test("pool verifier: CONFIRMED when re-derived; REJECTED for a wrong factory answer, wrong tokens, a hooked or mis-keyed v4 pool", async () => {
   const ok = await verifyDexPools(NV, [v3, v4], fakeVerifyRpc(), HOSTS);
   assert.equal(ok.verdict, "CONFIRMED", JSON.stringify(ok.claims.filter((c) => c.verdict !== "CONFIRMED")));
-  assert.deepEqual(ok.covered, [V3_POOL, v4.pool_ref]);
+  assert.deepEqual(ok.covered, [`uniswap_v3:${V3_POOL}`, `uniswap_v4:${v4.pool_ref}`]);
   assert.equal((await verifyDexPools(NV, [v3], fakeVerifyRpc({ factoryReturns: "0x1111111111111111111111111111111111111111" }), HOSTS)).verdict, "REJECTED");
   assert.equal((await verifyDexPools(NV, [v3], fakeVerifyRpc({ token1: USDC }), HOSTS)).verdict, "REJECTED");
   assert.equal((await verifyDexPools(NV, [{ ...v4, hooks: "0xbdf938149ac6a781f94faa0ed45e6a0e984c6544" }], fakeVerifyRpc(), HOSTS)).verdict, "REJECTED");
@@ -93,8 +94,9 @@ const MC = parseAbi([
   "function getPool(address,address,uint24) view returns (address)",
   "function getSlot0(bytes32) view returns (uint160, int24, uint24, uint24)",
   "function getLiquidity(bytes32) view returns (uint128)",
+  "function balanceOf(address) view returns (uint256)",
 ]);
-function fakeDexRpc(prices: { stockSqrt: bigint; stockL: bigint }) {
+function fakeDexRpc(prices: { stockSqrt: bigint; stockL: bigint; stockBal?: bigint }) {
   const ETH_USD_POOL = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
   const ethSqrt = BigInt(Math.floor(Math.sqrt(3000e6 / 1e18) * 2 ** 96)); // ≈ 3000 USDC per WETH (WETH token0)
   return async (method: string, params: any[]) => {
@@ -109,6 +111,7 @@ function fakeDexRpc(prices: { stockSqrt: bigint; stockL: bigint }) {
       else if (d.functionName === "getPool") ret = encodeFunctionResult({ abi: MC, functionName: "getPool", result: ETH_USD_POOL });
       else if (d.functionName === "slot0") ret = encodeFunctionResult({ abi: MC, functionName: "slot0", result: [c.target.toLowerCase() === ETH_USD_POOL.toLowerCase() ? ethSqrt : prices.stockSqrt, 0, 0, 0, 0, 0, true] });
       else if (d.functionName === "liquidity") ret = encodeFunctionResult({ abi: MC, functionName: "liquidity", result: prices.stockL });
+      else if (d.functionName === "balanceOf") ret = encodeFunctionResult({ abi: MC, functionName: "balanceOf", result: prices.stockBal ?? 10n ** 30n });
       else if (d.functionName === "getSlot0") ret = encodeFunctionResult({ abi: MC, functionName: "getSlot0", result: [0n, 0, 0, 0] });
       else ret = encodeFunctionResult({ abi: MC, functionName: "getLiquidity", result: 0n });
       return { success: true, returnData: ret };
@@ -137,7 +140,7 @@ test("live DEX: fails closed without a CONFIRMED review; prices only covered poo
   try {
     const none: any = await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n }));
     assert.equal(none.body.data.unavailable_reason, "no_verified_pools");
-    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ('r1',8453,$1,'CONFIRMED',2,$2,now())", [NV, JSON.stringify({ covered: [V3_POOL] })]);
+    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ('r1',8453,$1,'CONFIRMED',2,$2,now())", [NV, JSON.stringify({ covered: [`uniswap_v3:${V3_POOL}`] })]);
     const out: any = await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n }));
     const d = out.body.data;
     assert.equal(d.pools_total, 1, "the uncovered v4 pool is not used");
@@ -146,6 +149,11 @@ test("live DEX: fails closed without a CONFIRMED review; prices only covered poo
     assert.ok(d.main.depth_2pct_usd > 100, String(d.main.depth_2pct_usd));
     assert.equal(typeof d.main.thin_market, "boolean");
     assert.equal(d.block, String(0x3b9aca00));
+    assert.equal(d.main.depth_capped_by_balance, true);
+    // the same liquidity backed by only 0.75 tokens ($112.50) is capped to what the pool holds
+    const capped: any = await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n, stockBal: 75n * 10n ** 16n }));
+    assert.ok(Math.abs(capped.body.data.main.depth_2pct_usd - 112.5) < 0.01, String(capped.body.data.main.depth_2pct_usd));
+    assert.equal(capped.body.data.main.thin_market, true);
     const thin: any = await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n }));
     assert.equal(thin.body.data.main, null);
     assert.equal(thin.body.data.unavailable_reason, "no_pool_with_usable_depth");
@@ -173,10 +181,79 @@ test("market context carries the DEX price and the gap vs NAV, with a closure no
     assert.equal(dex.price_usd, "151.50000000");
     assert.equal(dex.nav_premium_pct, 1, "151.5 vs NAV 150 = +1%");
     assert.match(dex.premium_note, /Market closed/);
+    assert.match(dex.premium_note, /block 123/);
+    // a NAV that should have updated during an open session: the gap is withheld, not computed
+    const openLate = new Date("2026-11-30T19:00:00Z");
+    const stale: any = await marketContext(db, NV, openLate, reader, dexReader);
+    assert.equal(stale.body.data.staleness.state, "unexpectedly_stale");
+    assert.equal(stale.body.data.dex.nav_premium_pct, null);
+    assert.equal(stale.body.data.dex.premium_unavailable_reason, "nav_unexpectedly_stale");
     const noDex: any = await marketContext(db, NV, now, reader, async () => ({ status: 200, body: { data: { main: null, unavailable_reason: "no_pool_with_usable_depth" } } }));
     assert.equal(noDex.body.data.dex.price_usd, null);
     assert.equal(noDex.body.data.dex.unavailable_reason, "no_pool_with_usable_depth");
   } finally {
     await db.close();
   }
+});
+
+const pq = (o: Partial<PoolQuote>): PoolQuote => ({ venue: "uniswap_v3", pool: "p", quote: "USDC", fee: 3000, price_quote: "1", price_usd: "100", depth_2pct_usd: 5000, depth_capped_by_balance: true, status: "ok", ...o });
+
+test("main market: an uncapped v4 pool must be corroborated; outliers vs capped pools are excluded", () => {
+  // a deep but uncorroborated v4 pool cannot become main; the capped pool wins
+  let r = selectMain([pq({ pool: "cap", depth_2pct_usd: 500 }), pq({ venue: "uniswap_v4", pool: "v4", price_usd: "110", depth_2pct_usd: 1e9, depth_capped_by_balance: false })]);
+  assert.equal(r.main?.pool, "cap");
+  // corroborated within 2% → the deeper v4 pool can be main
+  r = selectMain([pq({ pool: "cap", depth_2pct_usd: 500 }), pq({ venue: "uniswap_v4", pool: "v4", price_usd: "101", depth_2pct_usd: 1e6, depth_capped_by_balance: false })]);
+  assert.equal(r.main?.pool, "v4");
+  assert.equal(r.main?.corroborated, true);
+  // only an uncapped, uncorroborated pool → no main, with a reason
+  r = selectMain([pq({ venue: "uniswap_v4", depth_capped_by_balance: false })]);
+  assert.equal(r.main, null);
+  assert.equal(r.reason, "uncorroborated_uncapped_pools_only");
+  // a pool 30% off the capped median is an outlier
+  const out = [pq({ pool: "a" }), pq({ pool: "b", price_usd: "101" }), pq({ pool: "far", price_usd: "130", depth_2pct_usd: 1e6 })];
+  r = selectMain(out);
+  assert.equal(out[2].status, "outlier");
+  assert.notEqual(r.main?.pool, "far");
+});
+
+test("live DEX: pools above 1% fee are excluded; coverage is venue-aware", async () => {
+  const db = await seeded();
+  const HI = "0x2222222222222222222222222222222222222222";
+  try {
+    await db.query("INSERT INTO dex_pools (chain_id, token_address, venue, pool_ref, currency0, currency1, quote, fee, tick_spacing, hooks, stable, source, discovered_block) VALUES (8453,$1,'uniswap_v3',$2,$3,$1,'USDC',20000,NULL,NULL,NULL,'test',1)", [NV, HI, USDC]);
+    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ('r2',8453,$1,'CONFIRMED',1,$2,now())", [NV, JSON.stringify({ covered: [`uniswap_v3:${HI}`] })]);
+    const d: any = (await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n }))).body.data;
+    assert.equal(d.main, null);
+    assert.equal(d.pools[0].status, "high_fee");
+    // coverage is venue-aware: the same ref under another venue is not served
+    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ('r3',8453,$1,'CONFIRMED',1,$2,now() + interval '1 second')", [NV, JSON.stringify({ covered: [`aerodrome_cl:${V3_POOL}`] })]);
+    assert.equal((await liveDex(db, NV, fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n }))).body.data.pools_total, 0);
+  } finally {
+    await db.close();
+  }
+});
+
+test("v4 discovery scan: chunked, both currency orders, halves a refused chunk, reports an incomplete scan", async () => {
+  const seen: any[] = [];
+  const head = V4_FROM_BLOCK + V4_LOG_CHUNK * 2n;
+  const log = (tx: string) => ({ topics: ["0x0", "0x" + tx.padStart(64, "0")], data: "0x", transactionHash: "0x" + tx, blockNumber: "0x1" });
+  const r = await scanV4Initialize(head, [["q", "t"], ["t", "q"]], async (f: any) => {
+    seen.push(f);
+    if (BigInt(f.toBlock) - BigInt(f.fromBlock) + 1n === V4_LOG_CHUNK && BigInt(f.fromBlock) === V4_FROM_BLOCK && f.topics[2] === "q") throw new Error("too large");
+    return f.topics[2] === "t" ? [log("aa"), log("aa")] : [log("bb")];
+  });
+  assert.equal(r.complete, true);
+  assert.deepEqual(r.logs.map((l) => l.transactionHash).sort(), ["0xaa", "0xbb"], "deduplicated across chunks and orders");
+  assert.ok(seen.some((f) => f.topics[2] === "t" && f.topics[3] === "q"), "the reversed order is queried");
+  const bad = await scanV4Initialize(head, [["q", "t"]], async () => {
+    throw new Error("down");
+  });
+  assert.equal(bad.complete, false);
+  assert.deepEqual(bad.logs, []);
+});
+
+test("priceFromSqrt: the decimal shift is applied before dividing (no precision lost when the stock is token1)", () => {
+  // stock token1 (18 dec) vs quote token0 (6 dec), raw ratio 9 stock per quote → 1e12/9 quote per stock
+  assert.equal(priceFromSqrt(3n * 2n ** 96n, false, 18, 6), "111111111111.111111111111111111");
 });

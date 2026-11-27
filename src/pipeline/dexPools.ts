@@ -23,7 +23,10 @@ export const BASE = {
 } as const;
 export const V3_FEES = [100, 500, 3000, 10000];
 export const CL_TICK_SPACINGS = [1, 10, 50, 100, 200, 2000];
-const V4_FROM_BLOCK = 0x2000000; // before the v4 PoolManager on Base; the scan is filtered by currency topics
+// A lower bound below the v4 PoolManager's launch on Base (Jan 2025, ~block 25.9M); the stock tokens are newer, so no
+// earlier block can hold their pools. The scan is filtered by currency topics and read in chunks.
+export const V4_FROM_BLOCK = 25_000_000n;
+export const V4_LOG_CHUNK = 2_500_000n;
 const ZERO = BASE.ETH;
 
 const ABI_V3 = parseAbi(["function getPool(address,address,uint24) view returns (address)"]);
@@ -52,6 +55,39 @@ export function parseV4Initialize(log: { topics: string[]; data: string; transac
   };
 }
 
+type V4Log = { topics: string[]; data: string; transactionHash: string; blockNumber: string };
+/** Read PoolManager Initialize logs in block chunks (halving a chunk once if the provider refuses it). */
+export async function scanV4Initialize(headBlock: bigint, orders: (string | string[])[][], getLogs: (f: unknown) => Promise<V4Log[]> = (f) => rpc<V4Log[]>("eth_getLogs", [f])): Promise<{ logs: V4Log[]; complete: boolean }> {
+  const logs: V4Log[] = [];
+  const seen = new Set<string>();
+  let complete = true;
+  const hex = (n: bigint) => "0x" + n.toString(16);
+  for (const [t2, t3] of orders) {
+    for (let from = V4_FROM_BLOCK; from <= headBlock; from += V4_LOG_CHUNK) {
+      const to = from + V4_LOG_CHUNK - 1n < headBlock ? from + V4_LOG_CHUNK - 1n : headBlock;
+      try {
+        await getLogs({ address: BASE.V4_POOL_MANAGER, fromBlock: hex(from), toBlock: hex(to), topics: [V4_INITIALIZE_TOPIC, null, t2, t3] }).then((r) => push(r));
+      } catch {
+        const mid = (from + to) / 2n;
+        for (const [a, b] of [[from, mid], [mid + 1n, to]] as [bigint, bigint][]) {
+          try {
+            push(await getLogs({ address: BASE.V4_POOL_MANAGER, fromBlock: hex(a), toBlock: hex(b), topics: [V4_INITIALIZE_TOPIC, null, t2, t3] }));
+          } catch {
+            complete = false;
+          }
+        }
+      }
+    }
+  }
+  return { logs, complete };
+  function push(r: V4Log[]) {
+    for (const l of r) {
+      const k = `${l.transactionHash}:${l.topics[1]}`;
+      if (!seen.has(k)) (seen.add(k), logs.push(l));
+    }
+  }
+}
+
 export async function discoverPools(token: string, head: BlockRef): Promise<DexPool[]> {
   const t = getAddress(token);
   const quotes: { sym: "USDC" | "WETH"; addr: string }[] = [{ sym: "USDC", addr: BASE.USDC }, { sym: "WETH", addr: BASE.WETH }];
@@ -70,25 +106,28 @@ export async function discoverPools(token: string, head: BlockRef): Promise<DexP
     const [c0, c1] = sorted(t, m.q);
     out.push({ venue: m.venue, pool_ref: getAddress(addr), currency0: c0, currency1: c1, quote: m.quote, fee: m.fee, tick_spacing: m.tick_spacing, hooks: null, stable: m.stable, source: `${m.factory}.getPool(${t},${m.q},${m.arg})@${head.number}` });
   });
-  // Uniswap v4: a stock token's address sorts after USDC, WETH and native ETH, so the stock is currency1.
+  // Uniswap v4: currencies are sorted by address, so the stock can be currency0 or currency1: query both orders.
   const quoteTopics = [BASE.ETH, BASE.WETH, BASE.USDC].map((a) => pad(a.toLowerCase() as `0x${string}`));
-  const logs = await rpc<{ topics: string[]; data: string; transactionHash: string; blockNumber: string }[]>("eth_getLogs", [
-    { address: BASE.V4_POOL_MANAGER, fromBlock: "0x" + V4_FROM_BLOCK.toString(16), toBlock: "0x" + head.number.toString(16), topics: [V4_INITIALIZE_TOPIC, null, quoteTopics, pad(t.toLowerCase() as `0x${string}`)] },
-  ]);
+  const tokTopic = pad(t.toLowerCase() as `0x${string}`);
+  const { logs, complete } = await scanV4Initialize(head.number, [[quoteTopics, tokTopic], [tokTopic, quoteTopics]]);
+  const quoteOf = (a: string) => (a === getAddress(BASE.USDC) ? "USDC" : a === getAddress(BASE.WETH) ? "WETH" : a === ZERO ? "ETH" : null);
   for (const l of logs) {
     const p = parseV4Initialize(l);
     if (p.hooks !== ZERO) continue; // launchpad / custom-logic pools are not a plain market
-    const quote = p.currency0 === getAddress(BASE.USDC) ? "USDC" : p.currency0 === getAddress(BASE.WETH) ? "WETH" : p.currency0 === ZERO ? "ETH" : null;
-    if (!quote || p.currency1 !== t) continue;
+    const other = p.currency0 === t ? p.currency1 : p.currency1 === t ? p.currency0 : null;
+    const quote = other === null ? null : quoteOf(other);
+    if (!quote) continue;
     out.push({ venue: "uniswap_v4", pool_ref: p.id, currency0: p.currency0, currency1: p.currency1, quote, fee: p.fee, tick_spacing: p.tickSpacing, hooks: p.hooks, stable: null, source: `PoolManager Initialize tx ${l.transactionHash} block ${BigInt(l.blockNumber)}` });
   }
+  // a failed v4 scan never drops the factory pools; it is reported so the next run retries
+  (out as DexPool[] & { v4_scan_complete?: boolean }).v4_scan_complete = complete;
   return out;
 }
 
-export async function indexDexPools(db: PGlite, only?: string[]): Promise<{ head: string; tokens: { symbol: string; token: string; found: number; added: number }[] }> {
+export async function indexDexPools(db: PGlite, only?: string[]): Promise<{ head: string; tokens: { symbol: string; token: string; found: number; added: number; v4_scan_complete: boolean }[] }> {
   const head = await getBlock("latest");
   const feeds = (await db.query<{ token_address: string; symbol: string }>("SELECT DISTINCT token_address, symbol FROM nav_feeds WHERE chain_id=$1 ORDER BY symbol", [CHAIN_ID])).rows.filter((f) => !only || only.includes(f.symbol));
-  const tokens: { symbol: string; token: string; found: number; added: number }[] = [];
+  const tokens: { symbol: string; token: string; found: number; added: number; v4_scan_complete: boolean }[] = [];
   for (const f of feeds) {
     const pools = await discoverPools(f.token_address, head);
     let added = 0;
@@ -99,7 +138,7 @@ export async function indexDexPools(db: PGlite, only?: string[]): Promise<{ head
       );
       added += r.rows.length;
     }
-    tokens.push({ symbol: f.symbol, token: f.token_address, found: pools.length, added });
+    tokens.push({ symbol: f.symbol, token: f.token_address, found: pools.length, added, v4_scan_complete: (pools as { v4_scan_complete?: boolean }).v4_scan_complete !== false });
   }
   return { head: head.number.toString(), tokens };
 }

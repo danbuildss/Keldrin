@@ -289,7 +289,7 @@ async function navVerifyCmd() {
 async function dexIndexCmd() {
   const db = await openDb(DB_DIR);
   const res = await indexDexPools(db, flag("symbols")?.split(","));
-  for (const t of res.tokens) console.log(`  ${t.symbol.padEnd(7)} pools found ${t.found}, new ${t.added}`);
+  for (const t of res.tokens) console.log(`  ${t.symbol.padEnd(7)} pools found ${t.found}, new ${t.added}${t.v4_scan_complete ? "" : " (v4 log scan incomplete: retried next run)"}`);
   console.log(`dex-index: head ${res.head}; ${res.tokens.length} token(s)`);
   await db.close();
 }

@@ -10069,6 +10069,11 @@ var USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 var ETH_USD_POOL = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
 var MIN_DEPTH_USD = 100;
 var THIN_DEPTH_USD = 1e3;
+var MAX_FEE_PPM = 1e4;
+var AGREE_PCT = 2;
+var BAND_PCT = 20;
+var MAX_DECIMALS = 36;
+var CACHE_MS = 8e3;
 var SQRT_102_MINUS_1 = Math.sqrt(1.02) - 1;
 var Q96 = 2n ** 96n;
 var ABI = parseAbi([
@@ -10077,6 +10082,7 @@ var ABI = parseAbi([
   "function liquidity() view returns (uint128)",
   "function getReserves() view returns (uint256, uint256, uint256)",
   "function decimals() view returns (uint8)",
+  "function balanceOf(address) view returns (uint256)",
   "function getSlot0(bytes32) view returns (uint160, int24, uint24, uint24)",
   "function getLiquidity(bytes32) view returns (uint128)",
   "function getPool(address,address,uint24) view returns (address)"
@@ -10097,10 +10103,10 @@ async function multicall(rpc, calls, block) {
 function priceFromSqrt(sqrtP, stockIsToken0, decStock, decQuote) {
   const S = 10n ** 18n;
   const sq = sqrtP * sqrtP;
-  const scale = (n, d) => n * S / d;
-  let v = stockIsToken0 ? scale(sq, 2n ** 192n) : scale(2n ** 192n, sq);
   const shift = decStock - decQuote;
-  v = shift >= 0 ? v * 10n ** BigInt(shift) : v / 10n ** BigInt(-shift);
+  const up = shift >= 0 ? 10n ** BigInt(shift) : 1n;
+  const down = shift < 0 ? 10n ** BigInt(-shift) : 1n;
+  const v = stockIsToken0 ? sq * S * up / (2n ** 192n * down) : 2n ** 192n * S * up / (sq * down);
   return fmt18(v);
 }
 function fmt18(v) {
@@ -10113,7 +10119,35 @@ function depth2pctConcentrated(L, sqrtP, stockIsToken0, decQuote) {
   const raw = stockIsToken0 ? Number(L) * Number(sqrtP) * SQRT_102_MINUS_1 / Number(Q96) : Number(L) * Number(Q96) * SQRT_102_MINUS_1 / Number(sqrtP);
   return raw / 10 ** decQuote;
 }
+function selectMain(out) {
+  for (const x of out) if (x.status === "ok" && (x.depth_2pct_usd ?? 0) < MIN_DEPTH_USD) x.status = "too_thin";
+  const eligible = out.filter((x) => x.status === "ok");
+  const capped = eligible.filter((x) => x.depth_capped_by_balance);
+  const refPrices = (capped.length ? capped : eligible).map((x) => Number(x.price_usd)).sort((a, b) => a - b);
+  const median = refPrices.length ? refPrices[Math.floor(refPrices.length / 2)] : null;
+  for (const x of eligible) if (median !== null && Math.abs(Number(x.price_usd) / median - 1) * 100 > BAND_PCT) x.status = "outlier";
+  const ok2 = out.filter((x) => x.status === "ok");
+  const corroborated = (x) => ok2.some((y) => y !== x && Math.abs(Number(y.price_usd) / Number(x.price_usd) - 1) * 100 <= AGREE_PCT);
+  const candidates = ok2.filter((x) => x.depth_capped_by_balance || corroborated(x)).sort((a, b) => (b.depth_2pct_usd ?? 0) - (a.depth_2pct_usd ?? 0));
+  const m = candidates[0];
+  if (!m) return { main: null, reason: ok2.length ? "uncorroborated_uncapped_pools_only" : "no_pool_with_usable_depth" };
+  return { main: { ...m, corroborated: corroborated(m), single_pool: ok2.length === 1 } };
+}
+var cache = /* @__PURE__ */ new Map();
 async function liveDex(db2, contract, rpc = publicRpc) {
+  const key = contract.toLowerCase();
+  const useCache = rpc === publicRpc;
+  const hit = useCache ? cache.get(key) : void 0;
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
+  const value = await liveDexUncached(db2, contract, rpc);
+  const d = value.body?.data;
+  if (useCache && value.status === 200 && d?.block) {
+    if (cache.size > 500) cache.clear();
+    cache.set(key, { at: Date.now(), value });
+  }
+  return value;
+}
+async function liveDexUncached(db2, contract, rpc) {
   const asset = (await db2.query("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
   if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
   const rev = (await db2.query(
@@ -10127,7 +10161,7 @@ async function liveDex(db2, contract, rpc = publicRpc) {
   const pools = (await db2.query(
     "SELECT venue, pool_ref, currency0, currency1, quote, fee, stable FROM dex_pools WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY venue, pool_ref",
     [CHAIN_ID, contract]
-  )).rows.filter((p) => covered2.has(p.pool_ref.toLowerCase()));
+  )).rows.filter((p) => covered2.has(`${p.venue}:${p.pool_ref}`.toLowerCase()));
   let block;
   let raw;
   const calls = [
@@ -10138,9 +10172,10 @@ async function liveDex(db2, contract, rpc = publicRpc) {
   const idx = [];
   for (const p of pools) {
     idx.push(calls.length);
+    const bal = { target: asset.contract_address, fn: "balanceOf", args: [p.pool_ref] };
     if (p.venue === "uniswap_v4") calls.push({ target: STATE_VIEW, fn: "getSlot0", args: [p.pool_ref] }, { target: STATE_VIEW, fn: "getLiquidity", args: [p.pool_ref] });
-    else if (p.venue === "aerodrome_v2") calls.push({ target: p.pool_ref, fn: "getReserves" }, { target: p.pool_ref, fn: "getReserves" });
-    else calls.push({ target: p.pool_ref, fn: "slot0", raw: true }, { target: p.pool_ref, fn: "liquidity" });
+    else if (p.venue === "aerodrome_v2") calls.push({ target: p.pool_ref, fn: "getReserves" }, bal);
+    else calls.push({ target: p.pool_ref, fn: "slot0", raw: true }, { target: p.pool_ref, fn: "liquidity" }, bal);
   }
   try {
     block = BigInt(await rpc("eth_blockNumber", []));
@@ -10148,18 +10183,23 @@ async function liveDex(db2, contract, rpc = publicRpc) {
   } catch {
     return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
   }
-  const dec = raw[0] ? Number(firstWord(raw[0])) : null;
+  const decRaw = raw[0] ? firstWord(raw[0]) : null;
+  if (decRaw === null) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
+  if (decRaw > BigInt(MAX_DECIMALS)) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "token_decimals_out_of_range" } } };
+  const dec = Number(decRaw);
   const refOk = raw[1] !== null && "0x" + raw[1].slice(-40).toLowerCase() === ETH_USD_POOL.toLowerCase() && raw[2] !== null;
   const ethUsd = refOk ? priceFromSqrt(firstWord(raw[2]), true, 18, 6) : null;
-  if (dec === null) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
   const out = pools.map((p, i) => {
-    const a = raw[idx[i]];
-    const b = raw[idx[i] + 1];
     const stockIsToken0 = p.currency0.toLowerCase() === asset.contract_address.toLowerCase();
     const decQuote = p.quote === "USDC" ? 6 : 18;
     const usdPer = p.quote === "USDC" ? 1 : ethUsd === null ? null : Number(ethUsd);
-    const q = { venue: p.venue, pool: p.pool_ref, quote: p.quote, fee: p.fee, price_quote: null, price_usd: null, depth_2pct_usd: null, status: "unreadable" };
+    const q = { venue: p.venue, pool: p.pool_ref, quote: p.quote, fee: p.fee, price_quote: null, price_usd: null, depth_2pct_usd: null, depth_capped_by_balance: false, status: "unreadable" };
+    if (p.fee !== null && p.fee > MAX_FEE_PPM) return { ...q, status: "high_fee", note: `fee ${(p.fee / 1e4).toFixed(2)}% is above 1%: not a market price` };
+    const a = raw[idx[i]];
+    const b = raw[idx[i] + 1];
     if (a === null || b === null) return q;
+    if (usdPer === null) return { ...q, status: "no_eth_usd", note: "ETH/USD reference pool unreadable at this block" };
+    let stockBal = null;
     if (p.venue === "aerodrome_v2") {
       if (p.stable) return { ...q, status: "unsupported", note: "stable-curve pool: price is not x*y" };
       const r0 = firstWord(a);
@@ -10168,28 +10208,27 @@ async function liveDex(db2, contract, rpc = publicRpc) {
       if (rs === 0n || rq === 0n) return { ...q, status: "too_thin" };
       const v = rq * 10n ** 18n * 10n ** BigInt(dec) / (rs * 10n ** BigInt(decQuote));
       q.price_quote = fmt18(v);
-      const depthQuote = Number(rq) / 10 ** decQuote * SQRT_102_MINUS_1;
-      q.depth_2pct_usd = usdPer === null ? null : depthQuote * usdPer;
+      q.depth_2pct_usd = Number(rq) / 10 ** decQuote * SQRT_102_MINUS_1 * usdPer;
+      stockBal = firstWord(b);
     } else {
       const sqrtP = firstWord(a);
       const L = firstWord(b);
       if (sqrtP === 0n) return { ...q, status: "too_thin" };
       q.price_quote = priceFromSqrt(sqrtP, stockIsToken0, dec, decQuote);
-      const dq = depth2pctConcentrated(L, sqrtP, stockIsToken0, decQuote);
-      q.depth_2pct_usd = usdPer === null ? null : dq * usdPer;
+      q.depth_2pct_usd = depth2pctConcentrated(L, sqrtP, stockIsToken0, decQuote) * usdPer;
+      const c = raw[idx[i] + 2];
+      if (p.venue !== "uniswap_v4" && c !== null && c !== void 0) stockBal = firstWord(c);
     }
-    q.price_usd = usdPer === null ? null : (Number(q.price_quote) * usdPer).toFixed(8);
+    q.price_usd = (Number(q.price_quote) * usdPer).toFixed(8);
+    if (stockBal !== null) {
+      const heldUsd = Number(stockBal) / 10 ** dec * Number(q.price_usd);
+      if (heldUsd < (q.depth_2pct_usd ?? 0)) q.depth_2pct_usd = heldUsd;
+      q.depth_capped_by_balance = true;
+    }
     q.status = "ok";
     return q;
   });
-  const priced = out.filter((x) => x.status === "ok" && x.price_usd !== null && (x.depth_2pct_usd ?? 0) >= MIN_DEPTH_USD);
-  const sortedPrices = priced.map((x) => Number(x.price_usd)).sort((x, y) => x - y);
-  const median = sortedPrices.length ? sortedPrices[Math.floor(sortedPrices.length / 2)] : null;
-  for (const x of out) {
-    if (x.status === "ok" && (x.depth_2pct_usd ?? 0) < MIN_DEPTH_USD) x.status = "too_thin";
-    else if (x.status === "ok" && median !== null && (Number(x.price_usd) < median / 4 || Number(x.price_usd) > median * 4)) x.status = "outlier";
-  }
-  const main = out.filter((x) => x.status === "ok").sort((x, y) => (y.depth_2pct_usd ?? 0) - (x.depth_2pct_usd ?? 0))[0] ?? null;
+  const { main, reason } = selectMain(out);
   out.sort((x, y) => (y.depth_2pct_usd ?? -1) - (x.depth_2pct_usd ?? -1));
   return {
     status: 200,
@@ -10198,11 +10237,11 @@ async function liveDex(db2, contract, rpc = publicRpc) {
         ...base,
         block: block.toString(),
         main: main ? { ...main, thin_market: (main.depth_2pct_usd ?? 0) < THIN_DEPTH_USD } : null,
-        ...main ? {} : { unavailable_reason: "no_pool_with_usable_depth" },
+        ...main ? {} : { unavailable_reason: reason },
         eth_usd: ethUsd,
         pools: out.slice(0, 10),
         pools_total: out.length,
-        method: `Read onchain at block ${block} (Base public RPC). Price per token from slot0/getReserves; depth_2pct_usd = estimated quote needed to move the price up 2% (assumes constant active liquidity over the move). Main market = deepest pool with depth >= $${MIN_DEPTH_USD} and price within 0.25x-4x of the median pool. Pools come from canonical factories and plain (no-hook) Uniswap v4 pools, independently re-derived (review ${rev.checked_at}).`
+        method: `Read onchain at block ${block} (Base public RPC). Price per token from slot0/getReserves; depth_2pct_usd = estimated quote needed to move the price up 2% (assumes constant active liquidity over the move), capped by the pool's real stock balance where readable (not Uniswap v4, whose pools share one balance). Pools above 1% fee are excluded. Main market = deepest pool with depth >= $${MIN_DEPTH_USD}, within \xB1${BAND_PCT}% of the median of balance-capped pools, and, if its depth is uncapped, corroborated by another pool within \xB1${AGREE_PCT}%. Pools come from canonical factories and plain (no-hook) Uniswap v4 pools, independently re-derived (review ${rev.checked_at}).`
       }
     }
   };
@@ -10210,12 +10249,12 @@ async function liveDex(db2, contract, rpc = publicRpc) {
 
 // src/api/marketContext.ts
 var PUBLIC_RPC_URL = process.env.MARKET_RPC_URL || "https://mainnet.base.org";
-var cache = /* @__PURE__ */ new Map();
-var CACHE_MS = 3e4;
+var cache2 = /* @__PURE__ */ new Map();
+var CACHE_MS2 = 3e4;
 var word = (hex, i) => BigInt("0x" + hex.slice(2 + i * 64, 2 + (i + 1) * 64));
 var liveLatestRound = async (feed) => {
-  const hit = cache.get(feed);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
+  const hit = cache2.get(feed);
+  if (hit && Date.now() - hit.at < CACHE_MS2) return hit.value;
   const r = await fetch(PUBLIC_RPC_URL, {
     method: "POST",
     signal: AbortSignal.timeout(5e3),
@@ -10226,7 +10265,7 @@ var liveLatestRound = async (feed) => {
   if (!j.result || j.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
   const a = word(j.result, 1);
   const value = { round_id: word(j.result, 0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(word(j.result, 3)), read_at: (/* @__PURE__ */ new Date()).toISOString() };
-  cache.set(feed, { at: Date.now(), value });
+  cache2.set(feed, { at: Date.now(), value });
   return value;
 };
 async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), readRound = liveLatestRound, readDex = liveDex) {
@@ -10260,7 +10299,7 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: reason, staleness: { state: "unknown", threshold_s: null } } } };
   }
   if (BigInt(round.answer_raw) <= 0n || round.updated_unix <= 0 || round.updated_unix > nowSec + 60) {
-    cache.delete(feed.feed_address);
+    cache2.delete(feed.feed_address);
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_result_invalid", staleness: { state: "unknown", threshold_s: null } } } };
   }
   const id = BigInt(round.round_id);
@@ -10272,10 +10311,14 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
   )).rows[0];
   if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
   const st = classifyStaleness(nowSec, round.updated_unix, p99);
-  if (dex.price_usd) {
+  if (dex.price_usd && (st.state === "unexpectedly_stale" || st.state === "unknown")) {
+    dex.nav_premium_pct = null;
+    dex.premium_unavailable_reason = `nav_${st.state}`;
+  } else if (dex.price_usd) {
     const navNum = Number(formatNav(round.answer_raw, feed.decimals));
     dex.nav_premium_pct = Number(((Number(dex.price_usd) / navNum - 1) * 100).toFixed(4));
-    dex.premium_note = market.session === "open" ? "DEX price vs the last published NAV during the regular session." : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing.";
+    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round.updated_unix * 1e3).toISOString()}.`;
+    dex.premium_note = (market.session === "open" ? "DEX price vs the last published NAV during the regular session. " : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing. ") + when;
   }
   return {
     status: 200,
@@ -10482,8 +10525,8 @@ async function handleMcp(db2, raw) {
 // src/api/server.ts
 var ADDR2 = /^0x[0-9a-fA-F]{40}$/;
 function send(res, status, body, type = "application/json", cacheOverride) {
-  const cache2 = cacheOverride ?? (status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store");
-  res.writeHead(status, { "content-type": type, "cache-control": cache2, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
+  const cache3 = cacheOverride ?? (status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store");
+  res.writeHead(status, { "content-type": type, "cache-control": cache3, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
   res.end(typeof body === "string" ? body : JSON.stringify(body, null, 1));
 }
 var RATE = { limit: Number(process.env.RATE_LIMIT_PER_MIN ?? 120), windowMs: 6e4 };
@@ -10512,7 +10555,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
 - GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD)
 - GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
-- GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
+- GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex \u2014 live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
 - POST /mcp \u2014 remote MCP server (Streamable HTTP, stateless): tools list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
 - GET /v1/market/session \u2014 the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)

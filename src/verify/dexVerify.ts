@@ -78,7 +78,7 @@ export async function verifyDexPools(token: string, pools: StoredPool[], tx: Tra
       const s0 = await call(CANON.stateView, DEX_SEL.getSlot0V4 + p.pool_ref.slice(2).padStart(64, "0"));
       const init = s0 !== null && BigInt("0x" + s0.slice(2, 66)) > 0n;
       add(`v4 ${p.pool_ref.slice(0, 12)}… initialized`, s0 === null ? "UNSURE" : init ? "CONFIRMED" : "REJECTED", s0 === null ? "unreadable" : init ? "sqrtPriceX96 > 0" : "not initialized");
-      if (init) covered.push(p.pool_ref);
+      if (init) covered.push(`${p.venue}:${p.pool_ref}`);
       continue;
     }
     const factory = CANON[p.venue as "uniswap_v3" | "aerodrome_v2" | "aerodrome_cl"];
@@ -96,7 +96,7 @@ export async function verifyDexPools(token: string, pools: StoredPool[], tx: Tra
     }
     const ok = got === p.pool_ref.toLowerCase() && a0 === c0 && a1 === c1;
     add(`${p.venue} ${p.pool_ref} is the factory's pool for this pair`, ok ? "CONFIRMED" : "REJECTED", `factory ${got}, token0 ${a0}, token1 ${a1}`);
-    if (ok) covered.push(p.pool_ref);
+    if (ok) covered.push(`${p.venue}:${p.pool_ref}`);
   }
   const verdict = claims.some((c) => c.verdict === "REJECTED") ? "REJECTED" : claims.some((c) => c.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
   return { verdict, pools_checked: pools.length, claims, covered, checked_at: new Date().toISOString(), verifier_rpc_host: hosts.verifier };
