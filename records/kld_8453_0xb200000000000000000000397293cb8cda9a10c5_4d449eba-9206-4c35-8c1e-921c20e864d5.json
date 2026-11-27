@@ -190,12 +190,12 @@
  },
  "payload_sha256": "55010e3812e57d0f760d06c4041d32b98de29213378960c27ae3c1b62ac76d81",
  "review": {
-  "review_id": "rev-55010e3812e5-1795773815830",
+  "review_id": "rev-55010e3812e5-1795776003413",
   "record_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5",
   "revision": 2,
   "payload_sha256": "55010e3812e57d0f760d06c4041d32b98de29213378960c27ae3c1b62ac76d81",
   "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
-  "checked_at": "2026-11-27T10:03:35.830Z",
+  "checked_at": "2026-11-27T10:40:03.413Z",
   "verdict": "CONFIRMED",
   "claims": [
    {

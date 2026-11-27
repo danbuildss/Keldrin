@@ -1,2 +1,6 @@
 == run 1 2026-11-27T09:54:54Z
   supabase migrate: exit 0, 6s
+  discover: exit 0, 607s
+  reconcile: exit 0, 76s
+  calendar: exit 0, 399s
+  supabase check: exit 0, 8s

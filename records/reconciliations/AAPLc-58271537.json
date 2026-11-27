@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376:sec:932a138975d9",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376:sec:0d9e92c87fc7",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
-   "payload_sha256": "932a138975d972a4e1b92fb407466f8ca10126ac018c40546a6c1d9989437225"
+   "payload_sha256": "0d9e92c87fc700687b518e65d3de82a897c3035ebdc8292810241828f44606ee"
   },
   "company": {
    "cik": "0000320193",
@@ -16,7 +16,7 @@
     "AAPL"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=d56a9b6dad0a2b8d",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=754e57ff700f02f8",
     "https://data.sec.gov/submissions/CIK0000320193.json sha256=7c22869dc335882f"
    ]
   },
@@ -126,16 +126,16 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T09:51:58.662Z"
+  "generated_at": "2026-11-27T10:24:21.817Z"
  },
- "payload_sha256": "1bb61077712f293b91c0fe2066e8a3065510811945ef7c358e703d59deef747c",
+ "payload_sha256": "8c2d5998a54a1023fb4f2d03fc385fa6165478ddbca72f6ea12e50041602e740",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 932a138975d972a4"
+    "evidence": "record hash 0d9e92c87fc70068"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -173,6 +173,6 @@
     "evidence": "answer 35550825000 at 58271536"
    }
   ],
-  "checked_at": "2026-11-27T09:51:59.866Z"
+  "checked_at": "2026-11-27T10:24:22.995Z"
  }
 }

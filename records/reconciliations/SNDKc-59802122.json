@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5:sec:75361097cf27",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5:sec:55010e3812e5",
   "action_kind": "stock_split",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5",
-   "payload_sha256": "75361097cf273f4c43fccbfad403166996d25d97c65e021f1cfea585c382202f"
+   "payload_sha256": "55010e3812e57d0f760d06c4041d32b98de29213378960c27ae3c1b62ac76d81"
   },
   "company": {
    "cik": "0002023554",
@@ -16,8 +16,8 @@
     "SNDK"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3a72f0a3ac4d31cb",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=5117e592008640aa",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3557c6f7d1e93eb6",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=213b3491221ee3cc",
     "https://data.sec.gov/submissions/CIK0002023554.json sha256=6f59d8f061f93fd6"
    ]
   },
@@ -86,16 +86,16 @@
    "Split ratio not yet evidenced in SEC structured data."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T09:52:07.825Z"
+  "generated_at": "2026-11-27T10:24:37.944Z"
  },
- "payload_sha256": "9427479e1748984fd4ada4cc36ce128adf4658662a7d5f88d53601e7c2ebf739",
+ "payload_sha256": "88d677329d25e3a56e1c2f3961bba96bd26849e1c89dc9f1f83fcbf3d09e57da",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 75361097cf273f4c"
+    "evidence": "record hash 55010e3812e57d0f"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -108,6 +108,6 @@
     "evidence": "Sandisk Corp SNDK"
    }
   ],
-  "checked_at": "2026-11-27T09:52:08.296Z"
+  "checked_at": "2026-11-27T10:24:38.421Z"
  }
 }

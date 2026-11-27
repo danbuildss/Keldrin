@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388:sec:8e2769a40424",
+  "reconciliation_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388:sec:f1b4a0256827",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
-   "payload_sha256": "8e2769a40424ec3e718d52dd336aa3c89814173ad529f39c4a58159ffbc03638"
+   "payload_sha256": "f1b4a02568272f071c09ce961dd663d319466421ec2118d9cac3b7de140414e3"
   },
   "company": {
    "cik": "0000891478",
@@ -370,16 +370,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T09:51:44.733Z"
+  "generated_at": "2026-11-27T10:24:04.964Z"
  },
- "payload_sha256": "95cdf0d0f608e9bdbb189c171cff652b5c4cc2bcaf282df95ef8d4bfc7fb2cc6",
+ "payload_sha256": "53790df3d9b1f38527fa07e5337a3be6a6ee4d0fbde5633669aa95f07de73f96",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 8e2769a40424ec3e"
+    "evidence": "record hash f1b4a02568272f07"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -392,6 +392,6 @@
     "evidence": "Banco Santander, S.A. SAN,BCDRF"
    }
   ],
-  "checked_at": "2026-11-27T09:51:45.196Z"
+  "checked_at": "2026-11-27T10:24:05.457Z"
  }
 }

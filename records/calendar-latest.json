@@ -1,6 +1,6 @@
 {
- "snapshot_id": "snap-2026-11-27T09-44-31-800Z",
- "as_of": "2026-11-27T09:44:31.800Z",
+ "snapshot_id": "snap-2026-11-27T10-24-45-749Z",
+ "as_of": "2026-11-27T10:24:45.749Z",
  "scope": [
   "AAPLc",
   "CAKEc",
@@ -166,7 +166,7 @@
     "expected_adjustment_date": "2026-12-14",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -197,7 +197,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:16.445Z"
+    "checked_at": "2026-11-27T10:29:37.452Z"
    }
   },
   {
@@ -247,7 +247,7 @@
     "expected_adjustment_date": "2026-12-15",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -278,7 +278,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:17.959Z"
+    "checked_at": "2026-11-27T10:29:39.957Z"
    }
   },
   {
@@ -328,7 +328,7 @@
     "expected_adjustment_date": "2026-12-17",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -359,7 +359,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:19.140Z"
+    "checked_at": "2026-11-27T10:29:42.110Z"
    }
   },
   {
@@ -409,7 +409,7 @@
     "expected_adjustment_date": "2026-12-17",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -440,7 +440,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:20.326Z"
+    "checked_at": "2026-11-27T10:29:44.256Z"
    }
   },
   {
@@ -490,7 +490,7 @@
     "expected_adjustment_date": "2026-12-17",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -521,7 +521,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:21.523Z"
+    "checked_at": "2026-11-27T10:29:46.396Z"
    }
   },
   {
@@ -571,7 +571,7 @@
     "expected_adjustment_date": "2026-12-21",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -602,7 +602,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:22.766Z"
+    "checked_at": "2026-11-27T10:29:48.575Z"
    }
   },
   {
@@ -652,7 +652,7 @@
     "expected_adjustment_date": "2026-12-23",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -683,7 +683,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:24.028Z"
+    "checked_at": "2026-11-27T10:29:50.725Z"
    }
   },
   {
@@ -733,7 +733,7 @@
     "expected_adjustment_date": "2026-12-24",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -764,7 +764,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:25.232Z"
+    "checked_at": "2026-11-27T10:29:52.890Z"
    }
   },
   {
@@ -814,7 +814,7 @@
     "expected_adjustment_date": "2026-12-29",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -845,7 +845,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:26.387Z"
+    "checked_at": "2026-11-27T10:29:54.991Z"
    }
   },
   {
@@ -895,7 +895,7 @@
     "expected_adjustment_date": "2026-12-30",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -926,7 +926,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:27.587Z"
+    "checked_at": "2026-11-27T10:29:57.177Z"
    }
   },
   {
@@ -976,7 +976,7 @@
     "expected_adjustment_date": "2026-12-30",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1007,7 +1007,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:28.802Z"
+    "checked_at": "2026-11-27T10:29:59.315Z"
    }
   },
   {
@@ -1057,7 +1057,7 @@
     "expected_adjustment_date": "2027-01-06",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1088,7 +1088,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:30.000Z"
+    "checked_at": "2026-11-27T10:30:01.523Z"
    }
   },
   {
@@ -1138,7 +1138,7 @@
     "expected_adjustment_date": "2027-01-20",
     "applied_record_id": null,
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1169,7 +1169,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:31.208Z"
+    "checked_at": "2026-11-27T10:30:03.799Z"
    }
   },
   {
@@ -1204,7 +1204,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1225,7 +1225,7 @@
       "evidence": "$0.27 dates 2026-11-16,2026-11-12"
      }
     ],
-    "checked_at": "2026-11-27T09:48:31.669Z"
+    "checked_at": "2026-11-27T10:30:06.035Z"
    }
   },
   {
@@ -1258,7 +1258,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1274,7 +1274,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:32.381Z"
+    "checked_at": "2026-11-27T10:30:07.654Z"
    }
   },
   {
@@ -1307,7 +1307,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1323,7 +1323,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:33.084Z"
+    "checked_at": "2026-11-27T10:30:09.367Z"
    }
   },
   {
@@ -1356,7 +1356,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1372,7 +1372,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:33.787Z"
+    "checked_at": "2026-11-27T10:30:10.986Z"
    }
   },
   {
@@ -1405,7 +1405,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1421,7 +1421,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:34.489Z"
+    "checked_at": "2026-11-27T10:30:12.628Z"
    }
   },
   {
@@ -1454,7 +1454,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1470,7 +1470,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:35.198Z"
+    "checked_at": "2026-11-27T10:30:14.284Z"
    }
   },
   {
@@ -1503,7 +1503,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1519,7 +1519,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:35.924Z"
+    "checked_at": "2026-11-27T10:30:15.935Z"
    }
   },
   {
@@ -1554,7 +1554,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1575,7 +1575,7 @@
       "evidence": "$0.30 dates 2026-11-24,2026-11-10"
      }
     ],
-    "checked_at": "2026-11-27T09:48:36.584Z"
+    "checked_at": "2026-11-27T10:30:17.498Z"
    }
   },
   {
@@ -1608,7 +1608,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1624,7 +1624,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:37.606Z"
+    "checked_at": "2026-11-27T10:30:19.435Z"
    }
   },
   {
@@ -1657,7 +1657,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1673,7 +1673,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:38.364Z"
+    "checked_at": "2026-11-27T10:30:21.207Z"
    }
   },
   {
@@ -1706,7 +1706,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1722,7 +1722,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:39.071Z"
+    "checked_at": "2026-11-27T10:30:22.839Z"
    }
   },
   {
@@ -1755,7 +1755,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1771,7 +1771,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:39.791Z"
+    "checked_at": "2026-11-27T10:30:24.451Z"
    }
   },
   {
@@ -1804,7 +1804,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1820,7 +1820,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:40.522Z"
+    "checked_at": "2026-11-27T10:30:26.149Z"
    }
   },
   {
@@ -1853,7 +1853,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1869,7 +1869,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:41.259Z"
+    "checked_at": "2026-11-27T10:30:27.809Z"
    }
   },
   {
@@ -1902,7 +1902,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1918,7 +1918,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:42.011Z"
+    "checked_at": "2026-11-27T10:30:29.442Z"
    }
   },
   {
@@ -1951,7 +1951,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -1967,7 +1967,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:42.729Z"
+    "checked_at": "2026-11-27T10:30:31.063Z"
    }
   },
   {
@@ -2000,7 +2000,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2016,7 +2016,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:43.449Z"
+    "checked_at": "2026-11-27T10:30:32.713Z"
    }
   },
   {
@@ -2049,7 +2049,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2065,7 +2065,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:44.173Z"
+    "checked_at": "2026-11-27T10:30:34.360Z"
    }
   },
   {
@@ -2098,7 +2098,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2114,7 +2114,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:44.873Z"
+    "checked_at": "2026-11-27T10:30:36.006Z"
    }
   },
   {
@@ -2147,7 +2147,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2163,7 +2163,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:45.607Z"
+    "checked_at": "2026-11-27T10:30:37.729Z"
    }
   },
   {
@@ -2196,7 +2196,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2212,7 +2212,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:46.320Z"
+    "checked_at": "2026-11-27T10:30:39.369Z"
    }
   },
   {
@@ -2245,7 +2245,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2261,7 +2261,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:47.059Z"
+    "checked_at": "2026-11-27T10:30:41.002Z"
    }
   },
   {
@@ -2294,7 +2294,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2310,7 +2310,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:47.762Z"
+    "checked_at": "2026-11-27T10:30:42.620Z"
    }
   },
   {
@@ -2343,7 +2343,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2359,7 +2359,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:48.491Z"
+    "checked_at": "2026-11-27T10:30:44.294Z"
    }
   },
   {
@@ -2394,7 +2394,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2415,7 +2415,7 @@
       "evidence": "$0.06 dates 2026-10-29,2026-10-09"
      }
     ],
-    "checked_at": "2026-11-27T09:48:49.042Z"
+    "checked_at": "2026-11-27T10:30:45.888Z"
    }
   },
   {
@@ -2450,7 +2450,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2471,7 +2471,7 @@
       "evidence": "$0.15 dates 2026-09-30,2026-10-29,2026-10-14"
      }
     ],
-    "checked_at": "2026-11-27T09:48:49.587Z"
+    "checked_at": "2026-11-27T10:30:47.561Z"
    }
   },
   {
@@ -2504,7 +2504,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2520,7 +2520,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:50.611Z"
+    "checked_at": "2026-11-27T10:30:49.419Z"
    }
   },
   {
@@ -2555,7 +2555,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2576,7 +2576,7 @@
       "evidence": "$0.25 dates 2026-10-01,2026-09-10"
      }
     ],
-    "checked_at": "2026-11-27T09:48:51.330Z"
+    "checked_at": "2026-11-27T10:30:51.039Z"
    }
   },
   {
@@ -2611,7 +2611,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2632,7 +2632,7 @@
       "evidence": "$0.50 dates 2026-10-09,2026-10-23"
      }
     ],
-    "checked_at": "2026-11-27T09:48:52.131Z"
+    "checked_at": "2026-11-27T10:30:52.470Z"
    }
   },
   {
@@ -2665,7 +2665,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2681,7 +2681,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:52.846Z"
+    "checked_at": "2026-11-27T10:30:54.251Z"
    }
   },
   {
@@ -2714,7 +2714,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2730,7 +2730,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:53.548Z"
+    "checked_at": "2026-11-27T10:30:56.209Z"
    }
   },
   {
@@ -2765,7 +2765,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857",
     "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2786,7 +2786,7 @@
       "evidence": "$1.60 dates 2026-10-26,2026-10-02"
      }
     ],
-    "checked_at": "2026-11-27T09:48:54.067Z"
+    "checked_at": "2026-11-27T10:30:57.845Z"
    }
   },
   {
@@ -2819,7 +2819,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2835,7 +2835,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:54.780Z"
+    "checked_at": "2026-11-27T10:31:00.012Z"
    }
   },
   {
@@ -2868,7 +2868,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2884,7 +2884,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:55.477Z"
+    "checked_at": "2026-11-27T10:31:01.775Z"
    }
   },
   {
@@ -2917,7 +2917,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2933,7 +2933,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:56.173Z"
+    "checked_at": "2026-11-27T10:31:03.502Z"
    }
   },
   {
@@ -2966,7 +2966,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -2982,7 +2982,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:56.877Z"
+    "checked_at": "2026-11-27T10:31:05.257Z"
    }
   },
   {
@@ -3015,7 +3015,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -3031,7 +3031,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:57.578Z"
+    "checked_at": "2026-11-27T10:31:06.980Z"
    }
   },
   {
@@ -3064,7 +3064,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -3080,7 +3080,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:58.294Z"
+    "checked_at": "2026-11-27T10:31:08.718Z"
    }
   },
   {
@@ -3113,7 +3113,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -3129,7 +3129,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:58.992Z"
+    "checked_at": "2026-11-27T10:31:10.451Z"
    }
   },
   {
@@ -3162,7 +3162,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -3178,7 +3178,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:48:59.709Z"
+    "checked_at": "2026-11-27T10:31:12.160Z"
    }
   },
   {
@@ -3211,7 +3211,7 @@
     "expected_adjustment_date": null,
     "applied_record_id": null,
     "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
-    "as_of": "2026-11-27T09:44:31.800Z"
+    "as_of": "2026-11-27T10:24:45.749Z"
    },
    "review": {
     "verdict": "CONFIRMED",
@@ -3227,7 +3227,7 @@
       "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
      }
     ],
-    "checked_at": "2026-11-27T09:49:00.450Z"
+    "checked_at": "2026-11-27T10:31:13.912Z"
    }
   }
  ]

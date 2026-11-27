@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78:sec:4b57e5dadce5",
+  "reconciliation_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78:sec:9542c2ecb1e1",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78",
-   "payload_sha256": "4b57e5dadce5b2c76d3da92d29faef644b974b02c9a85471b160ea77a4b61fb2"
+   "payload_sha256": "9542c2ecb1e18c47f52919ddb1cfd3935bd4fad23af11b267f0255dbe3ece192"
   },
   "company": {
    "cik": "0000924613",
@@ -146,16 +146,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T09:51:54.064Z"
+  "generated_at": "2026-11-27T10:24:16.523Z"
  },
- "payload_sha256": "52f714f02a6121c495b02ccd48442b8506b766f0bfa26d71bb2720e76590f1c3",
+ "payload_sha256": "d6c60a511819057a9069cbdbf9388a81ee2bc656159706c7fdc3ca31ad50143e",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 4b57e5dadce5b2c7"
+    "evidence": "record hash 9542c2ecb1e18c47"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -168,6 +168,6 @@
     "evidence": "NOKIA CORP NOK,NOKBF"
    }
   ],
-  "checked_at": "2026-11-27T09:51:54.528Z"
+  "checked_at": "2026-11-27T10:24:16.992Z"
  }
 }

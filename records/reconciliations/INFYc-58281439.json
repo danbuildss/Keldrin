@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536:sec:36d0862575f0",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536:sec:e957097bc46b",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
-   "payload_sha256": "36d0862575f0a7dfbb60fe89f143c37d72bd6bceafcd8334b806fa9e22b63b19"
+   "payload_sha256": "e957097bc46bccb73aedb15f852b58057a1a87e3a40e45a962289216c2710aff"
   },
   "company": {
    "cik": "0001067491",
@@ -117,16 +117,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T09:52:06.139Z"
+  "generated_at": "2026-11-27T10:24:35.340Z"
  },
- "payload_sha256": "373cfde8bfcf7d2c7208a4cf0c51ccd6c8862da803eba580f8a340f56fabfbad",
+ "payload_sha256": "9b5bfdb912bcf52450a907e9b6fa6ee62bdef6827529967e8c5eb63886d95acc",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 36d0862575f0a7df"
+    "evidence": "record hash e957097bc46bccb7"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -139,6 +139,6 @@
     "evidence": "Infosys Ltd INFY"
    }
   ],
-  "checked_at": "2026-11-27T09:52:06.685Z"
+  "checked_at": "2026-11-27T10:24:35.840Z"
  }
 }
