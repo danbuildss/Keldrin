@@ -5,9 +5,9 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { openDb, insertRecord, insertReview } from "../src/db/db.ts";
 import { classifyApplied, eventType } from "../src/api/events.ts";
-import { rateLimited } from "../src/api/server.ts";
+import { dbFailureReason, rateLimited } from "../src/api/server.ts";
 // The DEPLOYED artifact: the esbuild bundle Vercel runs.
-import { createHandler, normalisePath } from "../api/[...path].mjs";
+import { createHandler, normalisePath } from "../api/index.mjs";
 
 const fx = JSON.parse(readFileSync(new URL("../fixtures/recorded/googlc-e82812a6.json", import.meta.url), "utf8"));
 const NV = "0xb20000000000000000000078ee7ce2fE4908108C";
@@ -25,9 +25,17 @@ test("event type and status classification", () => {
   const pm = classifyApplied("2026-10-26T13:30:15Z", { payable_date: "2026-10-26" }, { type: "dividend", ratio: "1.558821201905386994" });
   assert.deepEqual([pm.status, pm.confidence, pm.warnings], ["verified_matched", "medium", ["multiplier_change_unusually_large_for_cash_dividend"]], "PMc: timing matches but magnitude is flagged");
   assert.equal(classifyApplied("2026-10-26T00:00:00Z", { payable_date: "2026-10-26" }, { type: "split", ratio: "8" }).warnings.length, 0, "splits are not dividends");
+  assert.equal(normalisePath("/api/index?__path=/v1/events&status=predicted"), "/v1/events?status=predicted", "Vercel rewrite form");
+  assert.equal(normalisePath("/api/index?__path=v1/changes&since=2026-11-27T00%3A00%3A00Z"), "/v1/changes?since=2026-11-27T00%3A00%3A00Z");
+  assert.equal(normalisePath("/api/index?__path="), "/");
+  assert.equal(normalisePath("/api/index?__path=/"), "/");
   assert.equal(normalisePath("/api/v1/events?x=1"), "/v1/events?x=1");
   assert.equal(normalisePath("/v1/events"), "/v1/events");
   assert.equal(normalisePath("/api"), "/");
+  assert.equal(dbFailureReason({ code: "28P01", message: "password authentication failed for user x" }), "auth_failed");
+  assert.equal(dbFailureReason({ message: "self-signed certificate in certificate chain" }), "tls_verify_failed");
+  assert.equal(dbFailureReason({ code: "ENOTFOUND", message: "getaddrinfo ENOTFOUND host" }), "dns_failed");
+  assert.equal(dbFailureReason(new Error("DATABASE_URL is not set")), "not_configured");
   assert.equal(normalisePath("/apiary"), "/apiary");
 });
 

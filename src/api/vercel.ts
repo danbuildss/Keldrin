@@ -6,10 +6,24 @@ import { openPg, type ReadDb } from "../db/pg.ts";
 // Vercel Node.js function entry. Bundled to api/index.mjs by `npm run build:api`.
 // Needs DATABASE_URL = the Supabase pooler URL for the read-only `keldrin_reader` login.
 
-/** Vercel may hand the function "/api/v1/events" (catch-all) or the original "/v1/events" (rewrite). */
+/**
+ * Rebuild the client's original path. Vercel rewrites every request to /api/index?__path=/<path>&<query>;
+ * direct calls (tests, local) arrive unchanged. The internal __path parameter never reaches the router.
+ */
 export function normalisePath(url: string | undefined): string {
-  const u = url ?? "/";
-  return u === "/api" || u.startsWith("/api/") || u.startsWith("/api?") ? u.slice(4) || "/" : u;
+  const u = new URL(url ?? "/", "http://x");
+  const original = u.searchParams.get("__path");
+  if (original !== null) {
+    u.searchParams.delete("__path");
+    const qs = u.searchParams.toString();
+    const path = ("/" + original.replace(/^\/+/, "")).replace(/\/+$/, "") || "/";
+    return path + (qs ? "?" + qs : "");
+  }
+  if (u.pathname === "/api" || u.pathname === "/api/index" || u.pathname.startsWith("/api/")) {
+    const rest = u.pathname === "/api" || u.pathname === "/api/index" ? "/" : u.pathname.slice(4);
+    return rest + u.search;
+  }
+  return u.pathname + u.search;
 }
 
 export function createHandler(db: ReadDb | PGlite) {

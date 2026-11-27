@@ -53,6 +53,21 @@ Records state what is unknown instead of guessing. Informational only: not an or
 Errors: {"error":{"code","message","hint"}}. 404 unknown, 400 bad input, 409 ambiguous symbol.
 `;
 
+/** Map a database error to a coarse, non-sensitive category (no host, user or message is exposed). */
+export function dbFailureReason(e: unknown): string {
+  const x = e as { code?: string; message?: string };
+  const code = String(x?.code ?? "");
+  const msg = String(x?.message ?? "").toLowerCase();
+  if (code === "28P01" || code === "28000" || /password authentication|authentication failed|tenant or user not found/.test(msg)) return "auth_failed";
+  if (/certificate|self[- ]signed|unable to verify|ssl|tls/.test(msg)) return "tls_verify_failed";
+  if (code === "ENOTFOUND" || code === "EAI_AGAIN" || /getaddrinfo/.test(msg)) return "dns_failed";
+  if (code === "ETIMEDOUT" || code === "ECONNREFUSED" || /timeout|timed out/.test(msg)) return "connect_timeout";
+  if (code === "42501" || /permission denied/.test(msg)) return "permission_denied";
+  if (code === "42P01" || code === "3F000" || /does not exist/.test(msg)) return "schema_missing";
+  if (/database_url is not set/.test(msg)) return "not_configured";
+  return "unknown";
+}
+
 export async function handle(db: PGlite, req: IncomingMessage, res: ServerResponse) {
   try {
     if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
@@ -87,6 +102,12 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
 
     if (p === "/health") {
+      try {
+        await db.query("SELECT 1");
+      } catch (e) {
+        console.error("keldrin health: database unavailable:", (e as Error).stack ?? e);
+        return send(res, 503, { ...err("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e) });
+      }
       const [a, r, c, run] = await Promise.all([
         db.query<{ n: number; verified: number }>("SELECT count(*)::int n, count(*) FILTER (WHERE identity_state='verified')::int verified FROM assets"),
         db.query<{ n: number }>("SELECT count(*)::int n FROM records"),

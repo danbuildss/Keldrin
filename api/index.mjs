@@ -6365,6 +6365,19 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /health \u2014 coverage, last run, limitations
 Errors: {"error":{"code","message","hint"}}. 404 unknown, 400 bad input, 409 ambiguous symbol.
 `;
+function dbFailureReason(e) {
+  const x = e;
+  const code = String(x?.code ?? "");
+  const msg = String(x?.message ?? "").toLowerCase();
+  if (code === "28P01" || code === "28000" || /password authentication|authentication failed|tenant or user not found/.test(msg)) return "auth_failed";
+  if (/certificate|self[- ]signed|unable to verify|ssl|tls/.test(msg)) return "tls_verify_failed";
+  if (code === "ENOTFOUND" || code === "EAI_AGAIN" || /getaddrinfo/.test(msg)) return "dns_failed";
+  if (code === "ETIMEDOUT" || code === "ECONNREFUSED" || /timeout|timed out/.test(msg)) return "connect_timeout";
+  if (code === "42501" || /permission denied/.test(msg)) return "permission_denied";
+  if (code === "42P01" || code === "3F000" || /does not exist/.test(msg)) return "schema_missing";
+  if (/database_url is not set/.test(msg)) return "not_configured";
+  return "unknown";
+}
 async function handle(db2, req, res) {
   try {
     if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
@@ -6395,6 +6408,12 @@ async function handle(db2, req, res) {
     if (p === "/llms.txt") return send(res, 200, LLMS_TXT, "text/plain; charset=utf-8");
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
     if (p === "/health") {
+      try {
+        await db2.query("SELECT 1");
+      } catch (e) {
+        console.error("keldrin health: database unavailable:", e.stack ?? e);
+        return send(res, 503, { ...err("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e) });
+      }
       const [a, r, c, run] = await Promise.all([
         db2.query("SELECT count(*)::int n, count(*) FILTER (WHERE identity_state='verified')::int verified FROM assets"),
         db2.query("SELECT count(*)::int n FROM records"),
@@ -6539,8 +6558,19 @@ function openPg(connectionString) {
 
 // src/api/vercel.ts
 function normalisePath(url) {
-  const u = url ?? "/";
-  return u === "/api" || u.startsWith("/api/") || u.startsWith("/api?") ? u.slice(4) || "/" : u;
+  const u = new URL(url ?? "/", "http://x");
+  const original = u.searchParams.get("__path");
+  if (original !== null) {
+    u.searchParams.delete("__path");
+    const qs = u.searchParams.toString();
+    const path = ("/" + original.replace(/^\/+/, "")).replace(/\/+$/, "") || "/";
+    return path + (qs ? "?" + qs : "");
+  }
+  if (u.pathname === "/api" || u.pathname === "/api/index" || u.pathname.startsWith("/api/")) {
+    const rest = u.pathname === "/api" || u.pathname === "/api/index" ? "/" : u.pathname.slice(4);
+    return rest + u.search;
+  }
+  return u.pathname + u.search;
 }
 function createHandler(db2) {
   return (req, res) => {

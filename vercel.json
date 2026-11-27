@@ -4,7 +4,7 @@
   "buildCommand": "",
   "outputDirectory": "public",
   "functions": {
-    "api/[...path].mjs": { "maxDuration": 15 }
+    "api/index.mjs": { "maxDuration": 15 }
   },
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/api/$1" }]
+  "rewrites": [{ "source": "/:path*", "destination": "/api/index?__path=/:path*" }]
 }
