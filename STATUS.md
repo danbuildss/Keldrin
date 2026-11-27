@@ -73,4 +73,4 @@
 
 ## Phase 11 (approved 2026-11-27): paid x402 on Bankr + 3 free tries
 - Live on Bankr (deployed by the founder from Bankr chat; Bankr's test calls cost $0.10): keldrin-snapshot and keldrin-report, $0.05 USDC on Base, payout to the founder's Bankr wallet 0xb98f…fa91. Self-contained (read the free API), never charged on incomplete answers. Bankr's reported answers match production data. Not verified from this session: the 402 terms (x402.bankr.bot is blocked by this session's network).
-- Built, not deployed: /v1/snapshot and /v1/report on Keldrin's own API with 3 free complete answers per client per day, then 402 with the Bankr links. Needs a merge.
+- LIVE: /v1/snapshot and /v1/report with 3 free complete answers per client per day (counted in Supabase), then 402 with the Bankr links (PRs #18–#20). Single-browser check by the founder pending.
