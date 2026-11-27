@@ -1,0 +1,5 @@
+count(*)::int n, max(revision) maxrev, count(DISTINCT [{"n":13,"maxrev":1,"ids":13}]
+verdict, count(*)::int FROM reviews GROUP BY 1 [{"verdict":"CONFIRMED","count":39}]
+count(*)::int confirmed FROM confirmed_records [{"confirmed":13}]
+run_id, rpc_calls, outcome FROM runs ORDER BY started [{"run_id":"run-2026-11-27T08-01-43-095Z","rpc_calls":436,"outcome":"ok"},{"run_id":"run-2026-11-27T08-03-21-407Z","rpc_calls":437,"outcome":"ok"},{"run_id":"run-2026-11-27T08-04-56-580Z","rpc_calls":434,"outcome":"ok"}]
+status, review_verdict FROM reconciliations [{"status":"partially_reconciled","review_verdict":"CONFIRMED"}]

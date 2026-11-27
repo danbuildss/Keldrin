@@ -1,6 +1,35 @@
-# Status | 2026-11-27
-Phase 0: ready for architecture and source discovery. Initial application submitted by founder; acceptance unknown. Keldrin name confirmed. No implemented agent, database, live endpoint, real events, users or revenue verified here.
+# Status | 2026-11-27 (end of Phase 1 session)
 
-Next: Claude inspects actual Orric/Aeon code and source access; proposes Phase 1 scope for approval. First real backend proof: one corporate event linked to a verified Base contract with independent review. No frontend until proof passes.
+**Phase 1: backend proof passed locally; PR open for founder review.** Nothing is deployed or published. There are no external users or revenue.
 
-Blockers: private repo access/pinned revisions, provider terms and permissions, live API response checks, brand clearance, actual watchlist and budget, deployment secrets, customer requirements and traction eligibility. Internal target Dec 5; official rules checked Nov 27 list Dec 12 23:59 UTC submission; verify before submission.
+## Done
+- **Keyless corporate-action feed** for all 435 Coinbase tokenized stocks on Base:
+  - onchain identity checks (435/435 verified)
+  - discovery by `multiplier()` bisection, because the public RPC refuses `eth_getLogs`
+  - receipt and bracket decoding, cross-checked against the issuer record
+- **13 real corporate actions**, all independently CONFIRMED in 3 of 3 controlled runs (idempotent: 13 records, revision 1):
+  - 12 cash dividends
+  - 1 scheduled 8-for-1 split (SNDKc, 2026-11-20)
+- **Independent verifier**: its own RPC client, ABI decoding, arithmetic and hash. It re-scans action blocks for completeness and REJECTS every tamper case tested.
+- **Storage**: append-only Postgres (PGlite locally); corrections become revisions.
+- **API**: read-only localhost API serving confirmed records only. A sample outside consumer validates schema, arithmetic and freshness.
+- **Deep proof**: GOOGLc linked to Alphabet's SEC XBRL dividend ($0.22) and the Chainlink reference. Implied net reinvestment is $0.1309 (interpretation). Status `partially_reconciled`.
+- **Code review**: a fresh-context review found 10 issues (7 important), all fixed with regression tests. 47/47 tests pass.
+
+## Findings worth your attention
+- **PMc**: multiplier ×1.5588, labelled "Cash Dividend" by the issuer. This is a lead, not a claim.
+- **Issuer conventions** all integrators must handle:
+  - 12 of 13 actions used the deprecated instant setter.
+  - 2 emitted only the legacy event.
+  - Most have two announcement IDs.
+
+## Blockers / decisions
+- **D2**: SEC contact User-Agent, needed for record/payment dates and share-class evidence.
+- **D9**: a log-capable RPC provider, for full announcement coverage (notice-only announcements).
+- **Make `main` the default branch** (repo setting; the founder's action).
+- Coinbase API rights: unknown. Brand clearance: pending.
+
+## Next
+Founder reviews the PR. On approval:
+- Phase 2: SEC-side company events and the leading calendar, earnings second, a gold set of 10+ events, Supabase.
+- Builder interviews (the GSTACK_REVIEW assignment) run in parallel.

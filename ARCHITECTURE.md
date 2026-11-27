@@ -6,3 +6,10 @@ Suggested stack: TypeScript/Node; Zod or JSON Schema; Postgres/Supabase for even
 Reuse Orric guard, verification, memory, scorecard, content drafts and scoped improvement patterns only after reviewing actual source. Inspect Aeon skill runner and scheduling format rather than inventing configuration. Proposed schedules: manual first; approved 30–60 minute event polling during suitable windows, daily digest, weekly evaluation; actual cadence subject to rate limits, freshness goals and cost. Use exchange timezone/calendar, UTC storage, locks, retry/backoff, budget caps and failure notification. Disabled until owner approval.
 
 v0.2: DATABASE.md, SECURITY.md and AUTOMATION.md expand the proposed stack. Use one orchestrator, not duplicate native cron and Aeon; no schedule until gate.
+
+v0.3 (Phase 0, proposed): see PHASE0_PLAN.md §6.
+- **Source of record:** chain + SEC. The Coinbase registry is an index (doubles, unknown rights).
+- **Orchestrator:** native GitHub Actions following Orric (not an Aeon fork); `keldrin-aeon` pack later.
+- **Data model:** separate company events (SEC), issuer actions (B20 announcement brackets and multiplier changes) and reconciliations.
+- **Verifier:** independent code path (raw JSON-RPC, separate SEC parser), bound to the payload sha256.
+- **Storage and API:** PGlite for local/tests with the same SQL on Supabase later; localhost read-only API in Phase 1.

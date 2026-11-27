@@ -1,0 +1,262 @@
+{
+ "record": {
+  "asset": {
+   "isin": "US30303M1027",
+   "name": "Meta Platforms Inc.",
+   "symbol": "METAc",
+   "chain_id": 8453,
+   "identity_state": "verified",
+   "contract_address": "0xb2000000000000000000008bC8786B856E61707C"
+  },
+  "flags": [
+   "instant_path_deprecated_setter",
+   "legacy_event_only"
+  ],
+  "action": {
+   "path": "instant",
+   "ratio": "1.000313792289598084",
+   "status": "applied",
+   "effective": {
+    "time": "2026-09-28T16:02:21.000Z",
+    "block": "51910997",
+    "block_hash": "0xb60048f184274ae2b560aa73fb96b930f47d761c578f705ba3c4cb2140b043ea"
+   },
+   "multiplier_after": "1.000313792289598084",
+   "scheduling_block": null,
+   "multiplier_before": "1",
+   "multiplier_after_wad": "1000313792289598084",
+   "operator_description": "Cash Dividend",
+   "corporate_action_uuid": "b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+   "multiplier_before_wad": "1000000000000000000",
+   "effective_at_scheduled": null
+  },
+  "checks": [
+   {
+    "name": "asset_identity_verified",
+    "detail": "verified",
+    "result": "pass"
+   },
+   {
+    "name": "multiplier_changed_exactly_at_block",
+    "detail": "1000000000000000000 -> 1000313792289598084 at 51910997",
+    "result": "pass"
+   },
+   {
+    "name": "announced_onchain",
+    "result": "pass"
+   },
+   {
+    "name": "all_brackets_closed",
+    "result": "pass"
+   },
+   {
+    "name": "multiplier_change_inside_bracket",
+    "detail": "0 unbracketed",
+    "result": "pass"
+   },
+   {
+    "name": "single_corporate_action_uuid",
+    "result": "pass"
+   },
+   {
+    "name": "callers_hold_operator_role",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_record_contract_matches",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_record_status_consistent",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_multiplier_after_matches_chain",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_multiplier_before_matches_chain",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_applied_at_matches_chain",
+    "detail": "2026-09-28T16:02:21Z vs 2026-09-28T16:02:21.000Z",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_listed_txs_confirmed_onchain",
+    "result": "pass"
+   }
+  ],
+  "sources": [
+   {
+    "id": "chain-change",
+    "url": "https://mainnet.base.org",
+    "kind": "base_rpc",
+    "sha256": null,
+    "locator": "eth_call multiplier() on 0xb2000000000000000000008bC8786B856E61707C at blocks 51910996 and 51910997; block hash 0xb60048f184274ae2b560aa73fb96b930f47d761c578f705ba3c4cb2140b043ea",
+    "retrieved_at": "2026-11-27T08:02:55.050Z",
+    "rights_state": "public"
+   },
+   {
+    "id": "tx-0x1219ccb9-553",
+    "url": "https://mainnet.base.org",
+    "kind": "base_tx_log",
+    "sha256": null,
+    "locator": "receipt 0x1219ccb952aab976f83a67ec998b34c951a867e2ea8409484b8cd657f1dc6a5a log 553 (Announcement id=b5b58e9c-bf6b-4d28-9021-49f762cdbabc)",
+    "retrieved_at": "2026-11-27T08:02:55.050Z",
+    "rights_state": "public"
+   },
+   {
+    "id": "issuer-record",
+    "url": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+    "kind": "coinbase_corporate_action",
+    "sha256": "2d5c23ff6fc3b4a08c22feaccf5d820fbe513b86ba1a2365966d89661d44fe4a",
+    "locator": "whole document",
+    "retrieved_at": "2026-11-27T08:02:54.878Z",
+    "rights_state": "unknown"
+   }
+  ],
+  "revision": 1,
+  "record_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+  "synthetic": false,
+  "supersedes": null,
+  "observed_at": "2026-11-27T08:02:55.050Z",
+  "record_type": "issuer_action",
+  "verification": {
+   "state": "draft",
+   "review_id": null,
+   "limitations": [
+    "Discovered by multiplier() change-point bisection (the public RPC refuses eth_getLogs); announcements with no multiplier effect are only included when the issuer record lists them.",
+    "The operator description and uri are issuer-supplied text; the token contract does not verify them.",
+    "Not linked to an underlying company disclosure in this record type."
+   ],
+   "reviewed_at": null
+  },
+  "announcements": [
+   {
+    "id": "b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+    "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+    "block": "51910997",
+    "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A",
+    "tx_hash": "0x1219ccb952aab976f83a67ec998b34c951a867e2ea8409484b8cd657f1dc6a5a",
+    "bracketed": true,
+    "log_index": 553,
+    "inner_events": [
+     "MultiplierUpdated"
+    ]
+   }
+  ],
+  "issuer_record": {
+   "note": "Coinbase values are JSON doubles shown for cross-check only; chain WAD values are the record of truth.",
+   "status": "CORPORATE_ACTION_STATUS_APPLIED",
+   "applied_at": "2026-09-28T16:02:21Z",
+   "announced_at": "2026-09-28T16:02:21Z",
+   "multiplier_after": 1.0003137922895982,
+   "multiplier_before": 1
+  },
+  "schema_version": "0.2",
+  "multiplier_events": [
+   {
+    "args": {
+     "multiplier": "1000313792289598084"
+    },
+    "block": "51910997",
+    "event": "MultiplierUpdated",
+    "tx_hash": "0x1219ccb952aab976f83a67ec998b34c951a867e2ea8409484b8cd657f1dc6a5a",
+    "log_index": 554
+   }
+  ]
+ },
+ "payload_sha256": "dcdbe3436718922f1f9cdeaa4541c2de1969fb48f149ca3d7ea1c884afbcd350",
+ "review": {
+  "review_id": "rev-dcdbe3436718-1795766768527",
+  "record_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+  "revision": 1,
+  "payload_sha256": "dcdbe3436718922f1f9cdeaa4541c2de1969fb48f149ca3d7ea1c884afbcd350",
+  "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
+  "checked_at": "2026-11-27T08:06:08.527Z",
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "asset is a B20 token (factory precompile)",
+    "verdict": "CONFIRMED",
+    "evidence": "isB20=1"
+   },
+   {
+    "claim": "symbol matches chain at action block",
+    "verdict": "CONFIRMED",
+    "evidence": "onchain=METAc"
+   },
+   {
+    "claim": "ISIN matches onchain extraMetadata(\"isin\") at action block",
+    "verdict": "CONFIRMED",
+    "evidence": "onchain=US30303M1027"
+   },
+   {
+    "claim": "multiplier before/after at effective block",
+    "verdict": "CONFIRMED",
+    "evidence": "block 51910996: 1000000000000000000; block 51910997: 1000313792289598084"
+   },
+   {
+    "claim": "effective block hash and time",
+    "verdict": "CONFIRMED",
+    "evidence": "hash 0xb60048f184274ae2b560aa73fb96b930f47d761c578f705ba3c4cb2140b043ea time 2026-09-28T16:02:21.000Z"
+   },
+   {
+    "claim": "ratio arithmetic",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed 1.000313792289598084"
+   },
+   {
+    "claim": "announcement b5b58e9c-bf6b-4d28-9021-49f762cdbabc in tx 0x1219ccb9…",
+    "verdict": "CONFIRMED",
+    "evidence": "id=b5b58e9c-bf6b-4d28-9021-49f762cdbabc caller=0x5da41bddc73406f246d73cbe2e319f3cfc814d9a block=51910997 bracketed=true inner=[MultiplierUpdated]"
+   },
+   {
+    "claim": "MultiplierUpdated log 554",
+    "verdict": "CONFIRMED",
+    "evidence": "value 1000313792289598084"
+   },
+   {
+    "claim": "every multiplier log in the action's blocks is in the record",
+    "verdict": "CONFIRMED",
+    "evidence": "1 found, 0 unlisted"
+   },
+   {
+    "claim": "flag undisclosed_multiplier_change",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed false"
+   },
+   {
+    "claim": "flag legacy_event_only",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed true"
+   },
+   {
+    "claim": "flag instant_path_deprecated_setter",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed true"
+   },
+   {
+    "claim": "flag multiple_announcement_ids",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed false"
+   },
+   {
+    "claim": "announcement callers hold OPERATOR_ROLE",
+    "verdict": "CONFIRMED",
+    "evidence": "1 caller(s) checked"
+   },
+   {
+    "claim": "issuer corporate-action record agrees",
+    "verdict": "CONFIRMED",
+    "evidence": "status=CORPORATE_ACTION_STATUS_APPLIED applied_at=2026-09-28T16:02:21Z listed_txs_covered=true"
+   }
+  ],
+  "limitations": [
+   "Re-derives every chain value from raw JSON-RPC; does not prove the issuer's off-chain description is true.",
+   "Cannot detect announcements the research pipeline never discovered (completeness is not reviewed here)."
+  ]
+ }
+}

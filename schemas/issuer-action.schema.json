@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://keldrin.invalid/schemas/issuer-action-v0.2.schema.json",
+  "title": "Keldrin issuer_action record v0.2",
+  "description": "A corporate action applied (or scheduled) on a B20 tokenized stock, derived from Base chain state. WAD values are exact base-10 integer strings scaled by 1e18. Issuer-record doubles are cross-check values only.",
+  "type": "object",
+  "required": ["schema_version", "record_type", "record_id", "revision", "synthetic", "asset", "action", "announcements", "multiplier_events", "flags", "checks", "issuer_record", "sources", "observed_at", "verification", "supersedes"],
+  "additionalProperties": false,
+  "$defs": {
+    "wad": { "type": "string", "pattern": "^[0-9]{1,78}$" },
+    "dec": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?$" },
+    "addr": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "hash32": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "uint": { "type": "string", "pattern": "^[0-9]+$" },
+    "check": {
+      "type": "object",
+      "required": ["name", "result"],
+      "additionalProperties": false,
+      "properties": { "name": { "type": "string" }, "result": { "enum": ["pass", "fail", "unknown"] }, "detail": { "type": "string" } }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "0.2" },
+    "record_type": { "const": "issuer_action" },
+    "record_id": { "type": "string", "pattern": "^kld:8453:0x[0-9a-f]{40}:[A-Za-z0-9-]+$" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "synthetic": { "const": false },
+    "asset": {
+      "type": "object",
+      "required": ["chain_id", "contract_address", "symbol", "name", "isin", "identity_state"],
+      "additionalProperties": false,
+      "properties": {
+        "chain_id": { "const": 8453 },
+        "contract_address": { "$ref": "#/$defs/addr" },
+        "symbol": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "isin": { "type": ["string", "null"], "pattern": "^[A-Z]{2}[A-Z0-9]{9}[0-9]$" },
+        "identity_state": { "enum": ["verified", "mismatch", "incomplete"] }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["status", "path", "corporate_action_uuid", "operator_description", "multiplier_before_wad", "multiplier_after_wad", "multiplier_before", "multiplier_after", "ratio", "effective", "effective_at_scheduled", "scheduling_block"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["applied", "scheduled"] },
+        "path": { "enum": ["instant", "scheduled", "unknown"] },
+        "corporate_action_uuid": { "type": ["string", "null"], "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+        "operator_description": { "type": ["string", "null"], "description": "Issuer-supplied text, not verified by the token contract." },
+        "multiplier_before_wad": { "oneOf": [{ "$ref": "#/$defs/wad" }, { "type": "null" }] },
+        "multiplier_after_wad": { "$ref": "#/$defs/wad" },
+        "multiplier_before": { "oneOf": [{ "$ref": "#/$defs/dec" }, { "type": "null" }] },
+        "multiplier_after": { "$ref": "#/$defs/dec" },
+        "ratio": { "oneOf": [{ "$ref": "#/$defs/dec" }, { "type": "null" }] },
+        "effective": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "required": ["block", "block_hash", "time"], "additionalProperties": false, "properties": { "block": { "$ref": "#/$defs/uint" }, "block_hash": { "$ref": "#/$defs/hash32" }, "time": { "type": "string", "format": "date-time" } } }
+          ]
+        },
+        "effective_at_scheduled": { "oneOf": [{ "$ref": "#/$defs/uint" }, { "type": "null" }] },
+        "scheduling_block": { "oneOf": [{ "$ref": "#/$defs/uint" }, { "type": "null" }] }
+      }
+    },
+    "announcements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "caller", "uri", "tx_hash", "block", "log_index", "bracketed", "inner_events"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "caller": { "$ref": "#/$defs/addr" },
+          "uri": { "type": "string" },
+          "tx_hash": { "$ref": "#/$defs/hash32" },
+          "block": { "$ref": "#/$defs/uint" },
+          "log_index": { "type": "integer", "minimum": 0 },
+          "bracketed": { "type": "boolean" },
+          "inner_events": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "multiplier_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event", "tx_hash", "block", "log_index", "args"],
+        "additionalProperties": false,
+        "properties": {
+          "event": { "enum": ["MultiplierUpdated", "UIMultiplierUpdated"] },
+          "tx_hash": { "$ref": "#/$defs/hash32" },
+          "block": { "$ref": "#/$defs/uint" },
+          "log_index": { "type": "integer", "minimum": 0 },
+          "args": { "type": "object", "additionalProperties": { "$ref": "#/$defs/uint" } }
+        }
+      }
+    },
+    "flags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "checks": { "type": "array", "items": { "$ref": "#/$defs/check" } },
+    "issuer_record": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["status", "announced_at", "applied_at", "multiplier_before", "multiplier_after", "note"],
+          "additionalProperties": false,
+          "properties": {
+            "status": { "type": "string" },
+            "announced_at": { "type": ["string", "null"] },
+            "applied_at": { "type": ["string", "null"] },
+            "multiplier_before": { "type": ["number", "null"] },
+            "multiplier_after": { "type": ["number", "null"] },
+            "note": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "url", "locator", "retrieved_at", "sha256", "rights_state"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "locator": { "type": "string", "minLength": 1 },
+          "retrieved_at": { "type": "string", "format": "date-time" },
+          "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+          "rights_state": { "enum": ["public", "unknown"] }
+        }
+      }
+    },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "verification": {
+      "type": "object",
+      "required": ["state", "review_id", "reviewed_at", "limitations"],
+      "additionalProperties": false,
+      "properties": {
+        "state": { "enum": ["draft", "confirmed", "unsure", "rejected"] },
+        "review_id": { "type": ["string", "null"] },
+        "reviewed_at": { "type": ["string", "null"] },
+        "limitations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "supersedes": { "type": ["integer", "null"], "minimum": 1 }
+  }
+}

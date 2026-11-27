@@ -1,0 +1,17 @@
+reconciliation partially_reconciled; review CONFIRMED
+  pass    sec_company_name_matches_token_name SEC="Alphabet Inc." token="Alphabet Inc."
+  pass    sec_lists_expected_ticker SEC tickers GOOGL,GOOG,GOOGM,GOOGN
+  pass    isin_to_cusip_valid 02079K305
+  unknown share_class_evidenced CUSIP 02079K305 → share class not yet evidenced from a primary source
+  pass    dividend_declared_in_quarter_of_action 0.22 USD/share for 2026-07-01..2026-09-30 (10-Q 0001652044-26-000084)
+  pass    sec_fact_filed_after_action fact first filed 2026-10-29; the declaration itself predates it (date not yet evidenced)
+  pass    multiplier_increased_consistent_with_reinvestment ratio 1.000377118676784179
+  pass    implied_net_not_above_declared implied 0.13089789 vs declared 0.22
+  review CONFIRMED links the exact issuer-action payload | record hash d2e66841e30fc92a
+  review CONFIRMED SEC XBRL fact re-fetched | 0.22 10-Q 0001652044-26-000084
+  review CONFIRMED action date falls inside the fact's period | 2026-09-14 in 2026-07-01..2026-09-30
+  review CONFIRMED reference value at block | answer 34710000000 at 51310618
+  review CONFIRMED implied net per share arithmetic | recomputed 0.13089789
+  interpretation: implied net 0.13089789 USD vs declared 0.22 (ratio 0.59499)
+  unknown: Share class of the underlying (CUSIP → class mapping needs SEC filing text or the ADGM prospectus). | Declaration, record and payment dates (in the declaring 8-K/press release on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).
+exit 0

@@ -1,0 +1,94 @@
+{
+ "note": "Extract of 7 of 435 records from GET https://api.coinbase.com/v1/tokenized-stocks (5 pages) retrieved 2026-11-27T07:07:55Z. Full response sha256 of page 1: a997402635fef28655761fed91437a1a0a9b640adf6a2a87dba12cb2636a02bf. Floats are as returned by the API (not exact). Redistribution rights UNKNOWN: private research use only.",
+ "records": [
+  {
+   "contract_address": "0xb2000000000000000000001e800a7f5189430cD0",
+   "symbol": "TSLAc",
+   "name": "Tesla Inc.",
+   "decimals": 8,
+   "total_supply": 6482.4246083,
+   "isin": "US88160R1014",
+   "multiplier": 1,
+   "nav_price": 390.39040083,
+   "nav_price_updated_at": "2026-11-27T06:18:13Z",
+   "first_mint_date": "2026-09-03T18:16:27Z",
+   "adgm_isin": "AE000A4AWG09"
+  },
+  {
+   "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
+   "symbol": "GOOGLc",
+   "name": "Alphabet Inc.",
+   "decimals": 8,
+   "total_supply": 38177.95164797,
+   "isin": "US02079K3059",
+   "multiplier": 1.0003771186767842,
+   "nav_price": 281.390107,
+   "nav_price_updated_at": "2026-11-27T05:45:00Z",
+   "first_mint_date": "2026-08-12T12:55:49Z",
+   "adgm_isin": "AE000A4AV8D4"
+  },
+  {
+   "contract_address": "0xb200000000000000000000397293Cb8cda9a10c5",
+   "symbol": "SNDKc",
+   "name": "Sandisk Corporation",
+   "decimals": 8,
+   "total_supply": 3531.28853669,
+   "isin": "US80004C2008",
+   "multiplier": 8,
+   "nav_price": 643.88182968,
+   "nav_price_updated_at": "2026-11-27T06:50:45Z",
+   "first_mint_date": "2026-09-03T18:13:27Z",
+   "adgm_isin": "AE000A4AWGU5"
+  },
+  {
+   "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "symbol": "NVDAc",
+   "name": "NVIDIA Corporation",
+   "decimals": 8,
+   "total_supply": 70831.99731283,
+   "isin": "US67066G1040",
+   "multiplier": 1.0005379395763694,
+   "nav_price": 156.04416385,
+   "nav_price_updated_at": "2026-11-27T06:44:22Z",
+   "first_mint_date": "2026-08-12T12:40:59Z",
+   "adgm_isin": "AE000A4AV8A0"
+  },
+  {
+   "contract_address": "0xb2000000000000000000008bC8786B856E61707C",
+   "symbol": "METAc",
+   "name": "Meta Platforms Inc.",
+   "decimals": 8,
+   "total_supply": 9247.44156886,
+   "isin": "US30303M1027",
+   "multiplier": 1.0003137922895982,
+   "nav_price": 625.98232943,
+   "nav_price_updated_at": "2026-11-27T05:15:17Z",
+   "first_mint_date": "2026-08-12T12:52:33Z",
+   "adgm_isin": "AE000A4AV8B8"
+  },
+  {
+   "contract_address": "0xB2000000000000000000008FC2A8C23cf5937b66",
+   "symbol": "PMc",
+   "name": "Philip Morris International Inc.",
+   "decimals": 8,
+   "total_supply": 0.2513925,
+   "isin": "US7181721090",
+   "multiplier": 1.558821201905387,
+   "first_mint_date": "2026-09-29T15:27:29Z",
+   "adgm_isin": "AE000A4AXHA3"
+  },
+  {
+   "contract_address": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+   "symbol": "AAPLc",
+   "name": "Apple Inc.",
+   "decimals": 8,
+   "total_supply": 5842.25161951,
+   "isin": "US0378331005",
+   "multiplier": 1.0005003893019802,
+   "nav_price": 358.41424808,
+   "nav_price_updated_at": "2026-11-27T02:33:54Z",
+   "first_mint_date": "2026-08-12T12:54:19Z",
+   "adgm_isin": "AE000A4AV8C6"
+  }
+ ]
+}
