@@ -1,0 +1,14 @@
+{
+  "network": "base",
+  "currency": "USDC",
+  "services": {
+    "keldrin-probe": {
+      "price": "0.001",
+      "currency": "USDC",
+      "network": "base",
+      "paymentScheme": "exact",
+      "methods": ["GET", "POST"],
+      "description": "Keldrin connectivity probe (temporary test, not a product). Reports whether this endpoint can reach Keldrin's public API. Facts with provenance, not advice: https://keldrin.vercel.app"
+    }
+  }
+}
