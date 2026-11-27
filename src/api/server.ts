@@ -197,11 +197,13 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     // Snapshot and report: 3 free complete answers per client per day, then 402 with the paid x402 links.
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
-      if (triesLeft(client) === 0) return send(res, 402, trialUsedUp().body as Json, undefined, "no-store");
+      let left = await triesLeft(db as never, client);
+      if (left === 0) return send(res, 402, trialUsedUp().body as Json, undefined, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db) : await report(db, url.searchParams.get("token") ?? "");
-      if (out.status === 200) res.setHeader("x-keldrin-free-tries-left", String(useTry(client)));
+      if (out.status === 200) left = await useTry(db as never, client);
+      if (out.status === 200) res.setHeader("x-keldrin-free-tries-left", String(left));
       const b = out.body as Json;
-      const body = out.status === 200 ? { ...b, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((b.meta as Json) ?? {}), free_tries_left_today: triesLeft(client), paid: PAID } } : b;
+      const body = out.status === 200 ? { ...b, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((b.meta as Json) ?? {}), free_tries_left_today: left, paid: PAID } } : b;
       return send(res, out.status, body, undefined, "no-store");
     }
     const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);

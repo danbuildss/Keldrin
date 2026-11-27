@@ -9,6 +9,9 @@ export type ReadDb = {
   query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
   exec(sql: string): Promise<void>;
   close(): Promise<void>;
+  /** One statement in an explicit READ WRITE transaction. Used only for the free-try counter function, the one
+   *  write the reader role is granted (supabase/010_trial_grants.sql); table grants stay SELECT-only. */
+  writeOne?<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
 };
 
 function tls() {
@@ -29,6 +32,21 @@ export function openPg(connectionString: string): ReadDb {
     },
     async exec() {
       throw new Error("read-only connection: exec is not allowed");
+    },
+    async writeOne<T>(sql: string, params: unknown[] = []) {
+      if (!/^SELECT trial_consume\(\$1, \$2\)/.test(sql)) throw new Error("writeOne only runs the free-try counter");
+      const c = await pool.connect();
+      try {
+        await c.query("BEGIN READ WRITE");
+        const r = await c.query(sql, params as unknown[]);
+        await c.query("COMMIT");
+        return { rows: r.rows as T[] };
+      } catch (e) {
+        await c.query("ROLLBACK").catch(() => {});
+        throw e;
+      } finally {
+        c.release();
+      }
     },
     async close() {
       await pool.end();

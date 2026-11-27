@@ -28,9 +28,9 @@ var __commonJS = (cb, mod) => function __require2() {
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
-    for (let key2 of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key2) && key2 !== except)
-        __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
   return to;
 };
@@ -1878,16 +1878,16 @@ var init_lru = __esm({
         });
         this.maxSize = size2;
       }
-      get(key2) {
-        const value = super.get(key2);
-        if (super.has(key2) && value !== void 0) {
-          this.delete(key2);
-          super.set(key2, value);
+      get(key) {
+        const value = super.get(key);
+        if (super.has(key) && value !== void 0) {
+          this.delete(key);
+          super.set(key, value);
         }
         return value;
       }
-      set(key2, value) {
-        super.set(key2, value);
+      set(key, value) {
+        super.set(key, value);
         if (this.maxSize && this.size > this.maxSize) {
           const firstKey = this.keys().next().value;
           if (firstKey)
@@ -3131,9 +3131,9 @@ var require_mutable = __commonJS({
     function extend(target) {
       for (var i = 1; i < arguments.length; i++) {
         var source = arguments[i];
-        for (var key2 in source) {
-          if (hasOwnProperty.call(source, key2)) {
-            target[key2] = source[key2];
+        for (var key in source) {
+          if (hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
           }
         }
       }
@@ -4131,13 +4131,13 @@ var require_utils2 = __commonJS({
       return await subtleCrypto.digest(hashName, text);
     }
     async function hmacSha256(keyBuffer, msg) {
-      const key2 = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-      return await subtleCrypto.sign("HMAC", key2, textEncoder.encode(msg));
+      const key = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      return await subtleCrypto.sign("HMAC", key, textEncoder.encode(msg));
     }
     async function deriveKey(password, salt, iterations) {
-      const key2 = await subtleCrypto.importKey("raw", textEncoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+      const key = await subtleCrypto.importKey("raw", textEncoder.encode(password), "PBKDF2", false, ["deriveBits"]);
       const params = { name: "PBKDF2", hash: "SHA-256", salt, iterations };
-      return await subtleCrypto.deriveBits(params, key2, 32 * 8, ["deriveBits"]);
+      return await subtleCrypto.deriveBits(params, key, 32 * 8, ["deriveBits"]);
     }
   }
 });
@@ -4605,35 +4605,35 @@ var require_pg_connection_string = __commonJS({
       return config;
     }
     function toConnectionOptions(sslConfig) {
-      const connectionOptions = Object.entries(sslConfig).reduce((c, [key2, value]) => {
+      const connectionOptions = Object.entries(sslConfig).reduce((c, [key, value]) => {
         if (value !== void 0 && value !== null) {
-          c[key2] = value;
+          c[key] = value;
         }
         return c;
       }, /* @__PURE__ */ Object.create(null));
       return connectionOptions;
     }
     function toClientConfig(config) {
-      const poolConfig = Object.entries(config).reduce((c, [key2, value]) => {
-        if (key2 === "ssl") {
+      const poolConfig = Object.entries(config).reduce((c, [key, value]) => {
+        if (key === "ssl") {
           const sslConfig = value;
           if (typeof sslConfig === "boolean") {
-            c[key2] = sslConfig;
+            c[key] = sslConfig;
           }
           if (typeof sslConfig === "object") {
-            c[key2] = toConnectionOptions(sslConfig);
+            c[key] = toConnectionOptions(sslConfig);
           }
         } else if (value !== void 0 && value !== null) {
-          if (key2 === "port") {
+          if (key === "port") {
             if (value !== "") {
               const v = parseInt(value, 10);
               if (isNaN(v)) {
-                throw new Error(`Invalid ${key2}: ${value}`);
+                throw new Error(`Invalid ${key}: ${value}`);
               }
-              c[key2] = v;
+              c[key] = v;
             }
           } else {
-            c[key2] = value;
+            c[key] = value;
           }
         }
         return c;
@@ -4670,17 +4670,17 @@ var require_connection_parameters = __commonJS({
     var dns = __require("dns");
     var defaults2 = require_defaults();
     var parse = require_pg_connection_string().parse;
-    var val = function(key2, config, envVar) {
-      if (config[key2]) {
-        return config[key2];
+    var val = function(key, config, envVar) {
+      if (config[key]) {
+        return config[key];
       }
       if (envVar === void 0) {
-        envVar = process.env["PG" + key2.toUpperCase()];
+        envVar = process.env["PG" + key.toUpperCase()];
       } else if (envVar === false) {
       } else {
         envVar = process.env[envVar];
       }
-      return envVar || defaults2[key2];
+      return envVar || defaults2[key];
     };
     var readSSLConfigFromEnvironment = function() {
       switch (process.env.PGSSLMODE) {
@@ -5395,8 +5395,8 @@ var require_serializer = __commonJS({
     var writer = new buffer_writer_1.Writer();
     var startup = (opts) => {
       writer.addInt16(3).addInt16(0);
-      for (const key2 of Object.keys(opts)) {
-        writer.addCString(key2).addCString(opts[key2]);
+      for (const key of Object.keys(opts)) {
+        writer.addCString(key).addCString(opts[key]);
       }
       writer.addCString("client_encoding").addCString("UTF8");
       const bodyBuffer = writer.addCString("").flush();
@@ -7727,9 +7727,9 @@ var require_query2 = __commonJS({
     NativeQuery.prototype.handleError = function(err3) {
       const fields = this.native && this.native.pq.resultErrorFields();
       if (fields) {
-        for (const key2 in fields) {
-          const normalizedFieldName = errorFieldMap[key2] || key2;
-          err3[normalizedFieldName] = fields[key2];
+        for (const key in fields) {
+          const normalizedFieldName = errorFieldMap[key] || key;
+          err3[normalizedFieldName] = fields[key];
         }
       }
       if (this.callback) {
@@ -10135,15 +10135,15 @@ function selectMain(out) {
 }
 var cache = /* @__PURE__ */ new Map();
 async function liveDex(db2, contract, rpc = publicRpc) {
-  const key2 = contract.toLowerCase();
+  const key = contract.toLowerCase();
   const useCache = rpc === publicRpc;
-  const hit = useCache ? cache.get(key2) : void 0;
+  const hit = useCache ? cache.get(key) : void 0;
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
   const value = await liveDexUncached(db2, contract, rpc);
   const d = value.body?.data;
   if (useCache && value.status === 200 && d?.block) {
     if (cache.size > 500) cache.clear();
-    cache.set(key2, { at: Date.now(), value });
+    cache.set(key, { at: Date.now(), value });
   }
   return value;
 }
@@ -10524,6 +10524,7 @@ async function handleMcp(db2, raw) {
 }
 
 // src/api/trial.ts
+import { createHash } from "node:crypto";
 var FREE_TRIES_PER_DAY = 3;
 var PAID = {
   price: "0.05 USDC on Base",
@@ -10536,21 +10537,32 @@ var TRANSIENT = /* @__PURE__ */ new Set(["rpc_unavailable", "rpc_result_invalid"
 var UNVERIFIED = /* @__PURE__ */ new Set(["feed_not_verified", "phase_not_reviewed"]);
 var err = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var incomplete = (why) => err(503, "INCOMPLETE", `could not build a complete answer right now (${why}); this did not use a free try`, "retry in a minute");
-var used = /* @__PURE__ */ new Map();
-var usedDay = "";
-function key(client, now) {
-  const day = now.toISOString().slice(0, 10);
-  if (day !== usedDay) used.clear(), usedDay = day;
-  return client;
+var mem = /* @__PURE__ */ new Map();
+var dayOf = (now) => now.toISOString().slice(0, 10);
+function clientHash(client) {
+  return createHash("sha256").update((process.env.TRIAL_SALT ?? "keldrin-trial-v1") + "|" + client).digest("hex").slice(0, 32);
 }
-function triesLeft(client, now = /* @__PURE__ */ new Date()) {
-  return Math.max(0, FREE_TRIES_PER_DAY - (used.get(key(client, now)) ?? 0));
+async function triesLeft(db2, client, now = /* @__PURE__ */ new Date()) {
+  const h = clientHash(client);
+  try {
+    const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
+    return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
+  } catch {
+    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
+  }
 }
-function useTry(client, now = /* @__PURE__ */ new Date()) {
-  const k = key(client, now);
-  if (used.size > 5e4) used.clear();
-  used.set(k, (used.get(k) ?? 0) + 1);
-  return triesLeft(client, now);
+async function useTry(db2, client, now = /* @__PURE__ */ new Date()) {
+  const h = clientHash(client);
+  try {
+    const sql = "SELECT trial_consume($1, $2::date) AS n";
+    const r = db2.writeOne ? await db2.writeOne(sql, [h, dayOf(now)]) : await db2.query(sql, [h, dayOf(now)]);
+    return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY));
+  } catch {
+    if (mem.size > 5e4) mem.clear();
+    const k = h + dayOf(now);
+    mem.set(k, (mem.get(k) ?? 0) + 1);
+    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(k) ?? 0));
+  }
 }
 var trialUsedUp = () => ({
   status: 402,
@@ -10786,11 +10798,13 @@ async function handle(db2, req, res) {
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
-      if (triesLeft(client) === 0) return send(res, 402, trialUsedUp().body, void 0, "no-store");
+      let left = await triesLeft(db2, client);
+      if (left === 0) return send(res, 402, trialUsedUp().body, void 0, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db2) : await report(db2, url.searchParams.get("token") ?? "");
-      if (out.status === 200) res.setHeader("x-keldrin-free-tries-left", String(useTry(client)));
+      if (out.status === 200) left = await useTry(db2, client);
+      if (out.status === 200) res.setHeader("x-keldrin-free-tries-left", String(left));
       const b = out.body;
-      const body = out.status === 200 ? { ...b, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...b.meta ?? {}, free_tries_left_today: triesLeft(client), paid: PAID } } : b;
+      const body = out.status === 200 ? { ...b, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...b.meta ?? {}, free_tries_left_today: left, paid: PAID } } : b;
       return send(res, out.status, body, void 0, "no-store");
     }
     const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);
@@ -10917,6 +10931,22 @@ function openPg(connectionString) {
     },
     async exec() {
       throw new Error("read-only connection: exec is not allowed");
+    },
+    async writeOne(sql, params = []) {
+      if (!/^SELECT trial_consume\(\$1, \$2\)/.test(sql)) throw new Error("writeOne only runs the free-try counter");
+      const c = await pool.connect();
+      try {
+        await c.query("BEGIN READ WRITE");
+        const r = await c.query(sql, params);
+        await c.query("COMMIT");
+        return { rows: r.rows };
+      } catch (e2) {
+        await c.query("ROLLBACK").catch(() => {
+        });
+        throw e2;
+      } finally {
+        c.release();
+      }
     },
     async close() {
       await pool.end();
