@@ -1,0 +1,283 @@
+{
+ "record": {
+  "asset": {
+   "isin": "US05964H1059",
+   "name": "Banco Santander, S.A.",
+   "symbol": "SANc",
+   "chain_id": 8453,
+   "identity_state": "verified",
+   "contract_address": "0xB20000000000000000000017BB66E9301E913A99"
+  },
+  "flags": [
+   "instant_path_deprecated_setter",
+   "multiple_announcement_ids"
+  ],
+  "action": {
+   "path": "instant",
+   "ratio": "1.010571078868727418",
+   "status": "applied",
+   "effective": {
+    "time": "2026-11-05T18:12:16.000Z",
+    "block": "53559803",
+    "block_hash": "0x502a8f1c1956d5969e079f123ebaa28c430d36d3986df7886786cf9f24c4b813"
+   },
+   "multiplier_after": "1.010571078868727418",
+   "scheduling_block": null,
+   "multiplier_before": "1",
+   "multiplier_after_wad": "1010571078868727418",
+   "operator_description": "Cash Dividend",
+   "corporate_action_uuid": "1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+   "multiplier_before_wad": "1000000000000000000",
+   "effective_at_scheduled": null
+  },
+  "checks": [
+   {
+    "name": "asset_identity_verified",
+    "detail": "verified",
+    "result": "pass"
+   },
+   {
+    "name": "multiplier_changed_exactly_at_block",
+    "detail": "1000000000000000000 -> 1010571078868727418 at 53559803",
+    "result": "pass"
+   },
+   {
+    "name": "announced_onchain",
+    "result": "pass"
+   },
+   {
+    "name": "all_brackets_closed",
+    "result": "pass"
+   },
+   {
+    "name": "multiplier_change_inside_bracket",
+    "detail": "0 unbracketed",
+    "result": "pass"
+   },
+   {
+    "name": "single_corporate_action_uuid",
+    "result": "pass"
+   },
+   {
+    "name": "callers_hold_operator_role",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_record_contract_matches",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_record_status_consistent",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_multiplier_after_matches_chain",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_multiplier_before_matches_chain",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_applied_at_matches_block_time",
+    "detail": "2026-11-05T18:12:16Z vs 2026-11-05T18:12:16.000Z",
+    "result": "pass"
+   },
+   {
+    "name": "issuer_listed_txs_confirmed_onchain",
+    "result": "pass"
+   }
+  ],
+  "sources": [
+   {
+    "id": "chain-change",
+    "url": "https://mainnet.base.org",
+    "kind": "base_rpc",
+    "sha256": null,
+    "locator": "eth_call multiplier() on 0xB20000000000000000000017BB66E9301E913A99 at blocks 53559802 and 53559803; block hash 0x502a8f1c1956d5969e079f123ebaa28c430d36d3986df7886786cf9f24c4b813",
+    "retrieved_at": "2026-11-27T07:51:00.709Z",
+    "rights_state": "public"
+   },
+   {
+    "id": "tx-0x11a2c1b2-600",
+    "url": "https://mainnet.base.org",
+    "kind": "base_tx_log",
+    "sha256": null,
+    "locator": "receipt 0x11a2c1b230bc7d73ecc2ddef1d2425c3bdcde874d2eacbc844a6104619beb43d log 600 (Announcement id=1df90f83-7c4f-4a7d-8739-3ad598ae0388:pre)",
+    "retrieved_at": "2026-11-27T07:51:00.709Z",
+    "rights_state": "public"
+   },
+   {
+    "id": "tx-0x60ded8fc-190",
+    "url": "https://mainnet.base.org",
+    "kind": "base_tx_log",
+    "sha256": null,
+    "locator": "receipt 0x60ded8fc227ccc3e7e301ab20f398ed046bb117dc50c584d93b3d4261b11cf58 log 190 (Announcement id=1df90f83-7c4f-4a7d-8739-3ad598ae0388)",
+    "retrieved_at": "2026-11-27T07:51:00.709Z",
+    "rights_state": "public"
+   },
+   {
+    "id": "issuer-record",
+    "url": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+    "kind": "coinbase_corporate_action",
+    "sha256": "d29f8b71d1bfe33e296ef71aba7ed91440536853327d88f544332188afbcf2e7",
+    "locator": "whole document",
+    "retrieved_at": "2026-11-27T07:51:00.299Z",
+    "rights_state": "unknown"
+   }
+  ],
+  "revision": 1,
+  "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+  "synthetic": false,
+  "supersedes": null,
+  "observed_at": "2026-11-27T07:51:00.709Z",
+  "record_type": "issuer_action",
+  "verification": {
+   "state": "draft",
+   "review_id": null,
+   "limitations": [
+    "Discovered by multiplier() change-point bisection (the public RPC refuses eth_getLogs); announcements with no multiplier effect are only included when the issuer record lists them.",
+    "The operator description and uri are issuer-supplied text; the token contract does not verify them.",
+    "Not linked to an underlying company disclosure in this record type."
+   ],
+   "reviewed_at": null
+  },
+  "announcements": [
+   {
+    "id": "1df90f83-7c4f-4a7d-8739-3ad598ae0388:pre",
+    "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+    "block": "53264562",
+    "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A",
+    "tx_hash": "0x11a2c1b230bc7d73ecc2ddef1d2425c3bdcde874d2eacbc844a6104619beb43d",
+    "bracketed": true,
+    "log_index": 600,
+    "inner_events": []
+   },
+   {
+    "id": "1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+    "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+    "block": "53559803",
+    "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A",
+    "tx_hash": "0x60ded8fc227ccc3e7e301ab20f398ed046bb117dc50c584d93b3d4261b11cf58",
+    "bracketed": true,
+    "log_index": 190,
+    "inner_events": [
+     "MultiplierUpdated",
+     "UIMultiplierUpdated"
+    ]
+   }
+  ],
+  "issuer_record": {
+   "note": "Coinbase values are JSON doubles shown for cross-check only; chain WAD values are the record of truth.",
+   "status": "CORPORATE_ACTION_STATUS_APPLIED",
+   "applied_at": "2026-11-05T18:12:16Z",
+   "announced_at": "2026-10-30T00:01:11Z",
+   "multiplier_after": 1.0105710788687274,
+   "multiplier_before": 1
+  },
+  "schema_version": "0.2",
+  "multiplier_events": [
+   {
+    "args": {
+     "multiplier": "1010571078868727418"
+    },
+    "block": "53559803",
+    "event": "MultiplierUpdated",
+    "tx_hash": "0x60ded8fc227ccc3e7e301ab20f398ed046bb117dc50c584d93b3d4261b11cf58",
+    "log_index": 191
+   },
+   {
+    "args": {
+     "newMultiplier": "1010571078868727418",
+     "oldMultiplier": "1000000000000000000",
+     "effectiveAtTimestamp": "1793902336"
+    },
+    "block": "53559803",
+    "event": "UIMultiplierUpdated",
+    "tx_hash": "0x60ded8fc227ccc3e7e301ab20f398ed046bb117dc50c584d93b3d4261b11cf58",
+    "log_index": 192
+   }
+  ]
+ },
+ "payload_sha256": "0bf1ef5751061b625ebac7395d21116e595ed14e35cccf06467934c25db6a72d",
+ "review": {
+  "review_id": "rev-0bf1ef575106-1795765862826",
+  "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+  "revision": 1,
+  "payload_sha256": "0bf1ef5751061b625ebac7395d21116e595ed14e35cccf06467934c25db6a72d",
+  "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
+  "checked_at": "2026-11-27T07:51:02.826Z",
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "asset is a B20 token (factory precompile)",
+    "verdict": "CONFIRMED",
+    "evidence": "isB20=1"
+   },
+   {
+    "claim": "symbol matches chain",
+    "verdict": "CONFIRMED",
+    "evidence": "onchain=SANc"
+   },
+   {
+    "claim": "ISIN matches onchain extraMetadata(\"isin\")",
+    "verdict": "CONFIRMED",
+    "evidence": "onchain=US05964H1059"
+   },
+   {
+    "claim": "multiplier before/after at effective block",
+    "verdict": "CONFIRMED",
+    "evidence": "block 53559802: 1000000000000000000; block 53559803: 1010571078868727418"
+   },
+   {
+    "claim": "effective block hash and time",
+    "verdict": "CONFIRMED",
+    "evidence": "hash 0x502a8f1c1956d5969e079f123ebaa28c430d36d3986df7886786cf9f24c4b813 time 2026-11-05T18:12:16.000Z"
+   },
+   {
+    "claim": "ratio arithmetic",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed 1.010571078868727418"
+   },
+   {
+    "claim": "announcement 1df90f83-7c4f-4a7d-8739-3ad598ae0388:pre in tx 0x11a2c1b2…",
+    "verdict": "CONFIRMED",
+    "evidence": "id=1df90f83-7c4f-4a7d-8739-3ad598ae0388:pre caller=0x5da41bddc73406f246d73cbe2e319f3cfc814d9a block=53264562 bracketed=true inner=[]"
+   },
+   {
+    "claim": "announcement 1df90f83-7c4f-4a7d-8739-3ad598ae0388 in tx 0x60ded8fc…",
+    "verdict": "CONFIRMED",
+    "evidence": "id=1df90f83-7c4f-4a7d-8739-3ad598ae0388 caller=0x5da41bddc73406f246d73cbe2e319f3cfc814d9a block=53559803 bracketed=true inner=[MultiplierUpdated,UIMultiplierUpdated]"
+   },
+   {
+    "claim": "MultiplierUpdated log 191",
+    "verdict": "CONFIRMED",
+    "evidence": "value 1010571078868727418"
+   },
+   {
+    "claim": "UIMultiplierUpdated log 192",
+    "verdict": "CONFIRMED",
+    "evidence": "value 1010571078868727418"
+   },
+   {
+    "claim": "flag legacy_event_only",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed false"
+   },
+   {
+    "claim": "flag multiple_announcement_ids",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed true"
+   },
+   {
+    "claim": "issuer corporate-action record agrees",
+    "verdict": "CONFIRMED",
+    "evidence": "status=CORPORATE_ACTION_STATUS_APPLIED applied_at=2026-11-05T18:12:16Z listed_txs_covered=true"
+   }
+  ],
+  "limitations": [
+   "Re-derives every chain value from raw JSON-RPC; does not prove the issuer's off-chain description is true.",
+   "Cannot detect announcements the research pipeline never discovered (completeness is not reviewed here)."
+  ]
+ }
+}
