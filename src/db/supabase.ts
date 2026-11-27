@@ -79,3 +79,45 @@ export async function syncFromLocal(local: PGlite, schema = "keldrin", batchByte
   }
   return out;
 }
+
+/** Render one parameter as a SQL literal. Strings are dollar-quoted with a tag absent from the value. */
+export function sqlLiteral(v: unknown): string {
+  if (v === null || v === undefined) return "NULL";
+  if (typeof v === "boolean") return v ? "TRUE" : "FALSE";
+  if (typeof v === "number") {
+    if (!Number.isFinite(v)) throw new TypeError("non-finite number parameter");
+    return String(v);
+  }
+  if (typeof v === "bigint") return v.toString();
+  if (v instanceof Date) return dollarQuote(v.toISOString());
+  if (typeof v === "string") return dollarQuote(v);
+  return dollarQuote(JSON.stringify(v));
+}
+
+/** Replace $1..$n placeholders (highest index first, so $10 is not read as $1 + "0"). */
+export function inlineParams(sql: string, params: unknown[] = []): string {
+  let out = sql;
+  for (let i = params.length; i >= 1; i--) out = out.split("$" + i).join(sqlLiteral(params[i - 1]));
+  if (/\$\d/.test(out.replace(/\$kld\d*\$[\s\S]*?\$kld\d*\$/g, ""))) throw new Error("unbound parameter in SQL");
+  return out;
+}
+
+/**
+ * Supabase as the primary store, with the subset of the PGlite interface the pipeline uses
+ * (query / exec / close). Every statement runs with search_path = keldrin.
+ */
+export class SupabaseDb {
+  schema: string;
+  constructor(schema = "keldrin") {
+    if (!/^[a-z_][a-z0-9_]*$/.test(schema)) throw new Error("bad schema name");
+    this.schema = schema;
+  }
+  async query<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<{ rows: T[] }> {
+    const rows = await sbQuery<T>(`SET search_path TO ${this.schema}, public; ${inlineParams(sql, params)}`);
+    return { rows: Array.isArray(rows) ? rows : [] };
+  }
+  async exec(sql: string): Promise<void> {
+    await sbQuery(`SET search_path TO ${this.schema}, public; ${sql}`);
+  }
+  async close(): Promise<void> {}
+}

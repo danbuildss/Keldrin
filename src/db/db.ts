@@ -9,8 +9,12 @@ import type { Review } from "../verify/verify.ts";
 
 const MIGRATIONS = join(dirname(fileURLToPath(import.meta.url)), "migrations");
 
-/** Open the database. `dataDir` undefined = in-memory (tests). */
+/** Open the database. `dataDir` undefined = in-memory (tests); "supabase" = the Supabase primary store. */
 export async function openDb(dataDir?: string): Promise<PGlite> {
+  if (dataDir === "supabase") {
+    const { SupabaseDb } = await import("./supabase.ts");
+    return new SupabaseDb() as unknown as PGlite; // schema managed by `supabase migrate`, not here
+  }
   if (dataDir) mkdirSync(dataDir, { recursive: true });
   const db = new PGlite(dataDir);
   for (const f of readdirSync(MIGRATIONS).filter((x) => x.endsWith(".sql")).sort()) {
