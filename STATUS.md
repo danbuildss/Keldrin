@@ -23,6 +23,6 @@
 Phase 3: deploy the read-only API (Vercel), with a read-only database login, rate limits and docs; then builder outreach drafts for approval.
 
 ## Phase 3 progress (approved 2026-11-27)
-- Done: /v1/events (integrator field shape: status predicted|confirmed_onchain|verified_matched|late, confidence never guessed, warnings), /v1/changes?since= diff feed, rate limit, CDN cache headers, generic 500s, OpenAPI 0.3.0, docs/API_QUICKSTART.md, Vercel function bundle (api/[...path].mjs, CI checks it matches source), read-only Postgres adapter, reader role defaults pinned in Supabase. 80 tests.
+- Done: /v1/events (integrator field shape: status predicted|confirmed_onchain|verified_matched|late, confidence never guessed, warnings), /v1/changes?since= diff feed, rate limit, CDN cache headers, generic 500s, OpenAPI 0.3.0, docs/API_QUICKSTART.md, Vercel function bundle (api/index.mjs, CI checks it matches source), read-only Postgres adapter, reader role defaults pinned in Supabase. 80 tests.
 - Live check on Supabase data: 60 events (13 predicted high, 7 verified_matched, 1 late, 5 confirmed_onchain, 34 predicted without date); PMc flagged with a magnitude warning.
 - Waiting on founder: reader login password + Vercel project + DATABASE_URL (docs/DEPLOY_VERCEL.md); then preview verification; production only on approval.

@@ -1,6 +1,6 @@
 # Deploying the Keldrin read-only API on Vercel (Phase 3)
 
-The API is one Vercel function, `api/[...path].mjs`: a committed esbuild bundle of `src/api/vercel.ts`. It reads Supabase through the **read-only** role `keldrin_reader` and can never write. Production deployment needs founder approval; start with a preview.
+The API is one Vercel function, `api/index.mjs`: a committed esbuild bundle of `src/api/vercel.ts`. It reads Supabase through the **read-only** role `keldrin_reader` and can never write. Production deployment needs founder approval; start with a preview.
 
 ## 1. Give the read-only role a login (founder, Supabase SQL editor)
 Supabase → your project → **SQL Editor**. Run this, replacing the password with a long random one that **you** generate. Never paste it into chat.
@@ -47,3 +47,16 @@ In Vercel → Deployments, promote the previous deployment. To revoke database a
 ```sql
 ALTER ROLE keldrin_reader NOLOGIN;
 ```
+
+## Troubleshooting
+`GET /health` returns `503 {"error":{"code":"DB_UNAVAILABLE"},"reason":…}` with a safe category, never the details:
+
+| Reason | Fix |
+|---|---|
+| `auth_failed` | The password doesn't match, or the reader login isn't enabled. Re-run `ALTER ROLE keldrin_reader WITH LOGIN PASSWORD '…'`, and URL-encode symbols in `DATABASE_URL` (`#` → `%23`, `@` → `%40`). Check that the user is `keldrin_reader.<project-ref>`. |
+| `tls_verify_failed` | Add `DATABASE_CA_CERT` (Supabase → Settings → Database → SSL certificate, paste the PEM). |
+| `dns_failed`, `connect_timeout` | Wrong pooler host or port. Copy them again from Supabase → Connect → Transaction pooler. |
+| `not_configured` | `DATABASE_URL` is missing for this environment (Production / Preview). |
+| `permission_denied`, `schema_missing` | Tell Claude; the migrations may need re-applying. |
+
+After changing an environment variable in Vercel, **redeploy** (Deployments → ⋯ → Redeploy); the change doesn't apply to running deployments.
