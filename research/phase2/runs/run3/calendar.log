@@ -1,0 +1,60 @@
+(node:3694) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+index: block 59601727 / 62928990, span 200000, 124 logs
+calendar: 47 issuer-announced action(s) not yet applied
+calendar: 9 past declaration(s) not applicable to the token: STZc (token has no supply (never minted)); WDCc (record date 2026-09-08 is before the token's first mint 2026-10-26); GILDc (record date 2026-09-15 is before the token's first mint 2026-11-24); WENc (record date 2026-09-01 is before the token's first mint 2026-09-29); VRTc (record date 2026-09-14 is before the token's first mint 2026-11-17); CSCOc (token has no supply (never minted)); TAPc (record date 2026-08-28 is before the token's first mint 2026-11-24); INTUc (record date 2026-10-08 is before the token's first mint 2026-11-24); DKSc (token has no supply (never minted))
+  CONFIRMED GOOGLc  upcoming     $0.22 record 2026-12-07 payable 2026-12-14 [issuer-announced]
+  CONFIRMED WENc    upcoming     $0.07 record 2026-12-01 payable 2026-12-15 [issuer-announced]
+  CONFIRMED VRTc    upcoming     $0.10 record 2026-11-24 payable 2026-12-17 [issuer-announced]
+  CONFIRMED WDCc    upcoming     $0.175 record 2026-12-04 payable 2026-12-17 [issuer-announced]
+  CONFIRMED ZMc     upcoming     $0.25 record 2026-12-03 payable 2026-12-17 [issuer-announced]
+  CONFIRMED NEMc    upcoming     $0.26 record 2026-11-25 payable 2026-12-21 [issuer-announced]
+  CONFIRMED NVDAc   upcoming     $0.25 record 2026-12-02 payable 2026-12-23 [issuer-announced]
+  CONFIRMED DKSc    upcoming     $1.25 record 2026-12-11 payable 2026-12-24 [issuer-announced]
+  CONFIRMED BMNRc   upcoming     $0.01 record 2026-12-08 payable 2026-12-29 [issuer-announced]
+  CONFIRMED GILDc   upcoming     $0.82 record 2026-12-15 payable 2026-12-30 [issuer-announced]
+  CONFIRMED GSc     upcoming     $5.00 record 2026-12-02 payable 2026-12-30 [issuer-announced]
+  CONFIRMED HPQc    upcoming     $0.31 record 2026-12-09 payable 2027-01-06 [issuer-announced]
+  CONFIRMED CSCOc   upcoming     $0.42 record 2027-01-04 payable 2027-01-20 [issuer-announced]
+  CONFIRMED AAPLc   applied      $0.27 record 2026-11-12 payable 2026-11-16 -> applied
+  CONFIRMED ADIc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED AEOc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED AMKRc   announced    Cash Dividend [issuer-announced]
+  CONFIRMED BALLc   announced    Cash Dividend [issuer-announced]
+  CONFIRMED BUDc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED BXc     announced    Cash Dividend [issuer-announced]
+  CONFIRMED CAKEc   applied      $0.30 record 2026-11-10 payable 2026-11-24 -> applied
+  CONFIRMED CANc    announced    Reverse Stock Split [issuer-announced]
+  CONFIRMED CMCSAc  announced    Cash Dividend [issuer-announced]
+  CONFIRMED COPc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED DISc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED GAPc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED HDc     announced    Cash Dividend [issuer-announced]
+  CONFIRMED HPEc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED INTUc   announced    Cash Dividend [issuer-announced]
+  CONFIRMED JNJc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED KLACc   announced    Cash Dividend [issuer-announced]
+  CONFIRMED KMBc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED KSSc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED LLYc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED LRCXc   announced    Cash Dividend [issuer-announced]
+  CONFIRMED LUVc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED MRKc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED MRVLc   applied      $0.06 record 2026-10-09 payable 2026-10-29 -> applied
+  CONFIRMED MUc     applied      $0.15 record 2026-10-14 payable 2026-10-29 -> applied
+  CONFIRMED NKEc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED NVDAc   applied      $0.25 record 2026-09-10 payable 2026-10-01 -> applied
+  CONFIRMED ORCLc   applied      $0.50 record 2026-10-09 payable 2026-10-23 -> applied
+  CONFIRMED PEPc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED PFEc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED PMc     applied      $1.60 record 2026-10-02 payable 2026-10-26 -> applied
+  CONFIRMED SPBc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED STZc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED TAPc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED TERc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED TKRc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED ULc     announced    Cash Dividend [issuer-announced]
+  CONFIRMED VCc     announced    Cash Dividend [issuer-announced]
+  CONFIRMED VSTc    announced    Cash Dividend [issuer-announced]
+  CONFIRMED YUMc    announced    Cash Dividend [issuer-announced]
+calendar: 54 entr(ies) for 13 token(s); skipped []

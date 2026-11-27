@@ -1,42 +1,23 @@
-# Status | 2026-11-27 (Phase 2 in progress, PR #2)
+# Status | 2026-11-27 (Phase 2 complete)
 
-**Phase 1: backend proof passed locally; PR open for founder review.** Nothing is deployed or published. There are no external users or revenue.
+**Phase 2 gate passed** (BACKEND_PROOF.md). Nothing is deployed or published; no external users or revenue.
 
-## Done
-- **Keyless corporate-action feed** for all 435 Coinbase tokenized stocks on Base:
-  - onchain identity checks (435/435 verified)
-  - discovery by `multiplier()` bisection, because the public RPC refuses `eth_getLogs`
-  - receipt and bracket decoding, cross-checked against the issuer record
-- **13 real corporate actions**, all independently CONFIRMED in 3 of 3 controlled runs (idempotent: 13 records, revision 1):
-  - 12 cash dividends
-  - 1 scheduled 8-for-1 split (SNDKc, 2026-11-20)
-- **Independent verifier**: its own RPC client, ABI decoding, arithmetic and hash. It re-scans action blocks for completeness and REJECTS every tamper case tested.
-- **Storage**: append-only Postgres (PGlite locally); corrections become revisions.
-- **API**: read-only localhost API serving confirmed records only. A sample outside consumer validates schema, arithmetic and freshness.
-- **Deep proof**: GOOGLc linked to Alphabet's SEC XBRL dividend ($0.22) and the Chainlink reference. Implied net reinvestment is $0.1309 (interpretation). Status `partially_reconciled`.
-- **Code review**: a fresh-context review found 10 issues (7 important), all fixed with regression tests. 47/47 tests pass.
+## What exists
+- Corporate-action feed for all 435 Coinbase tokenized stocks on Base, independently verified (13 applied actions).
+- SEC linkage: company identity, declaration filings, dated dividend declarations (9), reconciliations (13).
+- Leading calendar: 13 upcoming dated adjustments (SEC + issuer-announced), 34 issuer-announced without a dated declaration yet.
+- Alchemy log index: full coverage; 47 announced-not-applied actions; 0 undisclosed multiplier changes.
+- Supabase (private `keldrin` schema, RLS, read-only role, append-only) as the primary store; local PGlite for tests.
+- Read-only API (/v1/actions, /v1/assets, /v1/calendar, /health, /openapi.json, /llms.txt) — localhost only.
+- 75 tests; CI green; manual research workflow (disabled until enabled).
 
-## Findings worth your attention
-- **PMc**: multiplier ×1.5588, labelled "Cash Dividend" by the issuer. This is a lead, not a claim.
-- **Issuer conventions** all integrators must handle:
-  - 12 of 13 actions used the deprecated instant setter.
-  - 2 emitted only the legacy event.
-  - Most have two announcement IDs.
+## Findings
+- 8 of 9 dated dividends adjusted on the payable date; MRVLc 8 days late; PMc ×1.5588 vs a $1.60 dividend (lead, not a claim).
 
-## Blockers / decisions
-- **D2**: SEC contact User-Agent, needed for record/payment dates and share-class evidence.
-- **D9**: a log-capable RPC provider, for full announcement coverage (notice-only announcements).
-- **Make `main` the default branch** (repo setting; the founder's action).
-- Coinbase API rights: unknown. Brand clearance: pending.
+## Waiting on founder
+- Phase 3 approval (deploy the read-only API on Vercel).
+- Gold-set annotation (research/gold/README.md).
+- Supabase data-API key on the environment returns "Invalid API key" (not blocking; check its value).
 
 ## Next
-Founder reviews the PR. On approval:
-- Phase 2: SEC-side company events and the leading calendar, earnings second, a gold set of 10+ events, Supabase.
-- Builder interviews (the GSTACK_REVIEW assignment) run in parallel.
-
-## Phase 2 progress (PR #2, draft)
-- PR #1 (Phase 0+1) merged by founder. Phase 2 approved.
-- Done: SEC company linkage for all 13 actions; dated dividend declarations from SEC text (9 found); leading calendar with 2 upcoming adjustments (GOOGLc Dec 14, NVDAc Dec 23); `/v1/calendar`, company_context, OpenAPI; pinned Actions; RPC URL redaction. 68/68 tests.
-- Findings: 8/9 tokens adjusted on the payable date; MRVLc 8 days late; PMc ×1.5588 vs a $1.60 declared dividend (lead).
-- Waiting on founder: Alchemy network secret (host base-mainnet.g.alchemy.com, header Authorization: Bearer …) and Supabase project.
-- Remaining: gold set (10+, annotated independently), Alchemy indexer, Supabase migrations + RLS, manual research workflow, Phase 2 gate runs.
+Phase 3: deploy the read-only API (Vercel), with a read-only database login, rate limits and docs; then builder outreach drafts for approval.

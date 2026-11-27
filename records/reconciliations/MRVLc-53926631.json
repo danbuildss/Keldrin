@@ -124,7 +124,7 @@
    "No reference value feed, so the implied amount per share cannot be computed."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:24:09.604Z"
+  "generated_at": "2026-11-27T10:42:19.758Z"
  },
  "payload_sha256": "2a72f4c0051693fc64a096556b2352fa7a9e2510701f728289728fb9bcac9520",
  "review": {
@@ -166,6 +166,6 @@
     "evidence": "2026-11-06 vs record 2026-10-09"
    }
   ],
-  "checked_at": "2026-11-27T10:24:10.541Z"
+  "checked_at": "2026-11-27T10:42:20.821Z"
  }
 }

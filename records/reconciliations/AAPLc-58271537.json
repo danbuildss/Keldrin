@@ -16,7 +16,7 @@
     "AAPL"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=754e57ff700f02f8",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=d56a9b6dad0a2b8d",
     "https://data.sec.gov/submissions/CIK0000320193.json sha256=7c22869dc335882f"
    ]
   },
@@ -126,9 +126,9 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:24:21.817Z"
+  "generated_at": "2026-11-27T10:42:33.228Z"
  },
- "payload_sha256": "8c2d5998a54a1023fb4f2d03fc385fa6165478ddbca72f6ea12e50041602e740",
+ "payload_sha256": "99400f3069e448d10737ddfa0ef5193cad53b3b9594b594aa32d439f37f93af3",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -173,6 +173,6 @@
     "evidence": "answer 35550825000 at 58271536"
    }
   ],
-  "checked_at": "2026-11-27T10:24:22.995Z"
+  "checked_at": "2026-11-27T10:42:34.541Z"
  }
 }

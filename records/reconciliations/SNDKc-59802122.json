@@ -17,7 +17,7 @@
    ],
    "resolution_evidence": [
     "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3557c6f7d1e93eb6",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=213b3491221ee3cc",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=e9f8f5d65c30d37b",
     "https://data.sec.gov/submissions/CIK0002023554.json sha256=6f59d8f061f93fd6"
    ]
   },
@@ -86,9 +86,9 @@
    "Split ratio not yet evidenced in SEC structured data."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:24:37.944Z"
+  "generated_at": "2026-11-27T10:42:44.499Z"
  },
- "payload_sha256": "88d677329d25e3a56e1c2f3961bba96bd26849e1c89dc9f1f83fcbf3d09e57da",
+ "payload_sha256": "3caf570ae457d7f65f62f632b6ea9ad068fabfd23c4f050e857255017c357b1a",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -108,6 +108,6 @@
     "evidence": "Sandisk Corp SNDK"
    }
   ],
-  "checked_at": "2026-11-27T10:24:38.421Z"
+  "checked_at": "2026-11-27T10:42:44.950Z"
  }
 }

@@ -17,7 +17,7 @@
     "METAM"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Meta%20Platforms%20Inc. sha256=1e02f5d1c0165f3e",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Meta%20Platforms%20Inc. sha256=86458c5538181342",
     "https://data.sec.gov/submissions/CIK0001326801.json sha256=d8a3de061b73d74c"
    ]
   },
@@ -109,9 +109,9 @@
    "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:23:31.197Z"
+  "generated_at": "2026-11-27T10:41:44.204Z"
  },
- "payload_sha256": "1c594e09c1ba6c3b7a9efacfd000766147723a6df7d56fb7e22d0fe4bd80f077",
+ "payload_sha256": "29c4736f1165a697fd905c87c5abd3ae5c75311822496ed4e88dfffab4cd47c3",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -151,6 +151,6 @@
     "evidence": "recomputed 0.22570953"
    }
   ],
-  "checked_at": "2026-11-27T10:23:32.380Z"
+  "checked_at": "2026-11-27T10:41:45.412Z"
  }
 }

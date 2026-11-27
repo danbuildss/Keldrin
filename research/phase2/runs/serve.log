@@ -1,0 +1,3 @@
+(node:3866) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Keldrin API (read-only, confirmed records only) on http://127.0.0.1:8788  — try /llms.txt

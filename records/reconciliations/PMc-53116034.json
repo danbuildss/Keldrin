@@ -16,7 +16,7 @@
     "PM"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Philip%20Morris%20International%20Inc. sha256=29eb2369bb8cf048",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Philip%20Morris%20International%20Inc. sha256=32b9347428b631b3",
     "https://data.sec.gov/submissions/CIK0001413329.json sha256=69eb10d3876345bf"
    ]
   },
@@ -152,9 +152,9 @@
    "No reference value feed, so the implied amount per share cannot be computed."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:23:51.633Z"
+  "generated_at": "2026-11-27T10:42:04.714Z"
  },
- "payload_sha256": "6d9938a599f535df4fa18b2d0935e22d762ee1a56bee90fbc60e0e8325bae8e6",
+ "payload_sha256": "6012a2e3e49e60ae9ebfba9f0a4cdcd1cd69775cc02a1d7b708fb525f54e08e0",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -194,6 +194,6 @@
     "evidence": "2026-10-26 vs record 2026-10-02"
    }
   ],
-  "checked_at": "2026-11-27T10:23:52.570Z"
+  "checked_at": "2026-11-27T10:42:05.662Z"
  }
 }

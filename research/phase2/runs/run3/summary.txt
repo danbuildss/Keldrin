@@ -1,3 +1,7 @@
 == run 3 2026-11-27T10:31:23Z
   supabase migrate: exit 0, 6s
   discover: exit 0, 599s
+  reconcile: exit 0, 82s
+  calendar: exit 0, 411s
+  supabase check: exit 0, 8s
+== gate runs complete 2026-11-27T10:50:00Z

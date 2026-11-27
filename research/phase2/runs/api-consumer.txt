@@ -1,0 +1,10 @@
+GET /health -> 200 5179B 1.099870s
+GET /v1/actions?limit=50 -> 200 80980B 1.145073s
+GET /v1/calendar?state=upcoming -> 200 38729B 2.001449s
+GET /v1/actions?contract=0x12 -> 400 105B 0.001188s
+(node:3884) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+health: ok; 13 confirmed records; data age 0.14 h → fresh
+GOOGLc applied at block 51310619 (2026-09-14T18:29:45.000Z): "Cash Dividend" multiplier ×1.000377118676784179; flags [instant_path_deprecated_setter, legacy_event_only, multiple_announcement_ids]; evidence: 0xb5aa54fb26131123a7bb931e31d63baf466e1a1075d74450d048da88ad6a1444, 0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00
+consumer: 1/1 records schema-valid, confirmed and arithmetic-checked
+consumer exit 0

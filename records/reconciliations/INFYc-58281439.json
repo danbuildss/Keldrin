@@ -16,8 +16,8 @@
     "INFY"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Infosys%20Limited sha256=fe817998a145c319",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=INFY sha256=e31d9ac31047cfd9",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Infosys%20Limited sha256=d621a33a0c81a9d4",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=INFY sha256=08ea9b19053a3f31",
     "https://data.sec.gov/submissions/CIK0001067491.json sha256=1ff21b6c886bcead"
    ]
   },
@@ -117,9 +117,9 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:24:35.340Z"
+  "generated_at": "2026-11-27T10:42:41.798Z"
  },
- "payload_sha256": "9b5bfdb912bcf52450a907e9b6fa6ee62bdef6827529967e8c5eb63886d95acc",
+ "payload_sha256": "4e19d92ea0fea2b6cf37a5a0b9661100c16339501e40c9023127c654d17962be",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -139,6 +139,6 @@
     "evidence": "Infosys Ltd INFY"
    }
   ],
-  "checked_at": "2026-11-27T10:24:35.840Z"
+  "checked_at": "2026-11-27T10:42:42.266Z"
  }
 }

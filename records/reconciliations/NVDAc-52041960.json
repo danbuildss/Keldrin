@@ -16,8 +16,8 @@
     "NVDA"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=2526a7ba88160d88",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=2fea1ec0e321527e",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=446cb802ddbc31b5",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=6e339aec2b0bbd92",
     "https://data.sec.gov/submissions/CIK0001045810.json sha256=7c07b0a81346ce33"
    ]
   },
@@ -134,9 +134,9 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:23:39.159Z"
+  "generated_at": "2026-11-27T10:41:51.942Z"
  },
- "payload_sha256": "3fdb39c4b52827d55f2940420e87daf89ddfa3c3346cce7ebb187070b898c783",
+ "payload_sha256": "175592f08c17c044d7d88f9f4eb9121cf9c76817fe6e80dec6f135db4c248691",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -181,6 +181,6 @@
     "evidence": "answer 23025000000 at 52041959"
    }
   ],
-  "checked_at": "2026-11-27T10:23:40.430Z"
+  "checked_at": "2026-11-27T10:41:53.277Z"
  }
 }

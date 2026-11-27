@@ -17,8 +17,8 @@
     "NOKBF"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Nokia%20Corporation sha256=e447374102ee38d3",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NOK sha256=c887adcbc7881a4a",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Nokia%20Corporation sha256=99d1171c945bf358",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NOK sha256=5f2a18de252e929a",
     "https://data.sec.gov/submissions/CIK0000924613.json sha256=4eff7d906dfd8478"
    ]
   },
@@ -146,9 +146,9 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:24:16.523Z"
+  "generated_at": "2026-11-27T10:42:27.843Z"
  },
- "payload_sha256": "d6c60a511819057a9069cbdbf9388a81ee2bc656159706c7fdc3ca31ad50143e",
+ "payload_sha256": "288d2779f4c94e258979337048f4158c2a71c4f68b58732b0150716ceaf2d5d8",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -168,6 +168,6 @@
     "evidence": "NOKIA CORP NOK,NOKBF"
    }
   ],
-  "checked_at": "2026-11-27T10:24:16.992Z"
+  "checked_at": "2026-11-27T10:42:28.313Z"
  }
 }
