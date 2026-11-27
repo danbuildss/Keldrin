@@ -73,4 +73,8 @@
 
 ## Phase 11 (approved 2026-11-27): paid x402 on Bankr + 3 free tries
 - Live on Bankr (deployed by the founder from Bankr chat; Bankr's test calls cost $0.10): keldrin-snapshot and keldrin-report, $0.05 USDC on Base, payout to the founder's Bankr wallet 0xb98f…fa91. Self-contained (read the free API), never charged on incomplete answers. Bankr's reported answers match production data. Not verified from this session: the 402 terms (x402.bankr.bot is blocked by this session's network).
-- Built, not deployed: /v1/snapshot and /v1/report on Keldrin's own API with 3 free complete answers per client per day, then 402 with the Bankr links. Needs a merge.
+- LIVE: /v1/snapshot and /v1/report with 3 free complete answers per client per day (counted in Supabase), then 402 with the Bankr links (PRs #18–#20). Single-browser check by the founder pending.
+
+## Phase 12 (approved 2026-11-27): website
+- Built: public/index.html (keystone logo, lowercase wordmark, Base colours, halftone/flow/count/marquee/reveal animations with reduced-motion support, live numbers from /health, /mcp and one market-context call; never the metered snapshot), POST /v1/feedback (validated, honeypot, 5 per client per day, stored only through feedback_submit; IP never stored). API index also at /v1.
+- Waiting on the founder: approval to store feedback (applies migrations 008 + supabase/011). Until then the form answers "Feedback isn't open yet".

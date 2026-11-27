@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keldrin · the verified record for stocks on Base</title>
+<meta name="description" content="Corporate actions, Chainlink NAV and DEX prices for tokenized stocks on Base, each with its proof. Free API, MCP for agents, CLI, and pay-per-call snapshots via x402.">
+<meta property="og:title" content="keldrin · proof behind every stock on Base">
+<meta property="og:description" content="The verified record for tokenized stocks on Base: corporate actions, Chainlink NAV, DEX prices, each with its proof.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%230000FF' fill-rule='evenodd' d='M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0000FF;--ink:#111111;--paper:#FFFFFF;--soft:#F8F8F8;--line:#DDE3E9;--mute:#787878;--tint:#D1D7FF;--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:8px}
+.label::before{content:"";width:7px;height:7px;background:var(--blue);display:inline-block}
+.dark .label{color:#9a9a9a}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:11px 16px;border:1px solid var(--ink);transition:transform .2s,background .2s,color .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#0000cc}
+.btn.ghost:hover{background:var(--ink);color:#fff}
+.dark .btn.ghost{border-color:#fff;color:#fff}.dark .btn.ghost:hover{background:#fff;color:var(--ink)}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;letter-spacing:-.02em}
+.brand svg{width:22px;height:22px}
+.links{display:flex;gap:26px;font-size:13px;color:#444}
+.links a:hover{color:var(--blue)}
+@media(max-width:760px){.links{display:none}}
+/* hero */
+.hero{padding:72px 0 56px}
+.hero .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:end}
+.hero h1{font-size:clamp(48px,8vw,104px);line-height:.95;letter-spacing:-.045em;font-weight:600;margin-top:22px}
+.hero h1 .w{display:inline-block;opacity:0;transform:translateY(40px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+.hero h1 em{font-style:normal;color:var(--blue)}
+.hero p{font-size:15px;line-height:1.55;color:#333;max-width:340px}
+.hero .cta{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.status{font-family:var(--mono);font-size:11px;color:var(--mute);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.pulse{width:8px;height:8px;border-radius:50%;background:#1db954;box-shadow:0 0 0 0 rgba(29,185,84,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(29,185,84,0)}100%{box-shadow:0 0 0 0 rgba(29,185,84,0)}}
+@keyframes rise{to{opacity:1;transform:none}}
+@media(max-width:860px){.hero .grid{grid-template-columns:1fr}}
+/* ticker */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;font-family:var(--mono);font-size:12px;background:var(--soft)}
+.ticker .track{display:inline-flex;gap:40px;padding:12px 0;animation:marquee 40s linear infinite}
+.ticker span b{color:var(--blue);font-weight:500}
+@keyframes marquee{to{transform:translateX(-50%)}}
+/* halftone bands */
+.band{position:relative;background:var(--blue);height:360px;overflow:hidden}
+.band canvas{position:absolute;inset:0;width:100%;height:100%}
+.band .mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;text-align:center}
+.band .mark svg{width:64px;height:64px;filter:drop-shadow(0 0 30px rgba(255,255,255,.4));animation:float 6s ease-in-out infinite}
+.band .word{font-family:var(--mono);letter-spacing:.6em;font-size:18px;color:#fff;margin-top:14px}
+.band .tick{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;padding:0 24px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.7)}
+@keyframes float{50%{transform:translateY(-10px)}}
+/* flow */
+.flow{padding:72px 0}
+.flow svg{width:100%;height:auto;display:block}
+.flow .node rect{fill:#fff;stroke:var(--ink);stroke-width:1}
+.flow .node.k rect{fill:var(--blue);stroke:var(--blue)}
+.flow .node text{font-family:Inter,sans-serif;font-size:14px;font-weight:600;fill:var(--ink)}
+.flow .node.k text{fill:#fff}
+.flow .node .sub{font-family:var(--mono);font-size:9px;font-weight:400;fill:var(--mute)}
+.flow .node.k .sub{fill:var(--tint)}
+.flow path.wire{fill:none;stroke:var(--line);stroke-width:1.5}
+.flow path.pulse{fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:6 220;animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-226}}
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.pillars div{padding:18px 0;font-size:22px;letter-spacing:-.02em;font-weight:500}
+.pillars small{font-family:var(--mono);font-size:10px;color:var(--blue);margin-right:6px}
+@media(max-width:700px){.pillars{grid-template-columns:1fr}}
+/* stats */
+.stats{padding:80px 0;text-align:center}
+.stats h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.03em;font-weight:600}
+.stats p.lead{color:#444;margin:14px auto 0;max-width:560px;line-height:1.55}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);margin-top:44px;border:1px solid var(--line)}
+.nums div{padding:26px 10px;border-right:1px solid var(--line)}
+.nums div:last-child{border-right:0}
+.nums b{display:block;font-size:40px;font-weight:600;letter-spacing:-.03em;color:var(--blue);font-variant-numeric:tabular-nums}
+.nums span{font-family:var(--mono);font-size:11px;color:var(--mute);text-transform:uppercase}
+@media(max-width:700px){.nums{grid-template-columns:1fr 1fr}.nums div:nth-child(2){border-right:0}.nums div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+.live{margin:28px auto 0;max-width:760px;border:1px solid var(--ink);text-align:left;font-family:var(--mono);font-size:12px}
+.live .bar{display:flex;justify-content:space-between;padding:8px 12px;background:var(--ink);color:#fff}
+.live .rows{padding:6px 12px}
+.live .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);gap:12px}
+.live .row:last-child{border-bottom:0}
+.live .row span:first-child{color:var(--mute)}
+/* dark list */
+.dark{background:var(--ink);color:#fff}
+.platform{padding:84px 0}
+.platform h2{font-size:clamp(30px,4.4vw,48px);letter-spacing:-.03em;font-weight:600;line-height:1.05;max-width:620px;margin-top:18px}
+.list{margin-top:46px;border-top:1px solid #2a2a2a}
+.item{display:grid;grid-template-columns:1fr auto;align-items:center;padding:14px 0;border-bottom:1px solid #2a2a2a;position:relative;cursor:default}
+.item .name{font-size:clamp(38px,6vw,64px);letter-spacing:-.04em;font-weight:500;color:#3a3a3a;transition:color .35s}
+.item .desc{font-family:var(--mono);font-size:12px;color:#5a5a5a;text-align:right;max-width:260px;transition:color .35s}
+.item::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--blue);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.item.on .name,.item:hover .name{color:#fff}.item.on .desc,.item:hover .desc{color:#cfcfcf}
+.item.on::after,.item:hover::after{width:100%}
+/* proof cards */
+.proof{padding:84px 0}
+.proof h2{font-size:clamp(30px,4.4vw,48px);letter-spacing:-.03em;font-weight:600;line-height:1.05;margin-top:18px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.card{border:1px solid var(--line);padding:22px;transition:border-color .3s,transform .3s}
+.card:hover{border-color:var(--blue);transform:translateY(-4px)}
+.card .ic{width:26px;height:26px;border:1px solid var(--blue);display:grid;place-items:center;color:var(--blue);font-family:var(--mono);font-size:11px}
+.card h3{font-size:18px;margin:18px 0 8px;letter-spacing:-.01em}
+.card p{font-size:13px;line-height:1.55;color:#555}
+.card code{display:block;margin-top:14px;font-family:var(--mono);font-size:11px;background:var(--soft);padding:8px;border-left:2px solid var(--blue);overflow-x:auto;white-space:nowrap}
+@media(max-width:860px){.cards{grid-template-columns:1fr}}
+/* steps */
+.agents{padding:84px 0}
+.agents .top{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:end}
+.agents h2{font-size:clamp(30px,4.4vw,48px);letter-spacing:-.03em;font-weight:600;line-height:1.05;margin-top:18px}
+.agents .top p{font-size:14px;line-height:1.55;color:#444}
+.steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin-top:56px}
+.steps::before{content:"";position:absolute;left:12.5%;right:12.5%;top:13px;height:1px;background:var(--line)}
+.steps .prog{position:absolute;left:12.5%;top:13px;height:2px;background:var(--blue);width:0;transition:width 2.4s ease}
+.steps.go .prog{width:75%}
+.step{text-align:center;position:relative}
+.step .dot{width:26px;height:26px;margin:0 auto;background:#fff;border:1px solid var(--ink);display:grid;place-items:center;font-family:var(--mono);font-size:10px;transition:background .3s,color .3s,border-color .3s}
+.step.lit .dot{background:var(--blue);border-color:var(--blue);color:#fff}
+.step b{display:block;margin-top:12px;font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+.step span{display:block;font-size:12px;color:var(--mute);margin-top:4px}
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:56px;border-top:1px solid var(--line);padding-top:26px}
+.feat h4{font-size:14px;margin:10px 0 6px}.feat p{font-size:12.5px;color:#555;line-height:1.5}
+.feat small{font-family:var(--mono);font-size:10px;color:var(--blue)}
+@media(max-width:860px){.agents .top{grid-template-columns:1fr}.feat{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr;row-gap:30px}.steps::before,.steps .prog{display:none}}
+/* cta */
+.cta-sec{padding:90px 0}
+.cta-sec h2{font-size:clamp(34px,5.4vw,60px);letter-spacing:-.04em;font-weight:600;line-height:1}
+.cta-sec p{color:#aaa;margin-top:16px;max-width:520px;line-height:1.55;font-size:14px}
+.cta-sec .row{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.price{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:44px}
+.price div{border:1px solid #2a2a2a;padding:22px}
+.price b{font-size:28px;letter-spacing:-.02em}.price small{font-family:var(--mono);color:#9a9a9a;font-size:11px;display:block;margin-top:4px}
+.price ul{list-style:none;margin-top:14px;font-size:13px;color:#cfcfcf;line-height:1.9}
+.price li::before{content:"→ ";color:var(--blue)}
+@media(max-width:700px){.price{grid-template-columns:1fr}}
+pre.code{margin-top:22px;background:#000;border:1px solid #2a2a2a;padding:16px;font-family:var(--mono);font-size:12px;color:#d6d6d6;overflow-x:auto;line-height:1.7}
+pre.code i{color:#6f7cff;font-style:normal}
+/* footer */
+footer{padding:64px 0 0;border-top:1px solid var(--line);overflow:hidden}
+footer .cols{display:grid;grid-template-columns:1.4fr repeat(3,1fr) 1.6fr;gap:28px}
+footer h5{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--mute);text-transform:uppercase;margin-bottom:12px}
+footer .cols a{display:block;font-size:13px;color:#333;line-height:2}
+footer .cols a:hover{color:var(--blue)}
+form.fb{display:grid;gap:8px}
+form.fb input,form.fb textarea{font:inherit;font-size:13px;padding:10px;border:1px solid var(--line);background:var(--soft);outline:none;transition:border-color .2s}
+form.fb input:focus,form.fb textarea:focus{border-color:var(--blue)}
+form.fb .hp{position:absolute;left:-9999px}
+form.fb small{font-size:11px;color:var(--mute);line-height:1.45}
+.fbmsg{font-family:var(--mono);font-size:11px;min-height:16px}
+@media(max-width:900px){footer .cols{grid-template-columns:1fr 1fr}}
+.giant{font-weight:700;letter-spacing:-.08em;font-size:clamp(110px,27vw,400px);line-height:.78;color:var(--blue);margin-top:50px;display:flex;user-select:none}
+.giant span{display:inline-block;transform:translateY(110%);transition:transform 1s cubic-bezier(.2,.7,.2,1)}
+.giant.in span{transform:none}
+.legal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--mute);padding:16px 0 22px;border-top:1px solid var(--line)}
+/* reveal */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv,.hero h1 .w,.giant span{opacity:1!important;transform:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="logo" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" d="M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z"/></symbol></defs></svg>
+
+<nav><div class="wrap">
+  <a class="brand" href="/"><svg style="color:var(--blue)"><use href="#logo"/></svg>keldrin</a>
+  <div class="links"><a href="#platform">Product</a><a href="#proof">Proof</a><a href="#pricing">Pricing</a><a href="/llms.txt">Docs</a><a href="/openapi.json">OpenAPI</a></div>
+  <a class="btn primary" href="#pricing">Try it free ▸</a>
+</div></nav>
+
+<header class="hero"><div class="wrap grid">
+  <div>
+    <span class="label">Verified record · tokenized stocks on Base</span>
+    <h1><span class="w" style="animation-delay:.05s">Proof</span> <span class="w" style="animation-delay:.15s">behind</span><br><span class="w" style="animation-delay:.25s">every</span> <span class="w" style="animation-delay:.35s">stock</span><br><span class="w" style="animation-delay:.45s">on</span> <em class="w" style="animation-delay:.55s">Base.</em></h1>
+  </div>
+  <div>
+    <div class="status"><span class="pulse"></span><span id="st-run">checking live status…</span></div>
+    <p>Corporate actions, Chainlink NAV and DEX prices for tokenized stocks on Base. Every value names its source and is independently re-checked before it is served. Unknown is a valid answer; we never guess.</p>
+    <div class="cta"><a class="btn primary" href="#pricing">Try the API ▸</a><a class="btn ghost" href="/llms.txt">Read the docs</a></div>
+  </div>
+</div></header>
+
+<div class="ticker" aria-hidden="true"><div class="track" id="ticker"><span>loading live record…</span></div></div>
+
+<section class="band" aria-hidden="true"><canvas data-halftone="chart"></canvas>
+  <div class="mark"><svg><use href="#logo"/></svg></div>
+  <div class="tick"><span>CH. 8453 · BASE MAINNET</span><span id="band-block">BLOCK —</span></div>
+</section>
+
+<section class="flow"><div class="wrap">
+  <span class="label">How keldrin works</span>
+  <svg viewBox="0 0 1000 300" role="img" aria-label="Sources flow into keldrin's verification, then to your app or agent">
+    <path class="wire" id="w1" d="M190 50 C 330 50, 330 150, 420 150"/>
+    <path class="wire" id="w2" d="M190 117 C 330 117, 330 150, 420 150"/>
+    <path class="wire" id="w3" d="M190 183 C 330 183, 330 150, 420 150"/>
+    <path class="wire" id="w4" d="M190 250 C 330 250, 330 150, 420 150"/>
+    <path class="wire" id="w5" d="M600 150 L 790 150"/>
+    <path class="pulse" d="M190 50 C 330 50, 330 150, 420 150"/>
+    <path class="pulse" style="animation-delay:-.7s" d="M190 117 C 330 117, 330 150, 420 150"/>
+    <path class="pulse" style="animation-delay:-1.4s" d="M190 183 C 330 183, 330 150, 420 150"/>
+    <path class="pulse" style="animation-delay:-2.1s" d="M190 250 C 330 250, 330 150, 420 150"/>
+    <path class="pulse" style="animation-duration:1.6s" d="M600 150 L 790 150"/>
+    <g class="node"><rect x="20" y="30" width="170" height="40"/><text x="34" y="55">Chainlink NAV</text><text class="sub" x="34" y="66">round ids</text></g>
+    <g class="node"><rect x="20" y="97" width="170" height="40"/><text x="34" y="122">SEC filings</text><text class="sub" x="34" y="133">EDGAR</text></g>
+    <g class="node"><rect x="20" y="163" width="170" height="40"/><text x="34" y="188">Coinbase tokens</text><text class="sub" x="34" y="199">multipliers onchain</text></g>
+    <g class="node"><rect x="20" y="230" width="170" height="40"/><text x="34" y="255">DEX pools</text><text class="sub" x="34" y="266">Uniswap · Aerodrome</text></g>
+    <g class="node k"><rect x="420" y="120" width="180" height="60"/><text x="440" y="148">keldrin verify</text><text class="sub" x="440" y="166">independent 2nd check</text></g>
+    <g class="node"><rect x="790" y="125" width="190" height="50"/><text x="808" y="150">Your app / agent</text><text class="sub" x="808" y="164">API · MCP · CLI</text></g>
+  </svg>
+  <div class="pillars"><div><small>01</small>Corporate actions</div><div><small>02</small>Chainlink NAV</div><div><small>03</small>DEX prices</div></div>
+</div></section>
+
+<section class="band" aria-hidden="true" style="height:300px"><canvas data-halftone="wave"></canvas>
+  <div class="mark"><div class="word">P R O O F</div></div>
+</section>
+
+<section class="stats"><div class="wrap rv">
+  <span class="label">Live from the record</span>
+  <h2>Built for builders on Base.</h2>
+  <p class="lead">These numbers are read live from keldrin's API as this page loads. Nothing here is typed by hand.</p>
+  <div class="nums">
+    <div><b data-count id="n-assets">—</b><span>tokens tracked</span></div>
+    <div><b data-count id="n-feeds">—</b><span>NAV feeds verified</span></div>
+    <div><b data-count id="n-records">—</b><span>confirmed records</span></div>
+    <div><b id="n-session">—</b><span>US market now</span></div>
+  </div>
+  <div class="live" id="live"><div class="bar"><span>GET /v1/assets/NVDAc/market-context</span><span id="live-time">—</span></div>
+    <div class="rows"><div class="row"><span>loading…</span><span></span></div></div></div>
+</div></section>
+
+<section class="dark platform" id="platform"><div class="wrap">
+  <span class="label">The keldrin platform</span>
+  <h2 class="rv">Everything you need to build with tokenized stocks.</h2>
+  <div class="list" id="list">
+    <div class="item on"><span class="name">API</span><span class="desc">Free · one stock at a time · JSON with proof</span></div>
+    <div class="item"><span class="name">MCP</span><span class="desc">For AI agents · claude mcp add keldrin</span></div>
+    <div class="item"><span class="name">CLI</span><span class="desc">npx keldrin · re-checks answers onchain</span></div>
+    <div class="item"><span class="name">Snapshot</span><span class="desc">All verified stocks in one answer</span></div>
+    <div class="item"><span class="name">Report</span><span class="desc">Everything on one stock in one answer</span></div>
+    <div class="item"><span class="name">Verify</span><span class="desc">Don't trust us: re-read the chain yourself</span></div>
+  </div>
+</div></section>
+
+<section class="proof" id="proof"><div class="wrap">
+  <span class="label">The proof behind every answer</span>
+  <h2 class="rv">Every value names where it came from.</h2>
+  <div class="cards">
+    <div class="card rv"><div class="ic">01</div><h3>Chainlink round ids</h3><p>Each NAV point carries its feed, phase, aggregator and round id, so anyone can re-read it with getRoundData.</p><code>npx keldrin verify-nav NVDAc</code></div>
+    <div class="card rv"><div class="ic">02</div><h3>SEC filings linked</h3><p>Dividends and splits are matched to the issuer's filing and the onchain multiplier change before they are served.</p><code>GET /v1/assets/{token}/corporate-actions</code></div>
+    <div class="card rv"><div class="ic">03</div><h3>Onchain, at one block</h3><p>DEX prices are read at a single pinned block from verified pools, with depth capped by what each pool really holds.</p><code>npx keldrin verify-dex NVDAc</code></div>
+  </div>
+</div></section>
+
+<section class="band" aria-hidden="true" style="height:220px"><canvas data-halftone="grid"></canvas></section>
+
+<section class="agents"><div class="wrap">
+  <div class="top"><div><span class="label">For agents</span><h2 class="rv">Agents that act on facts, not guesses.</h2></div>
+  <p>Agents call keldrin over MCP or x402 and get a complete, checked answer, or a clear "unknown" with the reason. Never a made-up number.</p></div>
+  <div class="steps" id="steps"><div class="prog"></div>
+    <div class="step"><div class="dot">01</div><b>ASK</b><span>symbol or address</span></div>
+    <div class="step"><div class="dot">02</div><b>FETCH</b><span>chain, SEC, Chainlink</span></div>
+    <div class="step"><div class="dot">03</div><b>VERIFY</b><span>independent 2nd check</span></div>
+    <div class="step"><div class="dot">04</div><b>ANSWER</b><span>with provenance</span></div>
+  </div>
+  <div class="feat">
+    <div><small>01</small><h4>Freshness built in</h4><p>Is the NAV fresh, closed for the weekend, or late? Judged against the feed's own rhythm and the NYSE calendar.</p></div>
+    <div><small>02</small><h4>Fail closed</h4><p>Mismatched identity, stale data or a failed read: no value is served. Unknown beats wrong.</p></div>
+    <div><small>03</small><h4>Pay only for complete</h4><p>Paid calls settle only on a complete answer. Errors are free.</p></div>
+    <div><small>04</small><h4>Facts, not advice</h4><p>keldrin is a record, not a trading signal, adviser or price oracle.</p></div>
+  </div>
+</div></section>
+
+<section class="dark cta-sec" id="pricing"><div class="wrap">
+  <span class="label">Pricing</span>
+  <h2 class="rv">Build on verified data.</h2>
+  <p>Start free. Pay per call only for the one-shot answers, with x402 on Base. No account, no API key.</p>
+  <div class="price">
+    <div><b>Free</b><small>no key · fair use</small><ul><li>REST API, one stock at a time</li><li>MCP server for agents</li><li>CLI: npx keldrin</li><li>3 free snapshots or reports a day</li></ul></div>
+    <div style="border-color:var(--blue)"><b>$0.05</b><small>per call · USDC on Base · x402</small><ul><li>Snapshot: every verified stock, one call</li><li>Report: everything on one stock</li><li>Charged only on a complete answer</li><li>Pay from any x402 wallet or agent</li></ul></div>
+  </div>
+<pre class="code"><i>$</i> curl https://keldrin.vercel.app/v1/snapshot
+<i>$</i> npx keldrin context NVDAc
+<i>$</i> claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp</pre>
+  <div class="row"><a class="btn primary" href="/v1/snapshot">Try a free snapshot ▸</a><a class="btn ghost" href="https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot">Pay per call (x402) ▸</a></div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="cols">
+    <div><a class="brand" href="/"><svg style="color:var(--blue)"><use href="#logo"/></svg>keldrin</a><p style="font-size:12px;color:var(--mute);margin-top:10px;line-height:1.5">The verified record for tokenized stocks on Base.</p></div>
+    <div><h5>Product</h5><a href="#platform">API</a><a href="/mcp" onclick="return false">MCP</a><a href="https://www.npmjs.com/package/keldrin">CLI</a><a href="#pricing">Pricing</a></div>
+    <div><h5>Developers</h5><a href="/llms.txt">Docs (llms.txt)</a><a href="/openapi.json">OpenAPI</a><a href="/health">Status</a><a href="/v1">API index</a></div>
+    <div><h5>Proof</h5><a href="#proof">How we verify</a><a href="/v1/market/session">Market session</a></div>
+    <div><h5>Feedback</h5>
+      <form class="fb" id="fb" novalidate>
+        <input name="email" type="email" placeholder="Email" required maxlength="200" autocomplete="email">
+        <input name="x" type="text" placeholder="X handle (optional)" maxlength="40">
+        <textarea name="message" rows="2" placeholder="What should keldrin do next? (optional)" maxlength="1000"></textarea>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn primary" type="submit">Send ▸</button>
+        <div class="fbmsg" id="fbmsg" role="status"></div>
+        <small>We use your email and X handle only to reply about keldrin. Never sold or shared. Ask in the form to have it deleted.</small>
+      </form>
+    </div>
+  </div>
+  <div class="giant" id="giant" aria-label="keldrin"></div>
+  <div class="legal"><span>keldrin, built by SOMEHOW</span><span>Facts with provenance, not investment advice. Not affiliated with Base, Coinbase or Chainlink.</span></div>
+</div></footer>
+
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // giant wordmark, letter by letter
+  const g = $("#giant");
+  "keldrin".split("").forEach((ch, i) => { const s = document.createElement("span"); s.textContent = ch; s.style.transitionDelay = i * 0.06 + "s"; g.appendChild(s); });
+
+  // scroll reveals
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in", "go"); io.unobserve(e.target); } }), { threshold: 0.2 });
+  document.querySelectorAll(".rv, #giant, #steps").forEach((el) => io.observe(el));
+
+  // agent steps light up in order
+  const steps = [...document.querySelectorAll(".step")];
+  new IntersectionObserver((es, o) => es.forEach((e) => { if (e.isIntersecting) { steps.forEach((s, i) => setTimeout(() => s.classList.add("lit"), reduce ? 0 : i * 600)); o.disconnect(); } }), { threshold: 0.4 }).observe($("#steps"));
+
+  // platform list cycles
+  const items = [...document.querySelectorAll(".item")];
+  let cur = 0, hover = false;
+  items.forEach((it) => { it.addEventListener("mouseenter", () => { hover = true; items.forEach((x) => x.classList.remove("on")); }); it.addEventListener("mouseleave", () => (hover = false)); });
+  if (!reduce) setInterval(() => { if (hover) return; items[cur].classList.remove("on"); cur = (cur + 1) % items.length; items[cur].classList.add("on"); }, 2200);
+
+  // halftone bands
+  document.querySelectorAll("canvas[data-halftone]").forEach((cv) => {
+    const kind = cv.dataset.halftone, ctx = cv.getContext("2d");
+    let w, h, dpr;
+    const size = () => { dpr = Math.min(devicePixelRatio || 1, 2); w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    size(); addEventListener("resize", size);
+    const step = 11;
+    const chart = (x) => h * 0.62 - Math.sin(x / w * 7) * h * 0.12 - (x / w) * h * 0.28 - Math.sin(x / w * 23) * h * 0.04;
+    const draw = (t) => {
+      ctx.clearRect(0, 0, w, h);
+      for (let y = step / 2; y < h; y += step) for (let x = step / 2; x < w; x += step) {
+        let v;
+        if (kind === "chart") { const d = Math.abs(y - chart(x)); v = Math.max(0, 1 - d / (h * 0.22)) * 0.85 + 0.12 * Math.sin(x * 0.02 + y * 0.03 - t * 0.0012); }
+        else if (kind === "wave") { v = 0.5 + 0.5 * Math.sin(Math.hypot(x - w / 2, y - h / 2) * 0.03 - t * 0.002); v *= 0.75; }
+        else { v = 0.35 + 0.35 * Math.sin(x * 0.015 + t * 0.0015) * Math.cos(y * 0.05 - t * 0.001); }
+        const r = Math.max(0, Math.min(1, v)) * step * 0.48;
+        if (r < 0.4) continue;
+        ctx.fillStyle = "rgba(255,255,255," + (0.25 + v * 0.55) + ")";
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+      }
+      if (!reduce && !document.hidden) requestAnimationFrame(draw);
+    };
+    const vis = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) requestAnimationFrame(draw); }));
+    vis.observe(cv); draw(0);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) requestAnimationFrame(draw); });
+  });
+
+  // count-up
+  const countTo = (el, n) => { if (reduce) { el.textContent = n.toLocaleString(); return; } const t0 = performance.now(); const f = (t) => { const p = Math.min(1, (t - t0) / 1400); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 3))).toLocaleString(); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+  const ago = (iso) => { const s = (Date.now() - Date.parse(iso)) / 1000; return s < 3600 ? Math.round(s / 60) + " min ago" : Math.round(s / 3600) + " h ago"; };
+  const getJson = (u, init) => fetch(u, init).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+
+  // live data (free routes only; never the metered snapshot)
+  getJson("/health").then((h) => {
+    const d = h.data;
+    countTo($("#n-assets"), d.assets); countTo($("#n-records"), d.records_confirmed);
+    if (d.last_run) { $("#st-run").textContent = "record live · last research run " + ago(d.last_run.finished_at) + " · " + d.last_run.outcome; $("#band-block").textContent = "BLOCK " + Number(d.last_run.head_block).toLocaleString(); }
+  }).catch(() => ($("#st-run").textContent = "status unavailable right now"));
+  getJson("/v1/market/session").then((m) => ($("#n-session").textContent = m.data.session)).catch(() => {});
+  getJson("/mcp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "list_assets", arguments: { with_nav_only: true } } }) }).then((j) => {
+    const list = j.result.structuredContent.data;
+    countTo($("#n-feeds"), list.length);
+    const parts = list.map((a) => "<span><b>" + esc(a.symbol) + "</b> " + esc(a.contract_address.slice(0, 6) + "…" + a.contract_address.slice(-4)) + " · multiplier " + esc((Number(a.multiplier_wad) / 1e18).toFixed(4)) + "</span>").join("");
+    $("#ticker").innerHTML = parts + parts;
+    const nv = list.find((a) => a.symbol === "NVDAc");
+    if (!nv) return;
+    return getJson("/v1/assets/" + nv.contract_address + "/market-context").then((mc) => {
+      const d = mc.data, rows = [];
+      $("#live-time").textContent = new Date().toISOString().slice(11, 19) + " UTC";
+      if (d.nav) rows.push(["Chainlink NAV", "$" + Number(d.nav.nav).toFixed(2) + " · round " + d.nav.round_id.slice(-6)], ["NAV age", Math.round(d.nav.age_s / 60) + " min · " + d.staleness.state]);
+      else rows.push(["Chainlink NAV", "unknown · " + d.nav_unavailable_reason]);
+      if (d.dex && d.dex.price_usd) rows.push(["DEX price", "$" + Number(d.dex.price_usd).toFixed(2) + " · " + d.dex.venue + " · block " + d.dex.block], ["Gap vs NAV", d.dex.nav_premium_pct === null ? "withheld · " + (d.dex.premium_unavailable_reason || "") : (d.dex.nav_premium_pct >= 0 ? "+" : "") + d.dex.nav_premium_pct + "%"]);
+      rows.push(["Market", d.market.session]);
+      $("#live .rows").innerHTML = rows.map((r) => '<div class="row"><span>' + esc(r[0]) + "</span><span>" + esc(r[1]) + "</span></div>").join("");
+    });
+  }).catch(() => ($("#live .rows").innerHTML = '<div class="row"><span>live read unavailable right now</span><span></span></div>'));
+
+  // feedback form
+  $("#fb").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = e.target, msg = $("#fbmsg"), data = Object.fromEntries(new FormData(f));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email || "")) { msg.textContent = "Please enter a valid email."; return; }
+    msg.textContent = "Sending…";
+    fetch("/v1/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data) })
+      .then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+      .then(({ ok, j }) => { msg.textContent = ok ? "Thanks, we got it." : (j.error && j.error.message) || "Could not send right now."; if (ok) f.reset(); })
+      .catch(() => (msg.textContent = "Could not send right now."));
+  });
+})();
+</script>
+</body>
+</html>

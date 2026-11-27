@@ -11,12 +11,12 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __esm = (fn, res, err3) => function __init() {
-  if (err3) throw err3[0];
+var __esm = (fn, res, err4) => function __init() {
+  if (err4) throw err4[0];
   try {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   } catch (e2) {
-    throw err3 = [e2], e2;
+    throw err4 = [e2], e2;
   }
 };
 var __commonJS = (cb, mod) => function __require2() {
@@ -905,12 +905,12 @@ var init_version2 = __esm({
 });
 
 // node_modules/viem/_esm/errors/base.js
-function walk(err3, fn) {
-  if (fn?.(err3))
-    return err3;
-  if (err3 && typeof err3 === "object" && "cause" in err3 && err3.cause !== void 0)
-    return walk(err3.cause, fn);
-  return fn ? null : err3;
+function walk(err4, fn) {
+  if (fn?.(err4))
+    return err4;
+  if (err4 && typeof err4 === "object" && "cause" in err4 && err4.cause !== void 0)
+    return walk(err4.cause, fn);
+  return fn ? null : err4;
 }
 var errorConfig, BaseError2;
 var init_base = __esm({
@@ -4497,9 +4497,9 @@ var require_pg_connection_string = __commonJS({
           result = new URL(str.replace("@/", "@___DUMMY___/"), "postgres://base");
           dummyHost = true;
         }
-      } catch (err3) {
-        err3.input && (err3.input = "*****REDACTED*****");
-        throw err3;
+      } catch (err4) {
+        err4.input && (err4.input = "*****REDACTED*****");
+        throw err4;
       }
       for (const entry of result.searchParams.entries()) {
         config[entry[0]] = entry[1];
@@ -4803,8 +4803,8 @@ var require_connection_parameters = __commonJS({
         if (this.client_encoding) {
           params.push("client_encoding=" + quoteParamValue(this.client_encoding));
         }
-        dns.lookup(this.host, function(err3, address) {
-          if (err3) return cb(err3, null);
+        dns.lookup(this.host, function(err4, address) {
+          if (err4) return cb(err4, null);
           params.push("hostaddr=" + quoteParamValue(address));
           return cb(null, params.join(" "));
         });
@@ -4975,8 +4975,8 @@ var require_query = __commonJS({
         }
         try {
           row = this._result.parseRow(msg.fields);
-        } catch (err3) {
-          this._canceledDueToError = err3;
+        } catch (err4) {
+          this._canceledDueToError = err4;
           return;
         }
         this.emit("row", row, this._result);
@@ -5000,15 +5000,15 @@ var require_query = __commonJS({
           connection.sync();
         }
       }
-      handleError(err3, connection) {
+      handleError(err4, connection) {
         if (this._canceledDueToError) {
-          err3 = this._canceledDueToError;
+          err4 = this._canceledDueToError;
           this._canceledDueToError = false;
         }
         if (this.callback) {
-          return this.callback(err3);
+          return this.callback(err4);
         }
-        this.emit("error", err3);
+        this.emit("error", err4);
       }
       handleReadyForQuery(con) {
         if (this._canceledDueToError) {
@@ -5017,9 +5017,9 @@ var require_query = __commonJS({
         if (this.callback) {
           try {
             this.callback(null, this._results);
-          } catch (err3) {
+          } catch (err4) {
             process.nextTick(() => {
-              throw err3;
+              throw err4;
             });
           }
         }
@@ -5085,10 +5085,10 @@ var require_query = __commonJS({
             binary: this.binary,
             valueMapper: utils.prepareValue
           });
-        } catch (err3) {
+        } catch (err4) {
           connection.close({ type: "S", name: this.name });
           connection.sync();
-          this.handleError(err3, connection);
+          this.handleError(err4, connection);
           return;
         }
         connection.describe({
@@ -5484,9 +5484,9 @@ var require_serializer = __commonJS({
       writer.addInt16(len);
       try {
         writeValues(values, config.valueMapper, formatsOffset);
-      } catch (err3) {
+      } catch (err4) {
         writer.clear();
-        throw err3;
+        throw err4;
       }
       writer.addInt16(1);
       writer.addInt16(
@@ -6167,8 +6167,8 @@ var require_connection = __commonJS({
         }
         try {
           self.stream = stream.getSecureStream(options);
-        } catch (err3) {
-          return self.emit("error", err3);
+        } catch (err4) {
+          return self.emit("error", err4);
         }
         self.attachListeners(self.stream);
         self.stream.on("error", reportStreamError);
@@ -6357,9 +6357,9 @@ var require_split2 = __commonJS({
       stream.maxLength = options.maxLength;
       stream.skipOverflow = options.skipOverflow || false;
       stream.overflow = false;
-      stream._destroy = function(err3, cb) {
+      stream._destroy = function(err4, cb) {
         this._writableState.errorEmitted = false;
-        cb(err3);
+        cb(err4);
       };
       return stream;
     }
@@ -6455,9 +6455,9 @@ var require_helper = __commonJS({
         stream.destroy();
         cb(pass);
       };
-      var onErr = function(err3) {
+      var onErr = function(err4) {
         stream.destroy();
-        warn("WARNING: error on reading file: %s", err3);
+        warn("WARNING: error on reading file: %s", err4);
         cb(void 0);
       };
       stream.on("error", onErr);
@@ -6547,8 +6547,8 @@ var require_lib = __commonJS({
     var helper = require_helper();
     module.exports = function(connInfo, cb) {
       var file = helper.getFileName();
-      fs.stat(file, function(err3, stat) {
-        if (err3 || !helper.usePgPass(stat, file)) {
+      fs.stat(file, function(err4, stat) {
+        if (err4 || !helper.usePgPass(stat, file)) {
           return cb(void 0);
         }
         var st = fs.createReadStream(file);
@@ -6672,10 +6672,10 @@ var require_client = __commonJS({
       _getActiveQuery() {
         return this._activeQuery;
       }
-      _errorAllQueries(err3) {
+      _errorAllQueries(err4) {
         const enqueueError = (query) => {
           process.nextTick(() => {
-            query.handleError(err3, this.connection);
+            query.handleError(err4, this.connection);
           });
         };
         const activeQuery = this._getActiveQuery();
@@ -6693,9 +6693,9 @@ var require_client = __commonJS({
         const con = this.connection;
         this._connectionCallback = callback;
         if (this._connecting || this._connected) {
-          const err3 = new Error("Client has already been connected. You cannot reuse a client.");
+          const err4 = new Error("Client has already been connected. You cannot reuse a client.");
           process.nextTick(() => {
-            callback(err3);
+            callback(err4);
           });
           return;
         }
@@ -6798,8 +6798,8 @@ var require_client = __commonJS({
               this.connectionParameters.password = this.password = null;
             }
             cb();
-          }).catch((err3) => {
-            con.emit("error", err3);
+          }).catch((err4) => {
+            con.emit("error", err4);
           });
         } else if (this.password !== null) {
           cb();
@@ -6842,8 +6842,8 @@ var require_client = __commonJS({
               this.scramMaxIterations
             );
             this.connection.sendSASLInitialResponseMessage(this.saslSession.mechanism, this.saslSession.response);
-          } catch (err3) {
-            this.connection.emit("error", err3);
+          } catch (err4) {
+            this.connection.emit("error", err4);
           }
         });
       }
@@ -6856,16 +6856,16 @@ var require_client = __commonJS({
             this.enableChannelBinding && this.connection.stream
           );
           this.connection.sendSCRAMClientFinalMessage(this.saslSession.response);
-        } catch (err3) {
-          this.connection.emit("error", err3);
+        } catch (err4) {
+          this.connection.emit("error", err4);
         }
       }
       _handleAuthSASLFinal(msg) {
         try {
           sasl.finalizeSession(this.saslSession, msg.data);
           this.saslSession = null;
-        } catch (err3) {
-          this.connection.emit("error", err3);
+        } catch (err4) {
+          this.connection.emit("error", err4);
         }
       }
       _handleBackendKeyData(msg) {
@@ -6894,27 +6894,27 @@ var require_client = __commonJS({
       }
       // if we receive an error event or error message
       // during the connection process we handle it here
-      _handleErrorWhileConnecting(err3) {
+      _handleErrorWhileConnecting(err4) {
         if (this._connectionError) {
           return;
         }
         this._connectionError = true;
         clearTimeout(this.connectionTimeoutHandle);
         if (this._connectionCallback) {
-          return this._connectionCallback(err3);
+          return this._connectionCallback(err4);
         }
-        this.emit("error", err3);
+        this.emit("error", err4);
       }
       // if we're connected and we receive an error event from the connection
       // this means the socket is dead - do a hard abort of all queries and emit
       // the socket error on the client as well
-      _handleErrorEvent(err3) {
+      _handleErrorEvent(err4) {
         if (this._connecting) {
-          return this._handleErrorWhileConnecting(err3);
+          return this._handleErrorWhileConnecting(err4);
         }
         this._queryable = false;
-        this._errorAllQueries(err3);
-        this.emit("error", err3);
+        this._errorAllQueries(err4);
+        this.emit("error", err4);
       }
       // handle error messages from the postgres backend
       _handleErrorMessage(msg) {
@@ -7141,10 +7141,10 @@ var require_client = __commonJS({
           query = new Query2(config, values, callback);
           if (!query.callback) {
             result = new this._Promise((resolve, reject) => {
-              query.callback = (err3, res) => err3 ? reject(err3) : resolve(res);
-            }).catch((err3) => {
-              Error.captureStackTrace(err3);
-              throw err3;
+              query.callback = (err4, res) => err4 ? reject(err4) : resolve(res);
+            }).catch((err4) => {
+              Error.captureStackTrace(err4);
+              throw err4;
             });
           } else if (typeof query.callback !== "function") {
             throw new TypeError("callback is not a function");
@@ -7171,9 +7171,9 @@ var require_client = __commonJS({
             }
             this._pulseQueryQueue();
           }, readTimeout);
-          query.callback = (err3, res) => {
+          query.callback = (err4, res) => {
             clearTimeout(readTimeoutTimer);
-            queryCallback(err3, res);
+            queryCallback(err4, res);
           };
         }
         if (this.binary && !query.binary) {
@@ -7288,27 +7288,27 @@ var require_pg_pool = __commonJS({
       }
       let rej;
       let res;
-      const cb = function(err3, client) {
-        err3 ? rej(err3) : res(client);
+      const cb = function(err4, client) {
+        err4 ? rej(err4) : res(client);
       };
       const result = new Promise2(function(resolve, reject) {
         res = resolve;
         rej = reject;
-      }).catch((err3) => {
-        Error.captureStackTrace(err3);
-        throw err3;
+      }).catch((err4) => {
+        Error.captureStackTrace(err4);
+        throw err4;
       });
       return { callback: cb, result };
     }
     function makeIdleListener(pool, client) {
-      return function idleListener(err3) {
-        err3.client = client;
+      return function idleListener(err4) {
+        err4.client = client;
         client.removeListener("error", idleListener);
         client.on("error", () => {
-          pool.log("additional client error after disconnection due to error", err3);
+          pool.log("additional client error after disconnection due to error", err4);
         });
         pool._remove(client);
-        pool.emit("error", err3, client);
+        pool.emit("error", err4, client);
       };
     }
     var Pool2 = class extends EventEmitter {
@@ -7417,8 +7417,8 @@ var require_pg_pool = __commonJS({
       }
       connect(cb) {
         if (this.ending) {
-          const err3 = new Error("Cannot use a pool after calling end on the pool");
-          return cb ? cb(err3) : this.Promise.reject(err3);
+          const err4 = new Error("Cannot use a pool after calling end on the pool");
+          return cb ? cb(err4) : this.Promise.reject(err4);
         }
         const response = promisify(this.Promise, cb);
         const result = response.result;
@@ -7430,9 +7430,9 @@ var require_pg_pool = __commonJS({
             this._pendingQueue.push(new PendingItem(response.callback));
             return result;
           }
-          const queueCallback = (err3, res, done) => {
+          const queueCallback = (err4, res, done) => {
             clearTimeout(tid);
-            response.callback(err3, res, done);
+            response.callback(err4, res, done);
           };
           const pendingItem = new PendingItem(queueCallback);
           const tid = setTimeout(() => {
@@ -7470,20 +7470,20 @@ var require_pg_pool = __commonJS({
           }, this.options.connectionTimeoutMillis);
         }
         this.log("connecting new client");
-        client.connect((err3) => {
+        client.connect((err4) => {
           if (tid) {
             clearTimeout(tid);
           }
           client.on("error", idleListener);
-          if (err3) {
-            this.log("client failed to connect", err3);
+          if (err4) {
+            this.log("client failed to connect", err4);
             this._clients = this._clients.filter((c) => c !== client);
             if (timeoutHit) {
-              err3 = new Error("Connection terminated due to connection timeout", { cause: err3 });
+              err4 = new Error("Connection terminated due to connection timeout", { cause: err4 });
             }
             this._pulseQueue();
             if (!pendingItem.timedOut) {
-              pendingItem.callback(err3, void 0, NOOP);
+              pendingItem.callback(err4, void 0, NOOP);
             }
           } else {
             this.log("new client connected");
@@ -7517,7 +7517,7 @@ var require_pg_pool = __commonJS({
             if (idleIndex !== -1) {
               this._acquireClient(
                 client,
-                new PendingItem((err3, client2, clientRelease) => clientRelease()),
+                new PendingItem((err4, client2, clientRelease) => clientRelease()),
                 idleListener,
                 false
               );
@@ -7538,10 +7538,10 @@ var require_pg_pool = __commonJS({
         client.removeListener("error", idleListener);
         if (!pendingItem.timedOut) {
           if (isNew && this.options.verify) {
-            this.options.verify(client, (err3) => {
-              if (err3) {
-                client.release(err3);
-                return pendingItem.callback(err3, void 0, NOOP);
+            this.options.verify(client, (err4) => {
+              if (err4) {
+                client.release(err4);
+                return pendingItem.callback(err4, void 0, NOOP);
               }
               pendingItem.callback(void 0, client, client.release);
             });
@@ -7559,21 +7559,21 @@ var require_pg_pool = __commonJS({
       // returns a function that wraps _release and throws if called more than once
       _releaseOnce(client, idleListener) {
         let released = false;
-        return (err3) => {
+        return (err4) => {
           if (released) {
             throwOnDoubleRelease();
           }
           released = true;
-          this._release(client, idleListener, err3);
+          this._release(client, idleListener, err4);
         };
       }
       // release a client back to the poll, include an error
       // to remove it from the pool
-      _release(client, idleListener, err3) {
+      _release(client, idleListener, err4) {
         client.on("error", idleListener);
         client._poolUseCount = (client._poolUseCount || 0) + 1;
-        this.emit("release", err3, client);
-        if (err3 || this.ending || !client._queryable || client._ending || client._poolUseCount >= this.options.maxUses) {
+        this.emit("release", err4, client);
+        if (err4 || this.ending || !client._queryable || client._ending || client._poolUseCount >= this.options.maxUses) {
           if (client._poolUseCount >= this.options.maxUses) {
             this.log("remove expended client");
           }
@@ -7617,38 +7617,38 @@ var require_pg_pool = __commonJS({
         }
         const response = promisify(this.Promise, cb);
         cb = response.callback;
-        this.connect((err3, client) => {
-          if (err3) {
-            return cb(err3);
+        this.connect((err4, client) => {
+          if (err4) {
+            return cb(err4);
           }
           let clientReleased = false;
-          const onError = (err4) => {
+          const onError = (err5) => {
             if (clientReleased) {
               return;
             }
             clientReleased = true;
-            client.release(err4);
-            cb(err4);
+            client.release(err5);
+            cb(err5);
           };
           client.once("error", onError);
           this.log("dispatching query");
           try {
-            client.query(text, values, (err4, res) => {
+            client.query(text, values, (err5, res) => {
               this.log("query dispatched");
               client.removeListener("error", onError);
               if (clientReleased) {
                 return;
               }
               clientReleased = true;
-              client.release(err4);
-              if (err4) {
-                return cb(err4);
+              client.release(err5);
+              if (err5) {
+                return cb(err5);
               }
               return cb(void 0, res);
             });
-          } catch (err4) {
-            client.release(err4);
-            return cb(err4);
+          } catch (err5) {
+            client.release(err5);
+            return cb(err5);
           }
         });
         return response.result;
@@ -7656,8 +7656,8 @@ var require_pg_pool = __commonJS({
       end(cb) {
         this.log("ending");
         if (this.ending) {
-          const err3 = new Error("Called end on pool more than once");
-          return cb ? cb(err3) : this.Promise.reject(err3);
+          const err4 = new Error("Called end on pool more than once");
+          return cb ? cb(err4) : this.Promise.reject(err4);
         }
         this.ending = true;
         const promised = promisify(this.Promise, cb);
@@ -7724,18 +7724,18 @@ var require_query2 = __commonJS({
       sourceLine: "line",
       sourceFunction: "routine"
     };
-    NativeQuery.prototype.handleError = function(err3) {
+    NativeQuery.prototype.handleError = function(err4) {
       const fields = this.native && this.native.pq.resultErrorFields();
       if (fields) {
         for (const key in fields) {
           const normalizedFieldName = errorFieldMap[key] || key;
-          err3[normalizedFieldName] = fields[key];
+          err4[normalizedFieldName] = fields[key];
         }
       }
       if (this.callback) {
-        this.callback(err3);
+        this.callback(err4);
       } else {
-        this.emit("error", err3);
+        this.emit("error", err4);
       }
       this.state = "error";
     };
@@ -7760,13 +7760,13 @@ var require_query2 = __commonJS({
       const self = this;
       this.native = client.native;
       client.native.arrayMode = this._arrayMode;
-      let after = function(err3, rows, results) {
+      let after = function(err4, rows, results) {
         client.native.arrayMode = false;
         setImmediate(function() {
           self.emit("_done");
         });
-        if (err3) {
-          return self.handleError(err3);
+        if (err4) {
+          return self.handleError(err4);
         }
         if (self._emitRowEvents) {
           if (results.length > 1) {
@@ -7799,20 +7799,20 @@ var require_query2 = __commonJS({
         const values = (this.values || []).map(utils.prepareValue);
         if (client.namedQueries[this.name] !== void 0) {
           if (this.text && client.namedQueries[this.name] !== this.text) {
-            const err3 = new Error(`Prepared statements must be unique - '${this.name}' was used for a different statement`);
-            return after(err3);
+            const err4 = new Error(`Prepared statements must be unique - '${this.name}' was used for a different statement`);
+            return after(err4);
           }
           return client.native.execute(this.name, values, after);
         }
-        return client.native.prepare(this.name, this.text, values.length, function(err3) {
-          if (err3) return after(err3);
+        return client.native.prepare(this.name, this.text, values.length, function(err4) {
+          if (err4) return after(err4);
           client.namedQueries[self.name] = self.text;
           return self.native.execute(self.name, values, after);
         });
       } else if (this.values) {
         if (!Array.isArray(this.values)) {
-          const err3 = new Error("Query values must be an array");
-          return after(err3);
+          const err4 = new Error("Query values must be an array");
+          return after(err4);
         }
         const vals = this.values.map(utils.prepareValue);
         client.native.query(this.text, vals, after);
@@ -7876,11 +7876,11 @@ var require_client2 = __commonJS({
     };
     Client2.Query = NativeQuery;
     util.inherits(Client2, EventEmitter);
-    Client2.prototype._errorAllQueries = function(err3) {
+    Client2.prototype._errorAllQueries = function(err4) {
       const enqueueError = (query) => {
         process.nextTick(() => {
           query.native = this.native;
-          query.handleError(err3);
+          query.handleError(err4);
         });
       };
       if (this._hasActiveQuery()) {
@@ -7897,19 +7897,19 @@ var require_client2 = __commonJS({
         return;
       }
       this._connecting = true;
-      this.connectionParameters.getLibpqConnectionString(function(err3, conString) {
+      this.connectionParameters.getLibpqConnectionString(function(err4, conString) {
         if (self.connectionParameters.nativeConnectionString) conString = self.connectionParameters.nativeConnectionString;
-        if (err3) return cb(err3);
-        self.native.connect(conString, function(err4) {
-          if (err4) {
+        if (err4) return cb(err4);
+        self.native.connect(conString, function(err5) {
+          if (err5) {
             self.native.end();
-            return cb(err4);
+            return cb(err5);
           }
           self._connected = true;
-          self.native.on("error", function(err5) {
+          self.native.on("error", function(err6) {
             self._queryable = false;
-            self._errorAllQueries(err5);
-            self.emit("error", err5);
+            self._errorAllQueries(err6);
+            self.emit("error", err6);
           });
           self.native.on("notification", function(msg) {
             self.emit("notification", {
@@ -7960,11 +7960,11 @@ var require_client2 = __commonJS({
           result = new this._Promise((resolve, reject) => {
             resolveOut = resolve;
             rejectOut = reject;
-          }).catch((err3) => {
-            Error.captureStackTrace(err3);
-            throw err3;
+          }).catch((err4) => {
+            Error.captureStackTrace(err4);
+            throw err4;
           });
-          query.callback = (err3, res) => err3 ? rejectOut(err3) : resolveOut(res);
+          query.callback = (err4, res) => err4 ? rejectOut(err4) : resolveOut(res);
         }
       }
       if (readTimeout) {
@@ -7984,9 +7984,9 @@ var require_client2 = __commonJS({
           }
           this._pulseQueryQueue();
         }, readTimeout);
-        query.callback = (err3, res) => {
+        query.callback = (err4, res) => {
           clearTimeout(readTimeoutTimer);
-          queryCallback(err3, res);
+          queryCallback(err4, res);
         };
       }
       if (!this._queryable) {
@@ -8022,7 +8022,7 @@ var require_client2 = __commonJS({
       let result;
       if (!cb) {
         result = new this._Promise(function(resolve, reject) {
-          cb = (err3) => err3 ? reject(err3) : resolve();
+          cb = (err4) => err4 ? reject(err4) : resolve();
         });
       }
       const doEnd = function() {
@@ -8098,18 +8098,18 @@ var require_client2 = __commonJS({
         }
         queries.push(pipelineEntry);
       }
-      this.native.pipeline(queries, function(err3, results) {
+      this.native.pipeline(queries, function(err4, results) {
         self._pipelineInFlight = false;
-        if (err3) {
+        if (err4) {
           self._connected = false;
           self._queryable = false;
           for (let i = 0; i < nativeQueries.length; i++) {
             const q = nativeQueries[i];
             q.native = self.native;
-            q.handleError(err3);
+            q.handleError(err4);
           }
-          self._errorAllQueries(err3);
-          self.emit("error", err3);
+          self._errorAllQueries(err4);
+          self.emit("error", err4);
           self.emit("end");
           return;
         }
@@ -8223,9 +8223,9 @@ var require_lib2 = __commonJS({
         let native = null;
         try {
           native = new PG(require_native());
-        } catch (err3) {
-          if (err3.code !== "MODULE_NOT_FOUND") {
-            throw err3;
+        } catch (err4) {
+          if (err4.code !== "MODULE_NOT_FOUND") {
+            throw err4;
           }
         }
         Object.defineProperty(module.exports, "native", {
@@ -10517,14 +10517,11 @@ async function handleMcp(db2, raw) {
         if (!isRequest) return { status: 202, body: null };
         return error(-32601, `Method not found: ${String(msg.method).slice(0, 80)}`);
     }
-  } catch (err3) {
-    const code = err3.rpc ?? -32603;
-    return isRequest ? error(code, code === -32603 ? "Internal error" : err3.message) : { status: 202, body: null };
+  } catch (err4) {
+    const code = err4.rpc ?? -32603;
+    return isRequest ? error(code, code === -32603 ? "Internal error" : err4.message) : { status: 202, body: null };
   }
 }
-
-// src/api/trial.ts
-import { createHash } from "node:crypto";
 
 // node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib2(), 1);
@@ -10546,6 +10543,8 @@ function tls() {
   return process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {} };
 }
 var TRIAL_CONSUME_SQL = "SELECT trial_consume($1, $2::date) AS n";
+var FEEDBACK_SQL = "SELECT feedback_submit($1, $2, $3, $4) AS result";
+var WRITE_ALLOWED = /* @__PURE__ */ new Set([TRIAL_CONSUME_SQL, FEEDBACK_SQL]);
 function openPg(connectionString) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
   const ssl = tls();
@@ -10562,7 +10561,7 @@ function openPg(connectionString) {
       throw new Error("read-only connection: exec is not allowed");
     },
     async writeOne(sql, params = []) {
-      if (sql !== TRIAL_CONSUME_SQL) throw new Error("writeOne only runs the free-try counter");
+      if (!WRITE_ALLOWED.has(sql)) throw new Error("writeOne only runs the free-try counter and the feedback insert");
       const c = await pool.connect();
       try {
         await c.query("BEGIN READ WRITE");
@@ -10584,6 +10583,7 @@ function openPg(connectionString) {
 }
 
 // src/api/trial.ts
+import { createHash } from "node:crypto";
 var FREE_TRIES_PER_DAY = 3;
 var PAID = {
   price: "0.05 USDC on Base",
@@ -10693,6 +10693,32 @@ async function report(db2, token, now = /* @__PURE__ */ new Date(), readRound = 
   }
 }
 
+// src/api/feedback.ts
+var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+var err2 = (status, code, message) => ({ status, body: { error: { code, message } } });
+async function submitFeedback(db2, raw, client) {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return err2(400, "BAD_REQUEST", "send a JSON object");
+  const b = raw;
+  if (typeof b.website === "string" && b.website.trim()) return { status: 200, body: { data: { received: true } } };
+  const email = typeof b.email === "string" ? b.email.trim() : "";
+  const x = typeof b.x === "string" ? b.x.trim().replace(/^@/, "") : "";
+  const message = typeof b.message === "string" ? b.message.trim() : "";
+  if (!EMAIL.test(email) || email.length > 200) return err2(400, "BAD_EMAIL", "Please enter a valid email.");
+  if (x && !/^[A-Za-z0-9_]{1,15}$/.test(x)) return err2(400, "BAD_X_HANDLE", "An X handle is up to 15 letters, numbers or underscores.");
+  if (message.length > 1e3) return err2(400, "TOO_LONG", "Please keep the message under 1,000 characters.");
+  try {
+    const args = [email, x, message, clientHash(client)];
+    const r = db2.writeOne ? await db2.writeOne(FEEDBACK_SQL, args) : await db2.query(FEEDBACK_SQL, args);
+    const result = r.rows[0]?.result;
+    if (result === "rate_limited") return err2(429, "RATE_LIMITED", "Thanks, we already have your messages for today.");
+    if (result !== "ok") return err2(503, "FEEDBACK_UNAVAILABLE", "Feedback could not be saved right now.");
+    return { status: 200, body: { data: { received: true } } };
+  } catch (e2) {
+    console.warn("feedback not stored:", e2.message);
+    return err2(503, "FEEDBACK_UNAVAILABLE", "Feedback isn't open yet. Please try again soon.");
+  }
+}
+
 // src/api/server.ts
 var ADDR3 = /^0x[0-9a-fA-F]{40}$/;
 function send(res, status, body, type = "application/json", cacheOverride) {
@@ -10715,7 +10741,7 @@ function rateLimited(client, now = Date.now()) {
   return h.n > RATE.limit ? Math.ceil((h.reset - now) / 1e3) : null;
 }
 var ok = (data, extra = {}) => ({ data, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, served: "independently_confirmed_records_only", ...extra } });
-var err2 = (code, message, hint) => ({ error: { code, message, ...hint ? { hint } : {} } });
+var err3 = (code, message, hint) => ({ error: { code, message, ...hint ? { hint } : {} } });
 var OPENAPI = keldrin_v1_default;
 var LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
@@ -10775,12 +10801,25 @@ async function handle(db2, req, res) {
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
     const isMcp = p === "/mcp" && req.method === "POST";
-    if (req.method !== "GET" && !isMcp) return send(res, 405, err2("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
+    const isFeedback = p === "/v1/feedback" && req.method === "POST";
+    if (req.method !== "GET" && !isMcp && !isFeedback) return send(res, 405, err3("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
     const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
     const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
     if (retry !== null) {
       res.setHeader("retry-after", String(retry));
-      return send(res, 429, err2("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
+      return send(res, 429, err3("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
+    }
+    if (isFeedback) {
+      const raw = await readBody(req, 4 * 1024);
+      if (raw === null) return send(res, 413, err3("TOO_LARGE", "request body over 4 KB"), void 0, "no-store");
+      let body;
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return send(res, 400, err3("BAD_REQUEST", "send a JSON object"), void 0, "no-store");
+      }
+      const out = await submitFeedback(db2, body, fwd || req.socket?.remoteAddress || "unknown");
+      return send(res, out.status, out.body, void 0, "no-store");
     }
     if (isMcp) {
       const raw = await readBody(req, 64 * 1024);
@@ -10795,18 +10834,18 @@ async function handle(db2, req, res) {
       if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
       return send(res, out.status, out.body, void 0, "no-store");
     }
-    if (p === "/mcp") return send(res, 405, err2("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
-    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/mcp") return send(res, 405, err3("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
-      if (contract && !ADDR3.test(contract)) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const status = url.searchParams.get("status");
-      if (status && !["predicted", "confirmed_onchain", "verified_matched", "late", "unknown"].includes(status)) return send(res, 400, err2("BAD_STATUS", "status must be predicted, confirmed_onchain, verified_matched, late or unknown"));
+      if (status && !["predicted", "confirmed_onchain", "verified_matched", "late", "unknown"].includes(status)) return send(res, 400, err3("BAD_STATUS", "status must be predicted, confirmed_onchain, verified_matched, late or unknown"));
       let since = null;
       if (p === "/v1/changes") {
         const s = url.searchParams.get("since");
         since = s ? Date.parse(s) : NaN;
-        if (!s || Number.isNaN(since)) return send(res, 400, err2("BAD_SINCE", "since must be an ISO 8601 timestamp", "use meta.as_of from your previous call"));
+        if (!s || Number.isNaN(since)) return send(res, 400, err3("BAD_SINCE", "since must be an ISO 8601 timestamp", "use meta.as_of from your previous call"));
       }
       const events = (await listEvents(db2, { contract, status })).filter((e2) => since === null || Date.parse(e2.updated_at) > since);
       return send(res, 200, ok(events, { count: events.length, ...since !== null ? { since: new Date(since).toISOString() } : {} }));
@@ -10818,7 +10857,7 @@ async function handle(db2, req, res) {
         await db2.query("SELECT 1");
       } catch (e2) {
         console.error("keldrin health: database unavailable:", e2.stack ?? e2);
-        return send(res, 503, { ...err2("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e2) });
+        return send(res, 503, { ...err3("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e2) });
       }
       const [a, r, c, run] = await Promise.all([
         db2.query("SELECT count(*)::int n, count(*) FILTER (WHERE identity_state='verified')::int verified FROM assets"),
@@ -10839,9 +10878,9 @@ async function handle(db2, req, res) {
     }
     if (p === "/v1/calendar") {
       const contract = url.searchParams.get("contract");
-      if (contract && !ADDR3.test(contract)) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const state = url.searchParams.get("state");
-      if (state && !["upcoming", "applied", "not_observed", "announced"].includes(state)) return send(res, 400, err2("BAD_STATE", "state must be upcoming, applied, not_observed or announced"));
+      if (state && !["upcoming", "applied", "not_observed", "announced"].includes(state)) return send(res, 400, err3("BAD_STATE", "state must be upcoming, applied, not_observed or announced"));
       const snap = (await db2.query("SELECT snapshot_id, max(as_of) AS as_of FROM calendar_entries GROUP BY snapshot_id ORDER BY 2 DESC LIMIT 1")).rows[0];
       if (!snap) return send(res, 200, ok([], { count: 0, snapshot_as_of: null }));
       const rows = (await db2.query(
@@ -10870,44 +10909,44 @@ async function handle(db2, req, res) {
     }
     const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);
     if (dm) {
-      if (!ADDR3.test(dm[1])) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR3.test(dm[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const out = await liveDex(db2, dm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, "no-store");
     }
     const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
     if (cm) {
-      if (!ADDR3.test(cm[1])) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
-      if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err2("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
+      if (!ADDR3.test(cm[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {
-      if (!ADDR3.test(nm[1])) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
-      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err2("NAV_NOT_ENABLED", "NAV history is not publicly enabled yet", "read the Chainlink feed onchain meanwhile; GET /llms.txt lists what is live"));
+      if (!ADDR3.test(nm[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "NAV history is not publicly enabled yet", "read the Chainlink feed onchain meanwhile; GET /llms.txt lists what is live"));
       const out = await navHistory(db2, nm[1], url.searchParams);
       const body = out.status === 200 ? { ...out.body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...out.body.meta } } : out.body;
       return send(res, out.status, body);
     }
     const am = p.match(/^\/v1\/assets\/([^/]+)$/);
     if (am) {
-      if (!ADDR3.test(am[1])) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR3.test(am[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const row = (await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text, identity FROM assets WHERE lower(contract_address)=lower($1)", [am[1]])).rows[0];
-      if (!row) return send(res, 404, err2("UNKNOWN_ASSET", `no tracked asset ${am[1]}`, "GET /v1/assets lists tracked tokens"));
+      if (!row) return send(res, 404, err3("UNKNOWN_ASSET", `no tracked asset ${am[1]}`, "GET /v1/assets lists tracked tokens"));
       return send(res, 200, ok(row));
     }
     if (p === "/v1/actions") {
       let contract = url.searchParams.get("contract");
       const symbol = url.searchParams.get("symbol");
-      if (contract && !ADDR3.test(contract)) return send(res, 400, err2("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (!contract && symbol) {
         const m = (await db2.query("SELECT contract_address FROM assets WHERE symbol = $1", [symbol])).rows;
-        if (m.length === 0) return send(res, 404, err2("UNKNOWN_SYMBOL", `no token with exact symbol ${symbol}`, "symbols are exact token symbols such as GOOGLc; prefer contract="));
-        if (m.length > 1) return send(res, 409, err2("AMBIGUOUS_SYMBOL", `${m.length} tokens use symbol ${symbol}`, "query by contract address"));
+        if (m.length === 0) return send(res, 404, err3("UNKNOWN_SYMBOL", `no token with exact symbol ${symbol}`, "symbols are exact token symbols such as GOOGLc; prefer contract="));
+        if (m.length > 1) return send(res, 409, err3("AMBIGUOUS_SYMBOL", `${m.length} tokens use symbol ${symbol}`, "query by contract address"));
         contract = m[0].contract_address;
       }
       const limit = Number(url.searchParams.get("limit") ?? 50);
-      if (!Number.isInteger(limit) || limit < 1 || limit > 200) return send(res, 400, err2("BAD_LIMIT", "limit must be an integer 1-200"));
+      if (!Number.isInteger(limit) || limit < 1 || limit > 200) return send(res, 400, err3("BAD_LIMIT", "limit must be an integer 1-200"));
       const rawCursor = url.searchParams.get("cursor");
       let cur = null;
       if (rawCursor) {
@@ -10916,7 +10955,7 @@ async function handle(db2, req, res) {
           if (!Array.isArray(c) || c.length !== 2 || !(c[0] === null || /^\d+$/.test(c[0])) || typeof c[1] !== "string") throw new Error("shape");
           cur = c;
         } catch {
-          return send(res, 400, err2("BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged"));
+          return send(res, 400, err3("BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged"));
         }
       }
       const rows = (await db2.query(
@@ -10939,10 +10978,10 @@ async function handle(db2, req, res) {
       try {
         id = decodeURIComponent(xm[1]);
       } catch {
-        return send(res, 400, err2("BAD_RECORD_ID", "record id is not valid percent-encoding"));
+        return send(res, 400, err3("BAD_RECORD_ID", "record id is not valid percent-encoding"));
       }
       const rec = (await db2.query("SELECT payload, review_id, reviewed_at, revision FROM confirmed_records WHERE record_id=$1", [id])).rows[0];
-      if (!rec) return send(res, 404, err2("UNKNOWN_RECORD", `no confirmed record ${id}`, "unreviewed, unsure and rejected records are never served"));
+      if (!rec) return send(res, 404, err3("UNKNOWN_RECORD", `no confirmed record ${id}`, "unreviewed, unsure and rejected records are never served"));
       const review = (await db2.query("SELECT review_id, verdict, reviewer, claims, checked_at, payload_sha256 FROM reviews WHERE review_id=$1", [rec.review_id])).rows[0];
       const revisions = (await db2.query("SELECT revision, payload_sha256, created_at FROM records WHERE record_id=$1 ORDER BY revision", [id])).rows;
       const recon = (await db2.query(
@@ -10952,10 +10991,10 @@ async function handle(db2, req, res) {
       )).rows[0];
       return send(res, 200, ok({ company_context: recon ? { ...recon.payload, review: recon.review, reconciled_at: recon.created_at } : null, record: { ...rec.payload, verification: { ...rec.payload.verification, state: "confirmed", review_id: rec.review_id, reviewed_at: rec.reviewed_at } }, review, revisions }));
     }
-    return send(res, 404, err2("NOT_FOUND", `no route ${p}`, "see /llms.txt"));
+    return send(res, 404, err3("NOT_FOUND", `no route ${p}`, "see /llms.txt"));
   } catch (e2) {
     console.error("keldrin api error:", e2.stack ?? e2);
-    return send(res, 500, err2("INTERNAL", "internal error", "retry later; if it persists the service is degraded (see /health)"));
+    return send(res, 500, err3("INTERNAL", "internal error", "retry later; if it persists the service is degraded (see /health)"));
   }
 }
 
