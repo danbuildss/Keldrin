@@ -14,3 +14,9 @@ Use UUID/internal stable IDs, UTC timestamptz, exact numeric/decimal values, exp
 - payment_receipts(id, payment_id, network, asset, amount_atomic, tx_hash, state, resource_hash, fulfilled_at); unique authorization identity; settlement reconciler; private.
 
 Transactional release: validate schema + rights + active mapping + independently confirmed exact payload hash; create public projection atomically; otherwise reject. Corrections insert new revision; current view excludes withdrawn/superseded. Use worker-specific least privilege, API read-only approved views, separate private tables and RLS. Test service-role bypass risk, pagination and concurrent writes. Do not expose Supabase service key in UI. Migrations and rollback test required before release.
+
+## v0.3 proposed additions (Phase 0; not migrated)
+- `issuer_actions(id, asset_id, action_uuid, status announced|applied|cancelled, announced_at, applied_at, multiplier_before_wad numeric(78,0), multiplier_after_wad numeric(78,0), path scheduled|instant|none, first_block, source_ids)`. Unique (asset_id, action_uuid). Group announcements by URI UUID, not by the `id` argument.
+- `chain_logs(chain_id, block_number, block_hash, tx_hash, log_index, address, topic0, decoded jsonb, observed_at)`. PK (chain_id, tx_hash, log_index). Store block_hash for reorg checks. Flag multiplier changes outside an Announcement bracket.
+- `reconciliations(id, event_id, revision, issuer_action_id, checks jsonb, verdict match|mismatch|unsure, computed_at)`.
+- `events` hold company-level events (e.g. a declared dividend with declaration/record/pay dates). `event_assets` links them to `issuer_actions`. WAD and token amounts are `numeric(78,0)`; registry doubles are never stored as values of record.

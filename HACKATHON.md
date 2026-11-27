@@ -8,3 +8,10 @@ Demo sequence: select a real B20 asset; show source and mapping; run an actual r
 Evidence checklist: working product URL, documentation, reproducible sample, actual records, commit history, public dated progress posts, relevant transaction hashes, independent integration feedback, coverage limitations, official submission confirmation. Do not claim any unfinished feature as live.
 
 v0.2: initial application submitted by founder; acceptance unknown. Official dates rechecked 2026-11-27. Internal target remains Dec 5.
+
+Rechecked 2026-11-27 (base.org/stocksmaxxing and /rules, HTTP 200):
+- Quest Period Nov 5 – Dec 12, 2026.
+- Agentic Stock Finance: $21,000 in prizes, 3 partners, "Build agents that research, earn or trade around tokenized stocks in novel ways".
+- Submit a Loom on X tagging @buildonbase plus the form by 11:59 PM UTC on Dec 12.
+- Testnet submissions are not judged less favourably.
+- Judging criteria are on the Quest Page, weighted equally unless stated; specific criteria not yet extracted.
