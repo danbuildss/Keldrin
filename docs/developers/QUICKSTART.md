@@ -1,6 +1,6 @@
 # Keldrin developer quickstart
 
-Legend: ✅ live now · 🔒 built and verified, switched on at launch (Phase 7; returns 503 NAV_NOT_ENABLED until then) · 🛠 planned.
+Legend: ✅ live now · 🛠 planned.
 
 Base URL: `https://keldrin.vercel.app`. No key, no sign-up. JSON only; read-only (non-GET → 405). Responses carry `meta.as_of` and `meta.schema_version`.
 
@@ -12,7 +12,7 @@ curl -s "https://keldrin.vercel.app/v1/assets/0xb2000000000000000000002d0ba3164c
 ```
 Balances never change for a dividend or split; the multiplier (WAD, 1e18) does. Shares per token = multiplier / 1e18. `ui_multiplier_*` is filled only when the issuer emitted a UIMultiplierUpdated event; otherwise `ui_multiplier_unavailable_reason` says why (e.g. `legacy_event_only`). `issuer_context` holds issuer-supplied text, labelled as unverified.
 
-## 2. NAV history with proof 🔒
+## 2. NAV history with proof ✅
 ```bash
 # daily closes (last official round in each NYSE session)
 curl -s "https://keldrin.vercel.app/v1/assets/0xb20000000000000000000078ee7ce2fE4908108C/nav/history?interval=daily&from=2026-10-01"
@@ -23,14 +23,14 @@ curl -s "https://keldrin.vercel.app/v1/assets/0xb20000000000000000000078ee7ce2fE
 ```
 Each point: `feed`, `phase_id`, `aggregator`, `round_id`, `answer_raw`, `decimals`, `nav`, `updated_at`, `retrieved_at`, `retrieved_block`. Re-check any point yourself: `getRoundData(round_id)` on the feed.
 
-## 3. Market context 🔒
+## 3. Market context ✅
 ```bash
 curl -s "https://keldrin.vercel.app/v1/market/session"                                                    # ✅ live
 curl -s "https://keldrin.vercel.app/v1/assets/0xb20000000000000000000078ee7ce2fE4908108C/market-context"
 ```
 
 ## Real example responses
-Captured on 2026-11-27 from a local Keldrin instance serving the independently verified store, with live Base reads: `docs/developers/examples/`. They are real outputs, not hand-written, but they come from a local instance, not production, and predate the Phase 7 review fixes. They will be re-captured from production after switch-on. The local store had no calendar snapshot, so upcoming (predicted) events appear in production but not in `corporate-actions-GOOGLc.json`.
+Captured from production (https://keldrin.vercel.app) on 2026-11-27 at about 14:43 UTC, during the regular session: `docs/developers/examples/`. They are real responses, not hand-written.
 
 ## Coverage
 - Corporate actions: all Coinbase tokenized stocks on Base (435 registry entries; applied actions independently verified).

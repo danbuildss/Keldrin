@@ -1,36 +1,86 @@
 {
  "data": [
   {
+   "event_id": "cal:8453:0xb2000000000000000000002d0ba3164cc74f58b7:2026-12-14:0.22",
+   "chain_id": 8453,
+   "ticker": "GOOGLc",
+   "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
+   "event_type": "dividend",
+   "status": "predicted",
+   "confidence": "high",
+   "expected_adjustment_date": "2026-12-14",
+   "adjusted_at": null,
+   "multiplier_before_wad": null,
+   "multiplier_after_wad": null,
+   "multiplier_delta": null,
+   "per_share": "0.22",
+   "record_date": "2026-12-07",
+   "payable_date": "2026-12-14",
+   "sec_filing_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+   "quoted_text": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on December 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of December 7, 2026",
+   "onchain_tx": "0xf9ded54b23b505122f56aa603a22f162c98d1ac8e9c1cc9f5f13f5b43f564e59",
+   "issuer_corporate_action_uuid": "70925ca4-7aae-45d5-bbc4-adc4415d9248",
+   "record_id": null,
+   "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+   "warnings": [],
+   "updated_at": "2026-11-27T08:50:17.828Z",
+   "effective_block": null,
+   "effective_at": null,
+   "effective_at_scheduled": null,
+   "ui_multiplier_before_wad": null,
+   "ui_multiplier_after_wad": null,
+   "ui_multiplier_effective_at": null,
+   "issuer_context": null,
+   "announcements": [],
+   "evidence": {
+    "onchain_tx": "0xf9ded54b23b505122f56aa603a22f162c98d1ac8e9c1cc9f5f13f5b43f564e59",
+    "issuer_record_url": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/70925ca4-7aae-45d5-bbc4-adc4415d9248",
+    "sec_filing_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+    "keldrin_record": null
+   },
+   "verification": {
+    "state": "confirmed_calendar_entry",
+    "basis": "SEC declaration",
+    "note": "from an independently CONFIRMED calendar entry; no applied onchain record yet"
+   }
+  },
+  {
    "event_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
    "chain_id": 8453,
    "ticker": "GOOGLc",
    "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
    "event_type": "dividend",
-   "status": "confirmed_onchain",
-   "confidence": "medium",
-   "expected_adjustment_date": null,
+   "status": "verified_matched",
+   "confidence": "high",
+   "expected_adjustment_date": "2026-09-14",
    "adjusted_at": "2026-09-14T18:29:45.000Z",
    "multiplier_before_wad": "1000000000000000000",
    "multiplier_after_wad": "1000377118676784179",
    "multiplier_delta": "1.000377118676784179",
-   "per_share": null,
-   "record_date": null,
-   "payable_date": null,
-   "sec_filing_url": null,
-   "quoted_text": null,
+   "per_share": "0.22",
+   "record_date": "2026-09-07",
+   "payable_date": "2026-09-14",
+   "sec_filing_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm",
+   "quoted_text": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on September 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of September 7, 2026",
    "onchain_tx": "0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
    "issuer_corporate_action_uuid": "e82812a6-0b24-41c4-8ed1-322d1b466d33",
    "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
-   "basis": "Applied onchain and independently verified; no dated company declaration matched.",
+   "basis": "Token adjusted on 2026-09-14, matching the declared payable date 2026-09-14.",
    "warnings": [],
-   "updated_at": "2026-11-27T11:47:59.000Z",
-   "operator_description": "Cash Dividend",
-   "announced_at": "2026-09-14T15:39:01Z",
+   "updated_at": "2026-11-27T14:28:09.000Z",
    "effective_block": "51310619",
    "effective_at": "2026-09-14T18:29:45.000Z",
+   "effective_at_scheduled": null,
    "ui_multiplier_before_wad": null,
    "ui_multiplier_after_wad": null,
    "ui_multiplier_effective_at": null,
+   "ui_multiplier_unavailable_reason": "legacy_event_only",
+   "issuer_context": {
+    "operator_description": "Cash Dividend",
+    "operator_description_source": "operator-supplied text in the onchain announcement; not verified",
+    "announced_at": "2026-09-14T15:39:01Z",
+    "announced_at_source": "Coinbase issuer record (api.coinbase.com corporate action)"
+   },
    "announcements": [
     {
      "id": "2097",
@@ -48,22 +98,22 @@
    "evidence": {
     "onchain_tx": "0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
     "issuer_record_url": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33",
-    "sec_filing_url": null,
+    "sec_filing_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm",
     "keldrin_record": "/v1/actions/kld%3A8453%3A0xb2000000000000000000002d0ba3164cc74f58b7%3Ae82812a6-0b24-41c4-8ed1-322d1b466d33"
    },
    "verification": {
     "state": "confirmed",
-    "review_id": "rev-26f8dab8c9ed-1795780079057"
+    "review_id": "rev-9c0b6cf1e045-1795789689408"
    }
   }
  ],
  "meta": {
-  "as_of": "2026-11-27T14:13:36.375Z",
+  "as_of": "2026-11-27T14:43:24.038Z",
   "schema_version": "0.2",
   "token": "0xb2000000000000000000002D0BA3164cc74f58B7",
   "symbol": "GOOGLc",
   "current_multiplier_wad": "1000377118676784179",
-  "count": 1,
+  "count": 2,
   "accounting_note": "The token's balance never changes for a dividend or split: the multiplier (WAD, 1e18) does. Shares per token = multiplier / 1e18. The Chainlink NAV is already total-return (it includes the multiplier): never apply the multiplier to the NAV again."
  }
 }

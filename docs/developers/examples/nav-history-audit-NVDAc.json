@@ -15,8 +15,8 @@
    "started_at": "2026-08-03T15:45:50Z",
    "updated_at": "2026-08-03T15:47:05Z",
    "answered_in_round": "18446744073709551617",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500",
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136",
    "official": false,
    "proxy_live": true,
    "decimals_ok": false
@@ -36,8 +36,8 @@
    "started_at": "2026-08-03T17:19:50Z",
    "updated_at": "2026-08-03T17:20:05Z",
    "answered_in_round": "18446744073709551618",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500",
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136",
    "official": false,
    "proxy_live": true,
    "decimals_ok": false
@@ -57,15 +57,15 @@
    "started_at": "2026-08-03T19:54:01Z",
    "updated_at": "2026-08-03T19:55:15Z",
    "answered_in_round": "18446744073709551619",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500",
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136",
    "official": false,
    "proxy_live": true,
    "decimals_ok": false
   }
  ],
  "meta": {
-  "as_of": "2026-11-27T14:21:43.949Z",
+  "as_of": "2026-11-27T14:43:21.781Z",
   "schema_version": "0.2",
   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
   "symbol": "NVDAc",
@@ -82,9 +82,9 @@
   "order": "updated_at, then round_id",
   "count": 3,
   "quality": {
-   "official_rounds": 1920,
+   "official_rounds": 1923,
    "first_official_round_at": "2026-08-07T19:55:27Z",
-   "last_official_round_at": "2026-11-27T13:23:06Z",
+   "last_official_round_at": "2026-11-27T14:32:08Z",
    "missing_round_ids": [],
    "missing_round_ids_count": 0,
    "max_in_session_gap_s": 22364,
@@ -118,8 +118,8 @@
    "coverage_note": "History starts at the feed's first official round. Rounds an aggregator published outside the window in which the proxy served it, or from an aggregator whose decimals differ from the proxy's, are not official: they are excluded from daily closes and shown only with interval=round&include=all.",
    "verification": {
     "verdict": "CONFIRMED",
-    "review_id": "navrev:0x04689a41629776563e6822f76f2e57d148d28513:2026-11-27T14:20:21.628Z",
-    "checked_at": "2026-11-27T14:20:21.628Z",
+    "review_id": "navrev:0x04689a41629776563e6822f76f2e57d148d28513:2026-11-27T14:38:15.839Z",
+    "checked_at": "2026-11-27T14:38:15.839Z",
     "sampled": 54,
     "mismatches": 0
    }

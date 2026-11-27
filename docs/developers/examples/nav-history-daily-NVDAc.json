@@ -1,6 +1,26 @@
 {
  "data": [
   {
+   "session_day": "2026-11-16",
+   "session_close": "2026-11-16T21:00:00.000Z",
+   "provisional": false,
+   "chain_id": 8453,
+   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "round_id": "36893488147419104580",
+   "phase_id": 2,
+   "aggregator_round_id": "1348",
+   "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+   "answer_raw": "15557164314",
+   "decimals": 8,
+   "nav": "155.57164314",
+   "started_at": "2026-11-16T20:17:17Z",
+   "updated_at": "2026-11-16T20:17:30Z",
+   "answered_in_round": "36893488147419104580",
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
+  },
+  {
    "session_day": "2026-11-17",
    "session_close": "2026-11-17T21:00:00.000Z",
    "provisional": false,
@@ -17,8 +37,8 @@
    "started_at": "2026-11-17T20:59:44Z",
    "updated_at": "2026-11-17T20:59:57Z",
    "answered_in_round": "36893488147419104623",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-18",
@@ -37,8 +57,8 @@
    "started_at": "2026-11-18T20:43:42Z",
    "updated_at": "2026-11-18T20:43:55Z",
    "answered_in_round": "36893488147419104710",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-19",
@@ -57,8 +77,8 @@
    "started_at": "2026-11-19T20:55:31Z",
    "updated_at": "2026-11-19T20:55:44Z",
    "answered_in_round": "36893488147419104758",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-20",
@@ -77,8 +97,8 @@
    "started_at": "2026-11-20T20:59:21Z",
    "updated_at": "2026-11-20T20:59:34Z",
    "answered_in_round": "36893488147419104844",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-23",
@@ -97,8 +117,8 @@
    "started_at": "2026-11-23T20:50:28Z",
    "updated_at": "2026-11-23T20:50:41Z",
    "answered_in_round": "36893488147419104977",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-24",
@@ -117,8 +137,8 @@
    "started_at": "2026-11-24T20:53:17Z",
    "updated_at": "2026-11-24T20:53:30Z",
    "answered_in_round": "36893488147419105070",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
   },
   {
    "session_day": "2026-11-25",
@@ -137,12 +157,32 @@
    "started_at": "2026-11-25T20:50:36Z",
    "updated_at": "2026-11-25T20:50:50Z",
    "answered_in_round": "36893488147419105144",
-   "retrieved_at": "2026-11-27T13:24:36Z",
-   "retrieved_block": "62977500"
+   "retrieved_at": "2026-11-27T13:54:08Z",
+   "retrieved_block": "62986136"
+  },
+  {
+   "session_day": "2026-11-27",
+   "session_close": "2026-11-27T18:00:00.000Z",
+   "provisional": true,
+   "chain_id": 8453,
+   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "round_id": "36893488147419105185",
+   "phase_id": 2,
+   "aggregator_round_id": "1953",
+   "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+   "answer_raw": "14943034127",
+   "decimals": 8,
+   "nav": "149.43034127",
+   "started_at": "2026-11-27T14:31:55Z",
+   "updated_at": "2026-11-27T14:32:08Z",
+   "answered_in_round": "36893488147419105185",
+   "retrieved_at": "2026-11-27T14:35:08Z",
+   "retrieved_block": "62998463"
   }
  ],
  "meta": {
-  "as_of": "2026-11-27T14:21:43.914Z",
+  "as_of": "2026-11-27T14:43:20.188Z",
   "schema_version": "0.2",
   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
   "symbol": "NVDAc",
@@ -151,17 +191,17 @@
   "decimals": 8,
   "interval": "daily",
   "include": "official",
-  "from": "2026-11-17",
+  "from": "2026-11-16",
   "to": "2026-11-27",
   "semantics": "Chainlink total-return NAV per token: it already includes dividends and splits, so do not apply the multiplier again. A last published value outside market hours is a reference, not a live equity price.",
   "source": "Derived from public onchain Chainlink data on Base (feed listed by Coinbase /v1/tokenized-stocks/nav-feeds, cross-checked onchain); every point carries its round id so it can be re-read with getRoundData.",
   "calendar_version": "nyse-2026-2027.1",
   "daily_rule": "last official round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no official in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet; limit and cursor do not apply",
-  "count": 7,
+  "count": 9,
   "quality": {
-   "official_rounds": 1920,
+   "official_rounds": 1923,
    "first_official_round_at": "2026-08-07T19:55:27Z",
-   "last_official_round_at": "2026-11-27T13:23:06Z",
+   "last_official_round_at": "2026-11-27T14:32:08Z",
    "missing_round_ids": [],
    "missing_round_ids_count": 0,
    "max_in_session_gap_s": 22364,
@@ -195,8 +235,8 @@
    "coverage_note": "History starts at the feed's first official round. Rounds an aggregator published outside the window in which the proxy served it, or from an aggregator whose decimals differ from the proxy's, are not official: they are excluded from daily closes and shown only with interval=round&include=all.",
    "verification": {
     "verdict": "CONFIRMED",
-    "review_id": "navrev:0x04689a41629776563e6822f76f2e57d148d28513:2026-11-27T14:20:21.628Z",
-    "checked_at": "2026-11-27T14:20:21.628Z",
+    "review_id": "navrev:0x04689a41629776563e6822f76f2e57d148d28513:2026-11-27T14:38:15.839Z",
+    "checked_at": "2026-11-27T14:38:15.839Z",
     "sampled": 54,
     "mismatches": 0
    },
