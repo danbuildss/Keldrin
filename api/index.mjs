@@ -6236,7 +6236,7 @@ var keldrin_v1_default = {
     "/v1/assets/{contract}/market-context": {
       get: {
         summary: "Session, latest Chainlink NAV (live, with round id and age) and staleness for one token",
-        description: "The latest round is read live from Base's public RPC (cached up to 30 s). staleness: fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered, judged against the feed's own verified p99 in-session gap (threshold = max(2 \xD7 p99, 30 min)). Provider failures degrade to nav: null with nav_unavailable_reason. No DEX price is served (dex.unavailable_reason). Returns 503 NAV_NOT_ENABLED until enabled.",
+        description: "The latest round is read live from Base's public RPC (reused up to 30 s in the server; responses are not CDN-cached) and served only if its phase was covered by the latest CONFIRMED review with matching decimals. staleness (method v2): trading (regular-session) seconds since the round, across days, against threshold = max(2 \xD7 the feed's p99 in-session gap, 30 min): fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered. Failures degrade to nav: null with nav_unavailable_reason (no_nav_feed, feed_not_verified, rpc_unavailable, rpc_result_invalid, phase_not_reviewed, aggregator_decimals_differ_from_proxy). No DEX price. Returns 503 NAV_NOT_ENABLED until enabled.",
         parameters: [
           {
             name: "contract",
@@ -7041,8 +7041,8 @@ function marketNow(nowSec) {
   const td = isTradingDay(p.date);
   const early = EARLY_CLOSES.has(p.date);
   const hhmm = `${String(Math.floor(p.minutes / 60)).padStart(2, "0")}:${String(p.minutes % 60).padStart(2, "0")}`;
-  const base = { ny_date: p.date, ny_time: hhmm, is_trading_day: td, early_close: early, calendar_version: CALENDAR_VERSION };
-  if (td === null) return { ...base, session: "calendar_not_covered", next_open: null, next_close: null, last_close: null };
+  const base = { ny_date: p.date, ny_time: hhmm, is_trading_day: td, early_close: early, calendar_version: CALENDAR_VERSION, calendar_coverage: { from: COVERAGE.from, to: COVERAGE.to } };
+  if (td === null) return { ...base, session: "calendar_not_covered", next_open: null, next_close: null, last_close: null, note: "date outside the maintained NYSE calendar" };
   let session;
   if (!td) session = p.weekday === "Sat" || p.weekday === "Sun" ? "weekend" : "holiday";
   else if (nowSec >= sessionOpen(p.date) && nowSec < sessionClose(p.date)) session = "open";
@@ -7050,27 +7050,42 @@ function marketNow(nowSec) {
   else if (nowSec >= sessionClose(p.date) && nowSec < (early ? nyTime(p.date, 17, 0) : nyTime(p.date, 20, 0))) session = "after";
   else session = "closed";
   const nxt = nextSession(nowSec);
+  const lc = lastSessionClose(nowSec);
+  const nextClose = session === "open" ? sessionClose(p.date) : nxt?.close ?? null;
   return {
     ...base,
     session,
     next_open: isoS(nxt?.open ?? null),
-    next_close: session === "open" ? isoS(sessionClose(p.date)) : isoS(nxt?.close ?? null),
-    last_close: isoS(lastSessionClose(nowSec))
+    next_close: isoS(nextClose),
+    last_close: isoS(lc),
+    note: !nxt || lc === null ? "a neighbouring date is outside the maintained NYSE calendar (" + COVERAGE.from + " to " + COVERAGE.to + "); null means unknown, not none" : null
   };
 }
-var STALENESS_METHOD = "v1: threshold = max(2 \xD7 the feed's p99 in-session gap between official rounds, 30 min). Open session: stale if no round for longer than the threshold since the later of the last round and today's open. Otherwise: expected_closed if the last round is no older than the threshold before the last session close, else unexpectedly_stale.";
+var STALENESS_METHOD = "v2: count only regular-session (trading) seconds between the last round and now, across days. threshold = max(2 \xD7 the feed's p99 in-session gap between official rounds, 30 min). fresh (market open) / expected_closed (market closed) while that trading time is within the threshold; unexpectedly_stale once it exceeds it, open or closed. A NAV stuck through whole sessions accumulates trading time and is flagged.";
+function tradingSecondsBetween(fromSec, toSec) {
+  if (toSec <= fromSec) return 0;
+  let total = 0;
+  const first = nyParts(fromSec).date;
+  const last = nyParts(toSec).date;
+  for (let d = first, i = 0; d <= last && i < 400; d = dayShift(d, 1), i++) {
+    const td = isTradingDay(d);
+    if (td === null) return null;
+    if (!td) continue;
+    const a = Math.max(fromSec, sessionOpen(d));
+    const b = Math.min(toSec, sessionClose(d));
+    if (b > a) total += b - a;
+  }
+  return total;
+}
 function classifyStaleness(nowSec, updatedSec, p99GapS) {
   const m = marketNow(nowSec);
-  if (m.session === "calendar_not_covered") return { state: "calendar_not_covered", threshold_s: null };
-  if (p99GapS === null || p99GapS <= 0) return { state: "unknown", threshold_s: null };
+  if (m.session === "calendar_not_covered") return { state: "calendar_not_covered", threshold_s: null, trading_seconds_since_round: null };
+  if (p99GapS === null || p99GapS <= 0) return { state: "unknown", threshold_s: null, trading_seconds_since_round: null };
   const threshold = Math.max(2 * p99GapS, 1800);
-  if (m.session === "open") {
-    const since = Math.max(updatedSec, sessionOpen(m.ny_date));
-    return { state: nowSec - since <= threshold ? "fresh" : "unexpectedly_stale", threshold_s: threshold };
-  }
-  const last = lastSessionClose(nowSec);
-  if (last === null) return { state: "calendar_not_covered", threshold_s: threshold };
-  return { state: updatedSec >= last - threshold ? "expected_closed" : "unexpectedly_stale", threshold_s: threshold };
+  const elapsed = tradingSecondsBetween(updatedSec, nowSec);
+  if (elapsed === null) return { state: "calendar_not_covered", threshold_s: threshold, trading_seconds_since_round: null };
+  if (elapsed > threshold) return { state: "unexpectedly_stale", threshold_s: threshold, trading_seconds_since_round: elapsed };
+  return { state: m.session === "open" ? "fresh" : "expected_closed", threshold_s: threshold, trading_seconds_since_round: elapsed };
 }
 
 // src/api/marketContext.ts
@@ -7113,11 +7128,23 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
   let round;
   try {
     round = await readRound(feed.feed_address);
-  } catch {
-    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_unavailable", staleness: { state: "unknown", threshold_s: null } } } };
+  } catch (e2) {
+    const reason = e2.message === "rpc_result_invalid" ? "rpc_result_invalid" : "rpc_unavailable";
+    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: reason, staleness: { state: "unknown", threshold_s: null } } } };
   }
-  const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  if (BigInt(round.answer_raw) <= 0n || round.updated_unix <= 0 || round.updated_unix > nowSec + 60) {
+    cache.delete(feed.feed_address);
+    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_result_invalid", staleness: { state: "unknown", threshold_s: null } } } };
+  }
   const id = BigInt(round.round_id);
+  const livePhase = Number(id >> 64n);
+  const reviewed = Array.isArray(detail?.covered) && detail.covered.some((c) => Number(c.phase) === livePhase);
+  const ph = (await db2.query(
+    "SELECT (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS ok FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 AND phase_id=$3 ORDER BY observed_block DESC LIMIT 1",
+    [CHAIN_ID, feed.feed_address, livePhase]
+  )).rows[0];
+  if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
+  const st = classifyStaleness(nowSec, round.updated_unix, p99);
   return {
     status: 200,
     body: {
@@ -7133,10 +7160,10 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
           updated_at: new Date(round.updated_unix * 1e3).toISOString(),
           age_s: Math.max(0, nowSec - round.updated_unix),
           read_at: round.read_at,
-          source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (cached up to 30 s)",
+          source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (reused for up to 30 s inside the server; responses are not CDN-cached)",
           label: "Last published total-return reference per token, not a live equity price. It already includes dividends and splits."
         },
-        staleness: { state: st.state, threshold_s: st.threshold_s, p99_in_session_gap_s: p99, method: STALENESS_METHOD }
+        staleness: { state: st.state, threshold_s: st.threshold_s, trading_seconds_since_round: st.trading_seconds_since_round, p99_in_session_gap_s: p99, method: STALENESS_METHOD }
       }
     }
   };
@@ -7156,17 +7183,19 @@ async function assetCorporateActions(db2, contract) {
   const data = events.map((e2) => {
     const rec = e2.record_id ? recs.get(e2.record_id) : void 0;
     const p = rec?.payload;
-    const ui = p?.multiplier_events?.find((m) => m.event === "UIMultiplierUpdated");
+    const evBlock = p?.action?.scheduling_block ?? p?.action?.effective?.block;
+    const ui = p?.multiplier_events?.find((m) => m.event === "UIMultiplierUpdated" && String(m.block) === String(evBlock) && m.args?.newMultiplier === p?.action?.multiplier_after_wad);
     const uuid = e2.issuer_corporate_action_uuid;
     return {
       ...e2,
-      operator_description: p?.action?.operator_description ?? null,
-      announced_at: p?.issuer_record?.announced_at ?? null,
       effective_block: p?.action?.effective?.block ?? null,
       effective_at: p?.action?.effective?.time ?? null,
+      effective_at_scheduled: p?.action?.effective_at_scheduled ?? null,
       ui_multiplier_before_wad: ui?.args?.oldMultiplier ?? null,
       ui_multiplier_after_wad: ui?.args?.newMultiplier ?? null,
       ui_multiplier_effective_at: ui?.args?.effectiveAtTimestamp ? new Date(Number(ui.args.effectiveAtTimestamp) * 1e3).toISOString() : null,
+      ...p && !ui ? { ui_multiplier_unavailable_reason: p.flags?.includes("legacy_event_only") ? "legacy_event_only" : "no_matching_ui_multiplier_event" } : {},
+      issuer_context: p ? { operator_description: p.action?.operator_description ?? null, operator_description_source: "operator-supplied text in the onchain announcement; not verified", announced_at: p.issuer_record?.announced_at ?? null, announced_at_source: "Coinbase issuer record (api.coinbase.com corporate action)" } : null,
       announcements: (p?.announcements ?? []).map((a) => ({ id: a.id, block: a.block, tx_hash: a.tx_hash, uri: a.uri })),
       evidence: {
         onchain_tx: e2.onchain_tx,
@@ -7174,7 +7203,7 @@ async function assetCorporateActions(db2, contract) {
         sec_filing_url: e2.sec_filing_url,
         keldrin_record: e2.record_id ? `/v1/actions/${encodeURIComponent(e2.record_id)}` : null
       },
-      verification: rec ? { state: "confirmed", review_id: rec.review_id } : { state: e2.status === "predicted" ? "predicted_from_filing" : "not_applicable" }
+      verification: rec ? { state: "confirmed", review_id: rec.review_id } : { state: "confirmed_calendar_entry", basis: e2.sec_filing_url ? "SEC declaration" : "issuer announcement onchain", note: "from an independently CONFIRMED calendar entry; no applied onchain record yet" }
     };
   });
   return {
@@ -7194,8 +7223,8 @@ async function assetCorporateActions(db2, contract) {
 
 // src/api/server.ts
 var ADDR = /^0x[0-9a-fA-F]{40}$/;
-function send(res, status, body, type = "application/json") {
-  const cache2 = status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store";
+function send(res, status, body, type = "application/json", cacheOverride) {
+  const cache2 = cacheOverride ?? (status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store");
   res.writeHead(status, { "content-type": type, "cache-control": cache2, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
   res.end(typeof body === "string" ? body : JSON.stringify(body, null, 1));
 }
@@ -7321,13 +7350,13 @@ async function handle(db2, req, res) {
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
     }
     const meta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
-    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }));
+    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");
     const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
     if (cm) {
       if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
-      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body);
+      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

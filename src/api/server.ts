@@ -16,8 +16,8 @@ const ADDR = /^0x[0-9a-fA-F]{40}$/;
 
 // Successful reads may be cached at the CDN briefly (data changes at most once per research run);
 // errors are never cached.
-function send(res: ServerResponse, status: number, body: Json | string, type = "application/json") {
-  const cache = status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store";
+function send(res: ServerResponse, status: number, body: Json | string, type = "application/json", cacheOverride?: string) {
+  const cache = cacheOverride ?? (status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store");
   res.writeHead(status, { "content-type": type, "cache-control": cache, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
   res.end(typeof body === "string" ? body : JSON.stringify(body, null, 1));
 }
@@ -153,13 +153,13 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
     }
     const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
-    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }));
+    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }), undefined, "no-store"); // time-sensitive: never CDN-cached
     const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
     if (cm) {
       if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db, cm[1]) : await assetCorporateActions(db, cm[1]);
-      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : out.body);
+      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json), undefined, cm[2] === "market-context" ? "no-store" : undefined);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

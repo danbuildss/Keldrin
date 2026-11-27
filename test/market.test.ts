@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
 import { insertRecord, insertReview, openDb, upsertAsset } from "../src/db/db.ts";
 import { serve } from "../src/api/server.ts";
-import { classifyStaleness, marketNow } from "../src/lib/marketSession.ts";
+import { classifyStaleness, marketNow, tradingSecondsBetween } from "../src/lib/marketSession.ts";
 import { marketContext } from "../src/api/marketContext.ts";
 import { assetCorporateActions } from "../src/api/assetActions.ts";
 import { listEvents } from "../src/api/events.ts";
@@ -39,6 +39,20 @@ test("staleness: fresh vs unexpectedly stale in session; expected closed vs stuc
   assert.equal(classifyStaleness(t("2026-11-28T15:00:00Z"), t("2026-11-25T20:55:00Z"), p99).state, "unexpectedly_stale", "nothing during Friday's session: stuck");
   assert.equal(classifyStaleness(t("2026-11-28T15:00:00Z"), t("2026-11-27T17:55:00Z"), null).state, "unknown");
   assert.equal(classifyStaleness(t("2028-02-01T15:00:00Z"), t("2028-02-01T14:55:00Z"), p99).state, "calendar_not_covered");
+  // independent review: a NAV stuck for days must not read "fresh" just because a new session opened
+  assert.equal(classifyStaleness(t("2026-11-25T20:59:00Z"), t("2026-11-23T20:00:00Z"), 13448).state, "unexpectedly_stale", "stuck 2 days, NVDAc-like p99");
+  assert.equal(classifyStaleness(t("2026-11-25T14:31:00Z"), t("2026-11-20T20:00:00Z"), 1200).state, "unexpectedly_stale", "5-day-old round at 09:31");
+  assert.equal(tradingSecondsBetween(t("2026-11-25T20:00:00Z"), t("2026-11-27T15:00:00Z")), 3600 + 1800, "Wed 15:00-16:00 ET + Fri 09:30-10:00 ET; Thanksgiving counts nothing");
+});
+
+test("market session across the DST switches and at the calendar's edges", () => {
+  assert.equal(marketNow(t("2026-03-09T13:35:00Z")).session, "open", "Mon after the Mar 8 2026 switch: 09:35 EDT");
+  assert.equal(marketNow(t("2026-03-06T14:35:00Z")).session, "open", "Fri before the switch: 09:35 EST");
+  assert.equal(marketNow(t("2026-03-06T14:25:00Z")).session, "pre");
+  assert.equal(marketNow(t("2026-11-02T14:35:00Z")).session, "open", "Mon after the Nov 1 switch: 09:35 EST");
+  const edge = marketNow(t("2027-12-31T22:00:00Z"));
+  assert.equal(edge.next_open, null);
+  assert.ok(edge.note && /outside the maintained NYSE calendar/.test(edge.note), "null next_open is explained, not silent");
 });
 
 const TOKEN = "0xb20000000000000000000078ee7ce2fE4908108C";
@@ -60,7 +74,8 @@ test("market context: live round with age and staleness; graceful degradation; n
     const unverified: any = await marketContext(db, TOKEN, now, reader);
     assert.equal(unverified.body.data.nav, null);
     assert.equal(unverified.body.data.nav_unavailable_reason, "feed_not_verified", "fails closed without a CONFIRMED review");
-    await insertNavReview(db, FEED, { verdict: "CONFIRMED", sampled: 1, mismatches: 0, claims: [], checked_at: "2026-11-27T19:00:00.000Z", covered: [] }, 1, { official_rounds: 1, missing_round_ids: [], max_in_session_gap_s: 3000, p99_in_session_gap_s: 1200, overlap_rounds_excluded: 0, decimals_conflict_phases: [] });
+    await db.query("INSERT INTO nav_phases (chain_id, feed_address, phase_id, aggregator_address, aggregator_decimals, proxy_decimals, live_from_block, live_from_time, live_to_block, live_to_time, observed_block) VALUES (8453,$1,2,'0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675',8,8,49669080,'2026-08-07T18:31:47Z',NULL,NULL,1)", [FEED]);
+    await insertNavReview(db, FEED, { verdict: "CONFIRMED", sampled: 1, mismatches: 0, claims: [], checked_at: "2026-11-27T19:00:00.000Z", covered: [{ phase: 2, max_round_id: "36893488147419105182", phase_observed_block: "1" }], verifier_rpc_host: "v" }, 1, { official_rounds: 1, missing_round_ids: [], max_in_session_gap_s: 3000, p99_in_session_gap_s: 1200, overlap_rounds_excluded: 0, decimals_conflict_phases: [] });
     const ok: any = await marketContext(db, TOKEN, now, reader);
     assert.equal(ok.status, 200);
     const d = ok.body.data;
@@ -76,6 +91,12 @@ test("market context: live round with age and staleness; graceful degradation; n
     });
     assert.equal(down.status, 200, "a provider failure degrades, it does not 500");
     assert.equal(down.body.data.nav_unavailable_reason, "rpc_unavailable");
+    const zero: any = await marketContext(db, TOKEN, now, async () => ({ round_id: "36893488147419105182", answer_raw: "0", updated_unix: t("2026-11-27T17:55:00Z"), read_at: now.toISOString() }));
+    assert.equal(zero.body.data.nav_unavailable_reason, "rpc_result_invalid", "a zero answer is never served");
+    const future: any = await marketContext(db, TOKEN, now, async () => ({ round_id: "36893488147419105182", answer_raw: "1", updated_unix: t("2026-11-29T00:00:00Z"), read_at: now.toISOString() }));
+    assert.equal(future.body.data.nav_unavailable_reason, "rpc_result_invalid", "a future timestamp is never served");
+    const newPhase: any = await marketContext(db, TOKEN, now, async () => ({ round_id: ((3n << 64n) | 1n).toString(), answer_raw: "15000000000", updated_unix: t("2026-11-27T17:55:00Z"), read_at: now.toISOString() }));
+    assert.equal(newPhase.body.data.nav_unavailable_reason, "phase_not_reviewed", "a new aggregator is not served until reviewed");
   } finally {
     await db.close();
   }
@@ -98,7 +119,9 @@ test("corporate actions per asset: same events as /v1/events, with multiplier/ui
     assert.equal(a.verification.state, "confirmed");
     assert.equal(a.evidence.issuer_record_url, "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33");
     assert.ok(Array.isArray(a.announcements) && a.announcements.length > 0);
-    assert.ok("ui_multiplier_after_wad" in a);
+    assert.equal(a.ui_multiplier_after_wad, null);
+    assert.equal(a.ui_multiplier_unavailable_reason, "legacy_event_only", "GOOGLc's action emitted only the legacy MultiplierUpdated");
+    assert.match(a.issuer_context.operator_description_source, /not verified/);
     assert.match(out.body.meta.accounting_note, /never apply the multiplier to the NAV again/);
     assert.equal((await assetCorporateActions(db, "0x1111111111111111111111111111111111111111")).status, 404);
   } finally {

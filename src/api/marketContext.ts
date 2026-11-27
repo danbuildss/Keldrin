@@ -45,7 +45,7 @@ export async function marketContext(db: PGlite, contract: string, now = new Date
   const base = { token: asset.contract_address, symbol: asset.symbol, market, dex };
   if (!feed) return { status: 200, body: { data: { ...base, feed: null, nav: null, nav_unavailable_reason: "no_nav_feed", staleness: { state: "unknown", threshold_s: null } } } };
 
-  const rev = (await db.query<{ verdict: string; detail: { stats?: { p99_in_session_gap_s?: number | null; max_in_session_gap_s?: number | null } | null } }>(
+  const rev = (await db.query<{ verdict: string; detail: { covered?: { phase: number }[]; stats?: { p99_in_session_gap_s?: number | null; max_in_session_gap_s?: number | null } | null } }>(
     "SELECT verdict, detail FROM nav_reviews WHERE chain_id=$1 AND feed_address=$2 ORDER BY checked_at DESC LIMIT 1",
     [CHAIN_ID, feed.feed_address],
   )).rows[0];
@@ -56,11 +56,25 @@ export async function marketContext(db: PGlite, contract: string, now = new Date
   let round: Round;
   try {
     round = await readRound(feed.feed_address);
-  } catch {
-    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_unavailable", staleness: { state: "unknown", threshold_s: null } } } };
+  } catch (e) {
+    const reason = (e as Error).message === "rpc_result_invalid" ? "rpc_result_invalid" : "rpc_unavailable";
+    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: reason, staleness: { state: "unknown", threshold_s: null } } } };
   }
-  const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  // implausible rounds are never served
+  if (BigInt(round.answer_raw) <= 0n || round.updated_unix <= 0 || round.updated_unix > nowSec + 60) {
+    cache.delete(feed.feed_address);
+    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_result_invalid", staleness: { state: "unknown", threshold_s: null } } } };
+  }
   const id = BigInt(round.round_id);
+  // the live round must come from a phase the CONFIRMED review covered, whose aggregator decimals match the proxy
+  const livePhase = Number(id >> 64n);
+  const reviewed = Array.isArray(detail?.covered) && detail.covered.some((c: { phase: number }) => Number(c.phase) === livePhase);
+  const ph = (await db.query<{ ok: boolean }>(
+    "SELECT (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS ok FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 AND phase_id=$3 ORDER BY observed_block DESC LIMIT 1",
+    [CHAIN_ID, feed.feed_address, livePhase],
+  )).rows[0];
+  if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
+  const st = classifyStaleness(nowSec, round.updated_unix, p99);
   return {
     status: 200,
     body: {
@@ -70,10 +84,10 @@ export async function marketContext(db: PGlite, contract: string, now = new Date
         nav: {
           round_id: round.round_id, phase_id: Number(id >> 64n), answer_raw: round.answer_raw, decimals: feed.decimals, nav: formatNav(round.answer_raw, feed.decimals),
           updated_at: new Date(round.updated_unix * 1000).toISOString(), age_s: Math.max(0, nowSec - round.updated_unix), read_at: round.read_at,
-          source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (cached up to 30 s)",
+          source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (reused for up to 30 s inside the server; responses are not CDN-cached)",
           label: "Last published total-return reference per token, not a live equity price. It already includes dividends and splits.",
         },
-        staleness: { state: st.state, threshold_s: st.threshold_s, p99_in_session_gap_s: p99, method: STALENESS_METHOD },
+        staleness: { state: st.state, threshold_s: st.threshold_s, trading_seconds_since_round: st.trading_seconds_since_round, p99_in_session_gap_s: p99, method: STALENESS_METHOD },
       },
     },
   };
