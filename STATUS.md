@@ -69,4 +69,4 @@
 - Phase 9, remote MCP at POST /mcp (6 read-only tools) + server.json for the MCP Registry: built, not deployed (same PR).
 - Phase 10, CLI `npx keldrin` (npm/): built, 4 offline tests, CI checks the bundle matches the source. The name `keldrin` was free on npm on 2026-11-27. The founder publishes (`npm publish` from npm/).
 - Tests: 119 pass, 1 skipped.
-- LIVE (2026-11-27): PR #16 merged, run #6 green; /dex live for 11/13 tokens and independently re-checked; /mcp live. Next: founder publishes the CLI. Then Phase 11 (x402: needs payout wallet address, facilitator route, price), 12 (website from the founder's design + feedback form), 13 (launch).
+- LIVE (2026-11-27): PR #16 merged, run #6 green; /dex live for 11/13 tokens and independently re-checked; /mcp live; CLI published as keldrin@0.6.0 on npm (founder). Next: Phase 11 x402 on approval of the host + payout address. Then Phase 11 (x402: needs payout wallet address, facilitator route, price), 12 (website from the founder's design + feedback form), 13 (launch).
