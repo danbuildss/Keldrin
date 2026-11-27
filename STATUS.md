@@ -16,4 +16,4 @@
 - Brand clearance pending.
 
 ## Next
-Founder reviews PHASE0_PLAN.md §13 decisions D1–D9. On approval of D1: implement Phase 1 (tasks P1-01..P1-09). Internal target Dec 5; official deadline Dec 12 23:59 UTC, rechecked 2026-11-27.
+Founder reviews PHASE0_PLAN.md §13 decisions D1–D9 and docs/GSTACK_REVIEW.md (proposed re-sequencing: corporate-action feed first). On approval of D1: implement Phase 1 (tasks P1-01..P1-09). Internal target Dec 5; official deadline Dec 12 23:59 UTC, rechecked 2026-11-27.

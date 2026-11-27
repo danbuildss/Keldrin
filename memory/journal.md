@@ -12,3 +12,5 @@
 - Review: none yet. Costs: $0 spent.
 - Decisions needed: D1–D9 in PHASE0_PLAN.md §13.
 - Next: founder approval, then Phase 1.
+
+2026-11-27 (later) — Founder asked to apply garrytan/gstack (306ff23, MIT). Read, not installed (setup edits ~/.claude and CLAUDE.md, adds hooks/telemetry). Applied office-hours, plan-eng-review and plan-devex-review by hand → docs/GSTACK_REVIEW.md. Main result: no real user outcome yet; recommend re-sequencing so Phase 1 ships a keyless corporate-action feed for all tokens, with GOOGLc↔SEC as the deep proof; founder to contact 3 named builders. Proposal only; not approved.
