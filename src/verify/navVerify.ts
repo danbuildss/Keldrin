@@ -1,4 +1,5 @@
 import { liveTransport } from "./verify.ts";
+import { RPC_URL } from "../config.ts";
 
 // Independent verifier for stored Chainlink NAV rounds (Phase 5, hardened in 5b). It shares no code with the
 // indexer: hand-written selectors and ABI decoding, its own read of Coinbase's token→feed list, and by default a
@@ -52,12 +53,12 @@ function abiString(hex: string): string {
 
 /** started/updated are unix seconds as decimal strings (exact; no date parsing). */
 export type StoredRound = { round_id: string; phase_id: number; aggregator_round_id: string; aggregator_address: string; decimals: number; answer: string; started_unix: string; updated_unix: string; answered_in_round: string };
-export type StoredPhase = { phase: number; aggregator: string; min: string; max: string; count: number; distinct_aggregators: number; live_from_block: string | null; live_to_block: string | null; aggregator_decimals: number | null };
+export type StoredPhase = { phase: number; aggregator: string; min: string; max: string; count: number; distinct_aggregators: number; live_from_block: string | null; live_to_block: string | null; aggregator_decimals: number | null; live_from_unix?: string | null; live_to_unix?: string | null; phase_observed_block?: string | null };
 export type NavReviewInput = { token: string; symbol: string; feed: string; decimals: number; phases: StoredPhase[]; sample: StoredRound[] };
 export type NavClaim = { claim: string; verdict: "CONFIRMED" | "REJECTED" | "UNSURE"; evidence: string };
-export type NavReview = { verdict: "CONFIRMED" | "REJECTED" | "UNSURE"; sampled: number; mismatches: number; claims: NavClaim[]; checked_at: string; covered: { phase: number; max_round_id: string }[] };
+export type NavReview = { verdict: "CONFIRMED" | "REJECTED" | "UNSURE"; sampled: number; mismatches: number; claims: NavClaim[]; checked_at: string; covered: { phase: number; max_round_id: string; phase_observed_block: string | null }[]; verifier_rpc_host: string };
 
-export async function verifyNavFeed(input: NavReviewInput, tx: Transport = navTransport): Promise<NavReview> {
+export async function verifyNavFeed(input: NavReviewInput, tx: Transport = navTransport, hosts: { verifier: string; indexer: string } = { verifier: new URL(VERIFY_RPC_URL).host, indexer: new URL(RPC_URL).host }): Promise<NavReview> {
   const claims: NavClaim[] = [];
   const add = (claim: string, verdict: NavClaim["verdict"], evidence: string) => claims.push({ claim, verdict, evidence });
   const callAt = async (to: string, data: string, block: bigint | "latest" = "latest"): Promise<string | null> => {
@@ -69,6 +70,16 @@ export async function verifyNavFeed(input: NavReviewInput, tx: Transport = navTr
     }
   };
   const call = (data: string) => callAt(input.feed, data);
+  // independence of the data source: the verifier must not read through the indexer's provider
+  add("verifier reads a different RPC provider than the indexer", hosts.verifier !== hosts.indexer ? "CONFIRMED" : "UNSURE", `verifier ${hosts.verifier}, indexer ${hosts.indexer}`);
+  const blockTime = async (b: bigint): Promise<bigint | null> => {
+    try {
+      const blk = await tx.rpc("eth_getBlockByNumber", ["0x" + b.toString(16), false]);
+      return blk?.timestamp ? BigInt(blk.timestamp) : null;
+    } catch {
+      return null;
+    }
+  };
 
   // 1. Coinbase lists this exact token→feed pair (fetched independently).
   try {
@@ -113,16 +124,23 @@ export async function verifyNavFeed(input: NavReviewInput, tx: Transport = navTr
       if (currentPhase !== null && p.phase < currentPhase) add(`phase ${p.phase} stored up to the aggregator's last round`, last === null ? "UNSURE" : last === storedLast ? "CONFIRMED" : "UNSURE", `aggregator latestRound ${last ?? "unreadable"}, stored last ${storedLast}`);
       else add(`phase ${p.phase} stored last round exists onchain`, last === null ? "UNSURE" : storedLast <= last ? "CONFIRMED" : "REJECTED", `aggregator latestRound ${last ?? "unreadable"}, stored last ${storedLast}`);
     }
-    // the live window boundary: phaseId must be p-1 one block before live_from and p at live_from
+    // the live window: start boundary (phaseId < p one block before, >= p at it), its timestamp, and the end of the window
     if (p.phase > 1) {
       if (p.live_from_block === null) add(`phase ${p.phase} live window known`, "UNSURE", "no live_from_block stored");
       else {
         const b = BigInt(p.live_from_block);
         const before = await callAt(input.feed, NAV_SEL.phaseId, b - 1n);
         const at = await callAt(input.feed, NAV_SEL.phaseId, b);
-        const ok = before !== null && at !== null && Number(word(before, 0)) === p.phase - 1 && Number(word(at, 0)) === p.phase;
+        const ok = before !== null && at !== null && Number(word(before, 0)) < p.phase && Number(word(at, 0)) >= p.phase;
         add(`phase ${p.phase} became live at block ${b}`, before === null || at === null ? "UNSURE" : ok ? "CONFIRMED" : "REJECTED", `phaseId ${before === null ? "?" : word(before, 0)} at ${b - 1n}, ${at === null ? "?" : word(at, 0)} at ${b}`);
+        const ts = await blockTime(b);
+        add(`phase ${p.phase} live_from time equals block ${b}'s timestamp`, ts === null || p.live_from_unix == null ? "UNSURE" : ts === BigInt(p.live_from_unix) ? "CONFIRMED" : "REJECTED", `block ${ts ?? "?"}, stored ${p.live_from_unix ?? "null"}`);
       }
+    }
+    const next = input.phases.find((q) => q.phase === p.phase + 1);
+    if (currentPhase !== null && p.phase === currentPhase) add(`phase ${p.phase} (current) has no end`, p.live_to_block === null ? "CONFIRMED" : "REJECTED", `live_to_block ${p.live_to_block ?? "null"}`);
+    else if (next) {
+      add(`phase ${p.phase} ends where phase ${next.phase} starts`, p.live_to_block !== null && p.live_to_block === next.live_from_block && p.live_to_unix === next.live_from_unix ? "CONFIRMED" : "REJECTED", `live_to ${p.live_to_block}/${p.live_to_unix}, next live_from ${next.live_from_block}/${next.live_from_unix}`);
     }
   }
 
@@ -146,5 +164,5 @@ export async function verifyNavFeed(input: NavReviewInput, tx: Transport = navTr
   add(`${input.sample.length} sampled rounds match onchain (all fields)`, mismatches ? "REJECTED" : "CONFIRMED", `${mismatches} mismatch(es)`);
 
   const verdict = claims.some((c) => c.verdict === "REJECTED") ? "REJECTED" : claims.some((c) => c.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
-  return { verdict, sampled: input.sample.length, mismatches, claims, checked_at: new Date().toISOString(), covered: input.phases.map((p) => ({ phase: p.phase, max_round_id: p.max })) };
+  return { verdict, sampled: input.sample.length, mismatches, claims, checked_at: new Date().toISOString(), covered: input.phases.map((p) => ({ phase: p.phase, max_round_id: p.max, phase_observed_block: p.phase_observed_block ?? null })), verifier_rpc_host: hosts.verifier };
 }

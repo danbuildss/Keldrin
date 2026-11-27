@@ -12,7 +12,7 @@ import { CALENDAR_VERSION, dateRange, isTradingDay, nyParts, sessionClose, sessi
 export type NavRow = {
   round_id: string; phase_id: number; aggregator_round_id: string; aggregator_address: string; answer: string; decimals: number;
   started_at: string; updated_at: string; answered_in_round: string; retrieved_at: string; retrieved_block: string; updated_unix: string;
-  proxy_live?: boolean; decimals_ok?: boolean;
+  proxy_live?: boolean; decimals_ok?: boolean; aggregator_decimals?: number | null;
 };
 
 /** Exact decimal string for an integer answer with `decimals` places (no floating point). */
@@ -91,13 +91,18 @@ export async function navHistory(db: PGlite, contract: string, q: URLSearchParam
   if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered)) return e(503, "NAV_NOT_VERIFIED", `NAV history for ${feed.symbol} is not independently verified (${rev ? rev.verdict : "no review yet"})`, "Keldrin fails closed; read the feed onchain meanwhile: " + feed.feed_address);
   const covered = JSON.stringify(detail.covered);
 
-  const ph = `ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_time, live_to_time, (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS dec_ok
-                     FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC)`;
+  // the phase rows the CONFIRMED review checked (pinned by observed_block), never a newer unreviewed one
+  const phCte = (cov: string) => `ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_time, live_to_time, aggregator_decimals,
+                     (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS dec_ok
+                     FROM nav_phases WHERE chain_id=$1 AND feed_address=$2
+                       AND observed_block <= COALESCE((SELECT (c->>'phase_observed_block')::bigint FROM jsonb_array_elements(${cov}::jsonb) c WHERE (c->>'phase')::int = nav_phases.phase_id), -1)
+                     ORDER BY phase_id, observed_block DESC)`;
+  const ph = phCte("$5");
   const liveExpr = "(ph.live_from_time IS NULL OR r.updated_at >= ph.live_from_time) AND (ph.live_to_time IS NULL OR r.updated_at < ph.live_to_time)";
   const cols = `r.round_id::text AS round_id, r.phase_id, r.aggregator_round_id::text AS aggregator_round_id, r.aggregator_address, r.answer::text AS answer, r.decimals,
     to_char(r.started_at AT TIME ZONE 'UTC', ${iso}) AS started_at, to_char(r.updated_at AT TIME ZONE 'UTC', ${iso}) AS updated_at, r.answered_in_round::text AS answered_in_round,
     to_char(r.retrieved_at AT TIME ZONE 'UTC', ${iso}) AS retrieved_at, r.retrieved_block::text AS retrieved_block, extract(epoch from r.updated_at)::bigint::text AS updated_unix,
-    (${liveExpr}) AS proxy_live, ph.dec_ok AS decimals_ok`;
+    (${liveExpr}) AS proxy_live, ph.dec_ok AS decimals_ok, ph.aggregator_decimals AS aggregator_decimals`;
   // only rounds the latest CONFIRMED review covered (per-phase max round id it saw)
   const coveredExpr = "r.round_id <= (SELECT (c->>'max_round_id')::numeric FROM jsonb_array_elements($5::jsonb) c WHERE (c->>'phase')::int = r.phase_id)";
   const officialExpr = `(${liveExpr}) AND ph.dec_ok`;
@@ -127,14 +132,20 @@ export async function navHistory(db: PGlite, contract: string, q: URLSearchParam
     )).rows;
   }
 
-  const item = (r: NavRow, flags: boolean) => ({
+  // decimals per row = that round's aggregator's own decimals (verified); a round whose aggregator disagrees with
+  // the proxy gets no nav value: the raw answer is shown, a decimal value would be an inference
+  const item = (r: NavRow, flags: boolean) => {
+    const dec = r.aggregator_decimals ?? r.decimals;
+    return {
     chain_id: CHAIN_ID, token: feed.token_address, feed: feed.feed_address, round_id: r.round_id, phase_id: r.phase_id, aggregator_round_id: r.aggregator_round_id,
-    aggregator: r.aggregator_address, answer_raw: r.answer, decimals: r.decimals, nav: formatNav(r.answer, r.decimals),
+    aggregator: r.aggregator_address, answer_raw: r.answer, decimals: dec, nav: r.decimals_ok === false ? null : formatNav(r.answer, dec),
+    ...(r.decimals_ok === false ? { nav_unavailable_reason: "aggregator_decimals_differ_from_proxy" } : {}),
     started_at: r.started_at, updated_at: r.updated_at, answered_in_round: r.answered_in_round, retrieved_at: r.retrieved_at, retrieved_block: r.retrieved_block,
     ...(flags ? { official: Boolean(r.proxy_live && r.decimals_ok), proxy_live: Boolean(r.proxy_live), decimals_ok: Boolean(r.decimals_ok) } : {}),
-  });
+    };
+  };
   const span = (await db.query<{ first: string | null; last: string | null; n: number }>(
-    `WITH ${ph} SELECT to_char(min(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS first, to_char(max(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS last, count(*)::int AS n
+    `WITH ${phCte("$3")} SELECT to_char(min(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS first, to_char(max(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS last, count(*)::int AS n
      FROM nav_rounds r JOIN ph ON ph.phase_id = r.phase_id WHERE r.chain_id=$1 AND r.feed_address=$2 AND ${coveredExpr.replace("$5", "$3")} AND ${officialExpr}`,
     [CHAIN_ID, feed.feed_address, covered],
   )).rows[0];

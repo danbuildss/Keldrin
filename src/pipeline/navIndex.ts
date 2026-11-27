@@ -1,5 +1,5 @@
 import { getAddress } from "viem";
-import { getBlock, read, readMany, type BlockRef } from "../adapters/chain.ts";
+import { getBlock, getCode, read, readMany, type BlockRef } from "../adapters/chain.ts";
 import { navFeeds } from "../adapters/coinbase.ts";
 import { CHAIN_ID } from "../config.ts";
 import { recordSource } from "../db/db.ts";
@@ -129,12 +129,23 @@ async function syncPhases(db: PGlite, f: NavFeed, head: BlockRef, aggregators: s
     "SELECT DISTINCT ON (phase_id) phase_id, live_from_block::text AS live_from_block, live_to_block::text AS live_to_block, aggregator_decimals, aggregator_address FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC",
     [CHAIN_ID, f.feed],
   )).rows;
-  const phaseAt = async (b: bigint) => Number(((await read(f.feed, "phaseId", [], b)) as number | null) ?? 0);
-  // boundary[p] = first block where phaseId >= p (p >= 2). Closed boundaries never change, so reuse stored ones.
+  // A null read is phase 0 only where the proxy had no code yet; any other failure (timeout, RPC error) throws,
+  // so a transient error can never move a boundary.
+  const phaseAt = async (b: bigint) => {
+    const v = (await read(f.feed, "phaseId", [], b)) as number | null;
+    if (v !== null) return Number(v);
+    const code = await getCode(f.feed, b);
+    if (!code || code === "0x") return 0;
+    throw new Error(`${f.symbol}: phaseId() unreadable at block ${b} although the proxy has code`);
+  };
+  const isBoundary = async (b: bigint, p: number) => b > 0n && (await phaseAt(b - 1n)) < p && (await phaseAt(b)) >= p;
+  // boundary[p] = first block where phaseId >= p (p >= 2). Stored boundaries are re-checked each run and re-searched if wrong.
   const boundary = new Map<number, bigint>();
   for (let p = 2; p <= f.phase; p++) {
     const known = stored.find((s) => s.phase_id === p)?.live_from_block;
-    boundary.set(p, known ? BigInt(known) : await phaseStartBlock(phaseAt, p, head.number));
+    let b = known && (await isBoundary(BigInt(known), p)) ? BigInt(known) : await phaseStartBlock(phaseAt, p, head.number);
+    if (!(await isBoundary(b, p))) throw new Error(`${f.symbol}: phase ${p} boundary ${b} failed its own check`);
+    boundary.set(p, b);
   }
   const out: StoredPhase[] = [];
   for (let p = 1; p <= f.phase; p++) {
@@ -191,6 +202,8 @@ export async function indexFeed(db: PGlite, f: NavFeed, head: BlockRef): Promise
     if (ids.length) {
       const got = await readRounds(f.feed, ids.map((a) => proxyRoundId(BigInt(p), a)), head.number);
       got.forEach((r, i) => {
+        // nav_rounds.decimals records the PROXY's decimals at indexing time; the aggregator's own decimals live in
+        // nav_phases and are what the API serves per row (independent review 2026-11-27)
         if (r) rows.push({ feed: f.feed, round_id: proxyRoundId(BigInt(p), ids[i]), phase_id: p, aggregator_round_id: ids[i], aggregator, answer: r[1], decimals: f.decimals, started_at: Number(r[2]), updated_at: Number(r[3]), answered_in_round: r[4] });
         else missing.push(proxyRoundId(BigInt(p), ids[i]).toString());
       });

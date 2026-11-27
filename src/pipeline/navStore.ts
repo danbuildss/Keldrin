@@ -8,11 +8,13 @@ export async function loadReviewInput(db: PGlite, feed: string, sampleN = 50): P
   const f = (await db.query<{ token_address: string; symbol: string; decimals: number }>("SELECT token_address, symbol, decimals FROM nav_feeds WHERE chain_id=$1 AND feed_address=$2 LIMIT 1", [CHAIN_ID, feed])).rows[0];
   if (!f) throw new Error("unknown feed " + feed);
   const phases = (await db.query<StoredPhase>(
-    `WITH ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_block::text AS live_from_block, live_to_block::text AS live_to_block, aggregator_decimals
+    `WITH ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_block::text AS live_from_block, live_to_block::text AS live_to_block, aggregator_decimals,
+                        extract(epoch from live_from_time)::bigint::text AS live_from_unix, extract(epoch from live_to_time)::bigint::text AS live_to_unix, observed_block::text AS observed_block
                  FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC)
      SELECT r.phase_id AS phase, min(r.aggregator_address) AS aggregator, count(DISTINCT r.aggregator_address)::int AS distinct_aggregators,
             min(r.round_id)::text AS min, max(r.round_id)::text AS max, count(*)::int AS count,
-            min(ph.live_from_block) AS live_from_block, min(ph.live_to_block) AS live_to_block, min(ph.aggregator_decimals) AS aggregator_decimals
+            min(ph.live_from_block) AS live_from_block, min(ph.live_to_block) AS live_to_block, min(ph.aggregator_decimals) AS aggregator_decimals,
+            min(ph.live_from_unix) AS live_from_unix, min(ph.live_to_unix) AS live_to_unix, min(ph.observed_block) AS phase_observed_block
      FROM nav_rounds r LEFT JOIN ph ON ph.phase_id = r.phase_id WHERE r.chain_id=$1 AND r.feed_address=$2 GROUP BY r.phase_id ORDER BY r.phase_id`,
     [CHAIN_ID, feed],
   )).rows;
@@ -73,7 +75,7 @@ export async function insertNavReview(db: PGlite, feed: string, review: NavRevie
   const id = `navrev:${feed.toLowerCase()}:${review.checked_at}`;
   await db.query(
     "INSERT INTO nav_reviews (review_id, chain_id, feed_address, verdict, sampled, mismatches, rounds_indexed, detail, checked_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
-    [id, CHAIN_ID, feed, review.verdict, review.sampled, review.mismatches, roundsIndexed, JSON.stringify({ claims: review.claims, covered: review.covered, stats: stats ?? null }), review.checked_at],
+    [id, CHAIN_ID, feed, review.verdict, review.sampled, review.mismatches, roundsIndexed, JSON.stringify({ claims: review.claims, covered: review.covered, verifier_rpc_host: review.verifier_rpc_host, stats: stats ?? null }), review.checked_at],
   );
   return id;
 }

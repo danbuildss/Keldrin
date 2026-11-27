@@ -105,14 +105,21 @@ test("verifier selectors equal the canonical function signatures", () => {
 type R = { answer: bigint; started: bigint; updated: bigint };
 const w = (v: bigint) => (v < 0n ? (1n << 256n) + v : v).toString(16).padStart(64, "0");
 const abiStr = (s: string) => "0x" + w(32n) + w(BigInt(s.length)) + Buffer.from(s).toString("hex").padEnd(64, "0");
-type ChainOpts = { desc?: string; phase?: number; aggLatest?: Record<string, number>; aggDecimals?: Record<string, number>; switchBlock?: number; aggByPhase?: Record<number, string> };
+type ChainOpts = { desc?: string; phase?: number; aggLatest?: Record<string, number>; aggDecimals?: Record<string, number>; switchBlock?: number; aggByPhase?: Record<number, string>; blockTimes?: Record<number, number> };
+const HOSTS = { verifier: "verifier.example", indexer: "indexer.example" };
+const SWITCH_TS = Date.parse("2026-11-23T15:25:00Z") / 1000;
 function fakeChain(rounds: Map<string, R>, o: ChainOpts = {}) {
   const aggs = o.aggByPhase ?? { 1: AGG1, 2: AGG2 };
   return {
     async getJson() {
       return { nav_feeds: [{ contract_address: TOKEN, nav_feed_address: FEED }] };
     },
-    async rpc(_m: string, params: any[]) {
+    async rpc(m: string, params: any[]) {
+      if (m === "eth_getBlockByNumber") {
+        const b = Number(BigInt(params[0]));
+        const ts = (o.blockTimes ?? { 100: SWITCH_TS })[b];
+        return ts === undefined ? null : { timestamp: "0x" + ts.toString(16) };
+      }
       const to: string = params[0].to.toLowerCase();
       const data: string = params[0].data;
       const block = params[1] === "latest" ? Infinity : Number(BigInt(params[1]));
@@ -175,9 +182,11 @@ test("insertRounds is append-only and idempotent", async () => {
 test("verifier: a complete single-phase store is CONFIRMED and records what it covered", async () => {
   const { db, chain, rows } = await seeded([{ phase: 1, n: 5, agg: AGG1 }], onePhase);
   await insertRounds(db, rows, "2026-11-30T00:00:00Z", 1n);
-  const r = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 5 } }));
+  const r = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 5 } }), HOSTS);
   assert.equal(r.verdict, "CONFIRMED", JSON.stringify(r.claims.filter((c) => c.verdict !== "CONFIRMED")));
-  assert.deepEqual(r.covered, [{ phase: 1, max_round_id: proxyRoundId(1n, 5n).toString() }]);
+  assert.deepEqual(r.covered, [{ phase: 1, max_round_id: proxyRoundId(1n, 5n).toString(), phase_observed_block: "1" }]);
+  const same = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 5 } }), { verifier: "x", indexer: "x" });
+  assert.equal(same.verdict, "UNSURE", "same RPC provider as the indexer is not independent");
   await db.close();
 });
 
@@ -190,27 +199,28 @@ test("verifier: REJECTED on a tampered value, a wrong ticker, a wrong aggregator
   await insertRounds(db, rows, "2026-11-30T00:00:00Z", 1n);
   const input = await loadReviewInput(db, FEED, 20);
   const good = { phase: 2, aggLatest: { [AGG1]: 3, [AGG2]: 4 }, aggDecimals: { [AGG1]: 18, [AGG2]: 8 }, switchBlock: 100 };
-  const ok = await verifyNavFeed(input, fakeChain(chain, good));
+  const ok = await verifyNavFeed(input, fakeChain(chain, good), HOSTS);
   assert.equal(ok.verdict, "CONFIRMED", JSON.stringify(ok.claims.filter((c) => c.verdict !== "CONFIRMED")));
   const tampered = new Map(chain);
   tampered.set(rows[1].round_id.toString(), { ...chain.get(rows[1].round_id.toString())!, answer: 1n });
-  assert.equal((await verifyNavFeed(input, fakeChain(tampered, good))).verdict, "REJECTED");
-  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, desc: "Coinbase AAPL" }))).verdict, "REJECTED");
-  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, aggDecimals: { [AGG1]: 8, [AGG2]: 8 } }))).verdict, "REJECTED", "stored aggregator decimals must match onchain");
-  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, switchBlock: 90 }))).verdict, "REJECTED", "the proxy switched at a different block");
-  assert.notEqual((await verifyNavFeed(input, fakeChain(chain, { ...good, aggLatest: { [AGG1]: 5, [AGG2]: 4 } }))).verdict, "CONFIRMED", "closed phase stored short of its last round");
+  assert.equal((await verifyNavFeed(input, fakeChain(tampered, good, HOSTS))).verdict, "REJECTED");
+  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, desc: "Coinbase AAPL" }, HOSTS))).verdict, "REJECTED");
+  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, aggDecimals: { [AGG1]: 8, [AGG2]: 8 } }, HOSTS))).verdict, "REJECTED", "stored aggregator decimals must match onchain");
+  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, switchBlock: 90 }, HOSTS))).verdict, "REJECTED", "the proxy switched at a different block");
+  assert.notEqual((await verifyNavFeed(input, fakeChain(chain, { ...good, aggLatest: { [AGG1]: 5, [AGG2]: 4 } }, HOSTS))).verdict, "CONFIRMED", "closed phase stored short of its last round");
+  assert.equal((await verifyNavFeed(input, fakeChain(chain, { ...good, blockTimes: { 100: SWITCH_TS + 2 } }), HOSTS)).verdict, "REJECTED", "stored live_from time must equal the block timestamp");
   await db.close();
 });
 
 test("verifier: a hole, a missing phase, or rows naming two aggregators in one phase are never CONFIRMED", async () => {
   const { db, chain, rows } = await seeded([{ phase: 1, n: 6, agg: AGG1 }], onePhase);
   await insertRounds(db, rows.filter((_, i) => i !== 3), "2026-11-30T00:00:00Z", 1n);
-  const holed = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 6 } }));
+  const holed = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 6 } }, HOSTS));
   assert.ok(holed.claims.some((c) => c.verdict === "UNSURE" && /contiguous/.test(c.claim)));
-  const missingPhase = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 2, aggLatest: { [AGG1]: 6 } }));
+  const missingPhase = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 2, aggLatest: { [AGG1]: 6 } }, HOSTS));
   assert.ok(missingPhase.claims.some((c) => c.claim === "phase 2 is indexed" && c.verdict === "UNSURE"));
   await insertRounds(db, [{ ...rows[3], aggregator: AGG2 }], "2026-11-30T00:00:00Z", 1n);
-  const mixed = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 6 } }));
+  const mixed = await verifyNavFeed(await loadReviewInput(db, FEED, 10), fakeChain(chain, { phase: 1, aggLatest: { [AGG1]: 6 } }, HOSTS));
   assert.equal(mixed.verdict, "REJECTED");
   await db.close();
 });
@@ -254,7 +264,7 @@ test("API: gate, unknown asset, no feed, fails closed until verified, official-o
     await insertRounds(db, rows.slice(0, 8), "2026-11-30T00:00:00Z", 1n); // 3 phase-1 + 5 phase-2
     assert.equal((await get(`/v1/assets/${TOKEN}/nav/history?interval=round`)).body.error.code, "NAV_NOT_VERIFIED");
     // review covers phase 1 up to round 3 and phase 2 up to round 5; round 6 arrives after the review
-    await insertNavReview(db, FEED, { verdict: "CONFIRMED", sampled: 8, mismatches: 0, claims: [], checked_at: "2026-11-30T00:00:01.000Z", covered: [{ phase: 1, max_round_id: proxyRoundId(1n, 3n).toString() }, { phase: 2, max_round_id: proxyRoundId(2n, 5n).toString() }] }, 8, await computeNavStats(db, FEED));
+    await insertNavReview(db, FEED, { verdict: "CONFIRMED", sampled: 8, mismatches: 0, claims: [], checked_at: "2026-11-30T00:00:01.000Z", covered: [{ phase: 1, max_round_id: proxyRoundId(1n, 3n).toString(), phase_observed_block: "1" }, { phase: 2, max_round_id: proxyRoundId(2n, 5n).toString(), phase_observed_block: "1" }], verifier_rpc_host: "verifier.example" }, 8, await computeNavStats(db, FEED));
     await insertRounds(db, rows.slice(8), "2026-11-30T00:05:00Z", 2n);
     const off = await get(`/v1/assets/${TOKEN}/nav/history?interval=round&from=2026-11-01`);
     assert.equal(off.status, 200);
@@ -270,7 +280,12 @@ test("API: gate, unknown asset, no feed, fails closed until verified, official-o
     const times = all.body.data.map((x: any) => x.updated_at);
     assert.deepEqual([...times].sort(), times, "time never goes backwards");
     assert.equal(all.body.data.filter((x: any) => x.official).length, 3);
-    assert.ok(all.body.data.some((x: any) => x.decimals_ok === false), "phase-1 rounds flagged");
+    const p1 = all.body.data.filter((x: any) => x.phase_id === 1);
+    assert.ok(p1.length === 3 && p1.every((x: any) => x.decimals_ok === false && x.decimals === 18 && x.nav === null && x.nav_unavailable_reason === "aggregator_decimals_differ_from_proxy"), "phase-1 rows: their own decimals, raw answer only");
+    // a newer, unreviewed phase row must not change what is official
+    await db.query("INSERT INTO nav_phases (chain_id, feed_address, phase_id, aggregator_address, aggregator_decimals, proxy_decimals, live_from_block, live_from_time, live_to_block, live_to_time, observed_block) VALUES (8453,$1,2,$2,8,8,100,'2026-11-23T15:00:00Z',NULL,NULL,5)", [FEED, AGG2]);
+    const pinned = await get(`/v1/assets/${TOKEN}/nav/history?interval=round&from=2026-11-01`);
+    assert.deepEqual(pinned.body.data.map((x: any) => x.aggregator_round_id), ["3", "4", "5"], "served windows stay the reviewed ones");
     const page1 = await get(`/v1/assets/${TOKEN}/nav/history?interval=round&from=2026-11-01&include=all&limit=5`);
     const page2 = await get(`/v1/assets/${TOKEN}/nav/history?interval=round&from=2026-11-01&include=all&limit=5&cursor=${page1.body.meta.next_cursor}`);
     assert.equal(page1.body.data.length + page2.body.data.length, 8);
