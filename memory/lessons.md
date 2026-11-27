@@ -15,3 +15,4 @@ Append dated lesson with evidence, failure mode, proposed action and reviewer ve
 2026-11-27 — Lesson: "payable date passed, no adjustment" usually meant the token did not exist yet on the record date (9 of 9 cases). Check token issuance before calling anything late.
 
 - 2026-11-27: Pipeline commands always write evidence to records/, even when pointed at a test database. Run local or test pipelines with a clean check of `git status records/` before committing (a throwaway-DB run slipped into a commit once and was reverted).
+- 2026-11-27: When rewriting a workflow, diff its env against the previous version: dropping BASE_RPC_BEARER broke the first scheduled run. Also, any change under src/ that the API imports needs `npm run build:api` (CI checks the bundle).

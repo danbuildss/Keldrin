@@ -36,7 +36,9 @@
 - Proposed scope changes (NOT approved; TASKS.md T020–T026): earnings release events from 8-K 2.02; announced upcoming earnings dates; headline results; derived ex-dividend date; dividend history; asset context endpoint; DEX market data and fundamentals as P1. Excluded: results vs expectations (needs licensed consensus).
 - Recommended order: Phase 4 scheduling first, then earnings.
 
-## Phase 4 (approved 2026-11-27) — in progress
+## Phase 4 (approved 2026-11-27) — DONE
 - Done: keldrin_writer role (live, NOLOGIN), writer adapter, 6-hourly schedule (disabled until RESEARCH_ENABLED), real-Postgres test, full pipeline proven as the writer role (BACKEND_PROOF.md).
-- Waiting on founder: writer password + GitHub environment secrets (docs/PHASE4_SCHEDULE.md), then one manual run.
+- LIVE: GitHub Actions runs research every 6 hours (01:23, 07:23, 13:23, 19:23 UTC); first run succeeded (BACKEND_PROOF.md). Pause by setting RESEARCH_ENABLED=false.
+- Next (agreed route): founder sends Bankr and Hector the live link (Claude drafts); then SKILL.md + MCP (needs approval of T028/T029); demo and submission Dec 5–12.
+- Minor: GitHub warns that the pinned actions target Node 20 (still running on Node 24); bump the pins in a later PR.
 - Breakra study: docs/BREAKRA_STUDY.md (lessons for x402, MCP, SKILL.md and metrics; proposals not approved).

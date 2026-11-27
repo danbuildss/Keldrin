@@ -11,7 +11,7 @@
 | T007 | P0 | Implement adapters and job state | IN_PROGRESS (adapters done; job leases/dead letter in Phase 2) | Phase 1 P1-03; job state in Phase 2 |
 | T008 | P0 | Expand coverage to five approved assets | VERIFIED beyond scope (all 435 tokens; gold set pending) | Phase 2; needs log indexer + RPC decision (D9) |
 | T009 | P0 | REST feed + sample consumer | VERIFIED locally (OpenAPI spec pending Phase 3) | Localhost subset in Phase 1 P1-08; full Phase 3 |
-| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | IN_PROGRESS (Phase 4: code proven; founder secrets pending) | Manual runs proven; separate credentials; founder enable |
+| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | VERIFIED (Phase 4: GitHub Actions run #3 succeeded; BACKEND_PROOF.md) | Manual runs proven; separate credentials; founder enable |
 | T011 | P1 | x402 one paid route | OPEN | Entitlement and cost approvals, testnet proof, replay/outage handling |
 | T012 | P1 | Public evidence UI and docs | OPEN | Only after backend gate |
 | T013 | P1 | Founder-led builder integrations / interviews | IN_PROGRESS (CD-001, CD-002; CUSTOMER_DISCOVERY.md) | Validates differentiation hypothesis |
