@@ -1,4 +1,4 @@
-import { CHAIN_ID, RPC_URL, SCHEMA_VERSION } from "../config.ts";
+import { CHAIN_ID, RPC_PUBLIC_LABEL, SCHEMA_VERSION } from "../config.ts";
 import { doubleMatchesWad, ratio, wadToDecimal } from "../lib/decimal.ts";
 import { payloadHash } from "../lib/canonical.ts";
 import type { ActionEvidence } from "./discover.ts";
@@ -81,8 +81,8 @@ export function buildIssuerActionRecord(ev: ActionEvidence, asset: AssetIdentity
   if (ev.path === "unknown" && ev.change) flags.push("mechanism_not_identified");
 
   const sources: IssuerActionRecord["sources"] = [];
-  if (ev.change) sources.push({ id: "chain-change", kind: "base_rpc", url: RPC_URL, locator: `eth_call multiplier() on ${ev.contract} at blocks ${BigInt(ev.change.block) - 1n} and ${ev.change.block}; block hash ${ev.change.blockHash}`, retrieved_at: ev.observedAt, sha256: null, rights_state: "public" });
-  for (const a of ev.announcements) sources.push({ id: `tx-${a.txHash.slice(0, 10)}-${a.logIndex}`, kind: "base_tx_log", url: RPC_URL, locator: `receipt ${a.txHash} log ${a.logIndex} (Announcement id=${a.id})`, retrieved_at: ev.observedAt, sha256: null, rights_state: "public" });
+  if (ev.change) sources.push({ id: "chain-change", kind: "base_rpc", url: RPC_PUBLIC_LABEL, locator: `eth_call multiplier() on ${ev.contract} at blocks ${BigInt(ev.change.block) - 1n} and ${ev.change.block}; block hash ${ev.change.blockHash}`, retrieved_at: ev.observedAt, sha256: null, rights_state: "public" });
+  for (const a of ev.announcements) sources.push({ id: `tx-${a.txHash.slice(0, 10)}-${a.logIndex}`, kind: "base_tx_log", url: RPC_PUBLIC_LABEL, locator: `receipt ${a.txHash} log ${a.logIndex} (Announcement id=${a.id})`, retrieved_at: ev.observedAt, sha256: null, rights_state: "public" });
   if (ev.coinbase) sources.push({ id: "issuer-record", kind: "coinbase_corporate_action", url: ev.coinbase.source.url, locator: "whole document", retrieved_at: ev.coinbase.source.retrievedAt, sha256: ev.coinbase.source.sha256, rights_state: "unknown" });
 
   const record: IssuerActionRecord = {

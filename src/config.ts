@@ -3,6 +3,8 @@
 
 export const CHAIN_ID = 8453;
 export const RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+/** What records and logs may show for the RPC: origin only, never a path or query (keys can live there). */
+export const RPC_PUBLIC_LABEL = new URL(RPC_URL).origin;
 export const COINBASE_API = "https://api.coinbase.com/v1/tokenized-stocks";
 export const SEC_DATA = "https://data.sec.gov";
 

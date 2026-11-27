@@ -72,3 +72,11 @@ test("host allowlist blocks other hosts and plain http", () => {
   assert.throws(() => assertAllowed("http://api.coinbase.com/"));
   assert.throws(() => assertAllowed("https://169.254.169.254/latest/meta-data"));
 });
+
+test("records never carry an RPC path or query (where API keys can live)", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const r = spawnSync(process.execPath, ["-e", "import('./src/config.ts').then(c=>console.log(c.RPC_PUBLIC_LABEL))"], { env: { ...process.env, BASE_RPC_URL: "https://base-mainnet.g.alchemy.com/v2/SECRET123?x=1" }, encoding: "utf8" });
+  assert.equal(r.stdout.trim(), "https://base-mainnet.g.alchemy.com");
+  const src = readFileSync(new URL("../src/pipeline/records.ts", import.meta.url), "utf8");
+  assert.ok(!/url: RPC_URL\b/.test(src));
+});
