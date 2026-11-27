@@ -56,6 +56,14 @@ jobs:
           BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+      - name: Discover and independently verify DEX pools
+        run: node src/cli.ts dex-index --db=pg ${SYMBOLS:+--symbols=$SYMBOLS} && node src/cli.ts dex-verify --db=pg ${SYMBOLS:+--symbols=$SYMBOLS}
+        env:
+          SYMBOLS: ${{ inputs.symbols }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
+          DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       # The run's evidence files are a private artifact for review; nothing is committed or published.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

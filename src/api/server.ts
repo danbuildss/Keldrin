@@ -7,6 +7,7 @@ import { navHistory } from "./nav.ts";
 import { marketContext } from "./marketContext.ts";
 import { assetCorporateActions } from "./assetActions.ts";
 import { marketNow } from "../lib/marketSession.ts";
+import { liveDex } from "./dex.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -50,6 +51,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/assets — tokens, identity checks, current multiplier (WAD)
 - GET /v1/assets/{contract}/corporate-actions — one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context — US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
+- GET /v1/assets/{contract}/dex — live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
 - GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
@@ -89,7 +91,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/market/session", "/health"] }));
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -154,6 +156,12 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }), undefined, "no-store"); // time-sensitive: never CDN-cached
+    const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);
+    if (dm) {
+      if (!ADDR.test(dm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      const out = await liveDex(db, dm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json), undefined, "no-store"); // live onchain read
+    }
     const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
     if (cm) {
       if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));

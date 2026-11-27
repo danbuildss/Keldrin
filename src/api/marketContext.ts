@@ -2,6 +2,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { CHAIN_ID } from "../config.ts";
 import { classifyStaleness, marketNow, STALENESS_METHOD } from "../lib/marketSession.ts";
 import { formatNav } from "./nav.ts";
+import { liveDex } from "./dex.ts";
 
 // GET /v1/assets/{contract}/market-context (Phase 6). The US session right now, the latest Chainlink NAV round read
 // live at request time from Base's public RPC (short cache), its age, and whether that age is normal for the
@@ -35,13 +36,23 @@ export const liveLatestRound: RoundReader = async (feed) => {
 
 type Out = { status: number; body: unknown };
 
-export async function marketContext(db: PGlite, contract: string, now = new Date(), readRound: RoundReader = liveLatestRound): Promise<Out> {
+export type DexReader = (db: PGlite, contract: string) => Promise<{ status: number; body: unknown }>;
+
+export async function marketContext(db: PGlite, contract: string, now = new Date(), readRound: RoundReader = liveLatestRound, readDex: DexReader = liveDex): Promise<Out> {
   const asset = (await db.query<{ contract_address: string; symbol: string }>("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
   if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
   const nowSec = Math.floor(now.getTime() / 1000);
   const market = marketNow(nowSec);
   const feed = (await db.query<{ feed_address: string; decimals: number }>("SELECT feed_address, decimals FROM nav_feeds WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY discovered_at DESC LIMIT 1", [CHAIN_ID, contract])).rows[0];
-  const dex = { price: null, nav_premium: null, unavailable_reason: "no_approved_dex_source", note: "Keldrin does not serve a DEX price yet; compare against an onchain pool yourself." };
+  // DEX side: the main verified pool, read live onchain (see /v1/assets/{contract}/dex for every pool)
+  let dex: Record<string, unknown> = { price_usd: null, nav_premium_pct: null, unavailable_reason: "no_verified_pools" };
+  try {
+    const d = (await readDex(db, contract)).body as { data?: { main?: { venue: string; pool: string; quote: string; price_usd: string | null; depth_2pct_usd: number | null; thin_market?: boolean } | null; block?: string; unavailable_reason?: string } };
+    const mn = d?.data?.main;
+    dex = mn && mn.price_usd ? { price_usd: mn.price_usd, venue: mn.venue, pool: mn.pool, quote: mn.quote, depth_2pct_usd: mn.depth_2pct_usd, thin_market: mn.thin_market ?? null, block: d.data!.block, nav_premium_pct: null } : { price_usd: null, nav_premium_pct: null, unavailable_reason: d?.data?.unavailable_reason ?? "no_verified_pools" };
+  } catch {
+    dex = { price_usd: null, nav_premium_pct: null, unavailable_reason: "rpc_unavailable" };
+  }
   const base = { token: asset.contract_address, symbol: asset.symbol, market, dex };
   if (!feed) return { status: 200, body: { data: { ...base, feed: null, nav: null, nav_unavailable_reason: "no_nav_feed", staleness: { state: "unknown", threshold_s: null } } } };
 
@@ -75,6 +86,11 @@ export async function marketContext(db: PGlite, contract: string, now = new Date
   )).rows[0];
   if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
   const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  if (dex.price_usd) {
+    const navNum = Number(formatNav(round.answer_raw, feed.decimals));
+    dex.nav_premium_pct = Number(((Number(dex.price_usd) / navNum - 1) * 100).toFixed(4));
+    dex.premium_note = market.session === "open" ? "DEX price vs the last published NAV during the regular session." : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing.";
+  }
   return {
     status: 200,
     body: {
