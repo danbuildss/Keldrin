@@ -14,13 +14,21 @@
 | T010 | P1 | Native Actions scheduling + health (Aeon pack later) | OPEN | Manual runs proven; separate credentials; founder enable |
 | T011 | P1 | x402 one paid route | OPEN | Entitlement and cost approvals, testnet proof, replay/outage handling |
 | T012 | P1 | Public evidence UI and docs | OPEN | Only after backend gate |
-| T013 | P1 | Founder-led builder integrations / interviews | OPEN | Validates differentiation hypothesis |
+| T013 | P1 | Founder-led builder integrations / interviews | IN_PROGRESS (CD-001, CD-002; CUSTOMER_DISCOVERY.md) | Validates differentiation hypothesis |
 | T014 | P1 | Demo and final submission | OPEN | Honest evidence, current rules, founder submits |
 | T015 | P2 | MCP read-only adapter | OPEN | REST parity |
 | T016 | P2 | Telegram and webhook delivery | OPEN | Demand validated |
 | T017 | P3 | Additional market/sector analytics | OPEN | Separate licenses |
 | T018 | P1 | Investigate multiplier anomalies SNDKc (8) and PMc (1.5588) | IN_PROGRESS (SNDKc = verified 8-for-1 split; PMc unexplained lead) | Needs log indexer; leads, not claims |
-| T019 | P1 | Earnings calendar events (second event class) | OPEN | After corporate actions (D5) |
+| T019 | P1 | Earnings calendar events (second event class) | PROPOSED (split into T020–T022) | After corporate actions (D5) |
+| T020 | P0 (proposed) | Earnings release events: detect 8-K item 2.02, exact filing time, link press release | PROPOSED | CD-001; SEC submissions (keyless); gold set of real releases; independent verifier |
+| T021 | P0 (proposed) | Upcoming earnings dates, only when announced in a filing or release | PROPOSED | Unknown when not announced; no licensed calendars |
+| T022 | P1 (proposed) | Headline results (revenue, EPS) quoted from release text; XBRL after 10-Q | PROPOSED | No interpretation; results vs expectations EXCLUDED (licensed consensus) |
+| T023 | P0 (proposed) | Derived ex-dividend date (T+1 rule), labelled derived with the rule | PROPOSED | CD-001 implied; field `ex_date_basis` |
+| T024 | P1 (proposed) | Dividend history endpoint per company | PROPOSED | SEC XBRL + 8-Ks |
+| T025 | P1 (proposed) | `/v1/assets/{contract}/context`: Chainlink reference value + freshness | PROPOSED | Reference, not a price; market-hours caveat |
+| T026 | P1 (proposed) | DEX liquidity/volume (own indexing or partner) and XBRL fundamentals | PROPOSED | Partner terms; sizeable |
+| T027 | P2 | Token research (exploratory, no build) | OPEN (research only) | docs/TOKEN_RESEARCH.md; legal advice; founder approval before anything |
 
 Phase 1 (approved 2026-11-27, re-sequenced): DONE locally, see BACKEND_PROOF.md. Proposed Phase 2 (needs approval):
 
