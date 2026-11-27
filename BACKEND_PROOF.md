@@ -38,3 +38,11 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Coverage: Alchemy log index (blocks 49851727–62907003): 60 actions; all 13 applied match bisection; 47 announced not yet applied; 0 undisclosed multiplier changes.
 - Bugs found by the gate and fixed with regression tests: local/Supabase revision divergence (0 servable, fail-closed); SQL literal corruption in parameter inlining.
 - Not done / limitations: gold set unannotated (0/16, needs a human); share class not evidenced; Supabase writes are one statement per request (~10 min per discover run; batch in Phase 4); API still localhost.
+
+## 2026-11-27 Phase 3 — live deployment verified (https://keldrin.vercel.app)
+- Deployed by the founder from `main` on Vercel; DATABASE_URL uses the read-only `keldrin_reader` login (transaction pooler); TLS verified with DATABASE_CA_CERT (Supabase root CA).
+- Live checks: `/`, `/health` (status ok, 435/435 identities, 13 confirmed), `/v1/events` (60: 47 predicted, 7 verified_matched, 5 confirmed_onchain, 1 late), `/v1/events?status=late` (MRVLc), `/v1/changes?since=…`, `/v1/calendar?state=upcoming`, `/v1/actions`, `/v1/assets` all 200; bad input 400; unknown route 404; POST/PUT/DELETE/PATCH 405; headers `access-control-allow-origin: *`, `x-content-type-options: nosniff`, CDN cache HIT.
+- Outside consumer (examples/consumer.ts) against the live URL for GOOGLc, MRVLc, NVDAc: schema-valid, confirmed, arithmetic re-checked, data fresh.
+- PMc served as verified_matched/medium with warning `multiplier_change_unusually_large_for_cash_dividend`.
+- Issues found during deployment and fixed: catch-all routing (PR #6), root path (PR #7), TLS verification needed the Supabase CA (config). 
+- Limitations: data refreshes only when a research run writes to Supabase (no schedule yet — Phase 4); Coinbase registry rights still unknown while some registry-derived fields (symbol, ISIN, issuer status) are now publicly served; Vercel plan/commercial use to confirm before charging.
