@@ -26,3 +26,9 @@ test("$10 is not confused with $1, and unbound placeholders are rejected", () =>
 test("a parameter whose text looks like a placeholder is not re-substituted", () => {
   assert.equal(inlineParams("SELECT $1, $2", ["$2", "b"]), "SELECT $kld$$2$kld$, $kld$b$kld$");
 });
+
+test("regression: a literal starting with a digit (dates) is not corrupted by later placeholders", () => {
+  // "$kld$2026..." contains the text "$2"; the earlier multi-pass replacement corrupted it.
+  const sql = inlineParams("INSERT INTO t VALUES ($1, $2, $3)", ["a", "b", "2026-11-27T09:53:38Z"]);
+  assert.equal(sql, "INSERT INTO t VALUES ($kld$a$kld$, $kld$b$kld$, $kld$2026-11-27T09:53:38Z$kld$)");
+});

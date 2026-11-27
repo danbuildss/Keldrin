@@ -94,12 +94,13 @@ export function sqlLiteral(v: unknown): string {
   return dollarQuote(JSON.stringify(v));
 }
 
-/** Replace $1..$n placeholders (highest index first, so $10 is not read as $1 + "0"). */
+/** Replace $1..$n placeholders in ONE pass over the original SQL, so inserted literals are never re-scanned. */
 export function inlineParams(sql: string, params: unknown[] = []): string {
-  let out = sql;
-  for (let i = params.length; i >= 1; i--) out = out.split("$" + i).join(sqlLiteral(params[i - 1]));
-  if (/\$\d/.test(out.replace(/\$kld\d*\$[\s\S]*?\$kld\d*\$/g, ""))) throw new Error("unbound parameter in SQL");
-  return out;
+  return sql.replace(/\$(\d+)/g, (_m, n: string) => {
+    const i = Number(n);
+    if (i < 1 || i > params.length) throw new Error("unbound parameter $" + i + " in SQL");
+    return sqlLiteral(params[i - 1]);
+  });
 }
 
 /**
