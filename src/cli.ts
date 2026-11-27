@@ -13,6 +13,9 @@ import { buildCalendar, mergeIssuerAnnounced } from "./pipeline/calendar.ts";
 import { scanLogs } from "./pipeline/indexer.ts";
 import { getCorporateAction } from "./adapters/coinbase.ts";
 import { canonicalJson } from "./lib/canonical.ts";
+import { indexAll } from "./pipeline/navIndex.ts";
+import { insertNavReview, loadReviewInput } from "./pipeline/navStore.ts";
+import { verifyNavFeed } from "./verify/navVerify.ts";
 
 const args = process.argv.slice(2);
 const cmd = args[0];
@@ -242,6 +245,42 @@ async function supabaseCmd(sub: string) {
   }
 }
 
+/** Phase 5: index Chainlink NAV rounds for every feed-backed token (or --symbols), append-only. */
+async function navIndexCmd() {
+  const db = await openDb(DB_DIR);
+  const res = await indexAll(db, flag("symbols")?.split(","));
+  for (const f of res.feeds) {
+    const miss = f.phases.reduce((n, p) => n + p.missing.length, 0);
+    console.log(`  ${f.symbol.padEnd(7)} ${f.feed} +${f.inserted} round(s); phases ${f.phases.map((p) => `${p.phase}:${p.last}`).join(" ")}; missing ${miss}`);
+    for (const p of f.phases) if (p.missing.length) console.log(`      phase ${p.phase} missing ids: ${p.missing.slice(0, 10).join(", ")}${p.missing.length > 10 ? " …" : ""}`);
+  }
+  for (const r of res.rejected) console.log(`  REJECTED feed ${r.feed} for ${r.token}: ${r.reason}`);
+  // gitignored location: local runs must never drop files into the committed records/ evidence folder
+  mkdirSync("data", { recursive: true });
+  writeFileSync(join("data", "_last_nav_index.json"), JSON.stringify(res, (_k, v) => (typeof v === "bigint" ? v.toString() : v), 1) + "\n");
+  console.log(`nav-index: head ${res.head}; ${res.feeds.length} feed(s); +${res.feeds.reduce((n, f) => n + f.inserted, 0)} round(s); ${res.rejected.length} rejected`);
+  await db.close();
+}
+
+/** Phase 5: independent re-verification of stored NAV rounds per feed (random sample + phase ends). */
+async function navVerifyCmd() {
+  const db = await openDb(DB_DIR);
+  const only = flag("symbols")?.split(",");
+  const feeds = (await db.query<{ feed_address: string; symbol: string }>("SELECT DISTINCT feed_address, symbol FROM nav_feeds ORDER BY symbol")).rows.filter((f) => !only || only.includes(f.symbol));
+  const tally: Record<string, number> = {};
+  for (const f of feeds) {
+    const input = await loadReviewInput(db, f.feed_address, Number(flag("sample") ?? 50));
+    const review = await verifyNavFeed(input);
+    await insertNavReview(db, f.feed_address, review, input.rounds_indexed);
+    tally[review.verdict] = (tally[review.verdict] ?? 0) + 1;
+    console.log(`  ${review.verdict.padEnd(9)} ${f.symbol.padEnd(7)} rounds ${input.rounds_indexed} sampled ${review.sampled} mismatches ${review.mismatches}`);
+    for (const c of review.claims.filter((x) => x.verdict !== "CONFIRMED")) console.log(`      ${c.verdict} ${c.claim}: ${c.evidence}`);
+  }
+  console.log(`nav-verify: ${feeds.length} feed(s); ${JSON.stringify(tally)}`);
+  await db.close();
+  if (tally.REJECTED) process.exit(1);
+}
+
 async function verifyFile() {
   const f = args[1];
   const doc = JSON.parse(readFileSync(f, "utf8"));
@@ -259,6 +298,8 @@ const commands: Record<string, () => Promise<void>> = {
   supabase: () => supabaseCmd(args[1] ?? ""),
   "proof-googl": () => reconcileAll(["GOOGLc"]),
   "verify-file": verifyFile,
+  "nav-index": navIndexCmd,
+  "nav-verify": navVerifyCmd,
   serve: async () => {
     const db = await openDb(DB_DIR);
     const port = Number(flag("port") ?? 8787);

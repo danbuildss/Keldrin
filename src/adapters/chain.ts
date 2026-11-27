@@ -19,6 +19,10 @@ export const TOKEN_ABI = parseAbi([
   "function isB20(address) view returns (bool)",
   "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
   "function description() view returns (string)",
+  "function getRoundData(uint80) view returns (uint80, int256, uint256, uint256, uint80)",
+  "function phaseId() view returns (uint16)",
+  "function phaseAggregators(uint16) view returns (address)",
+  "function latestRound() view returns (uint256)",
 ]);
 
 export const EVENT_ABI = parseAbi([

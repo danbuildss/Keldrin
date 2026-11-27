@@ -49,3 +49,8 @@
 - Proposed revised plan (awaiting approval): Phase 5 NAV history → Phase 6 per-asset intelligence + skill.md → Phase 7 front page + launch check (Monday); MCP after Monday.
 - Open: Chainlink data rights; freshness (6-hourly vs hourly).
 - CD-003 follow-up: MAXXAGENT agreed to test endpoints (not an integration). Plan with acceptance criteria: docs/PLAN_DEVELOPER_RELEASE.md. Developer docs drafted (live vs planned labelled). Waiting on founder: approve Phase 5; the Chainlink-data decision; rate-limit approach; DEX price now or later.
+
+## Phase 5 (approved 2026-11-27): NAV history built and verified locally
+- 13 feeds / 36,375 rounds / 0 missing / 13 of 13 independently CONFIRMED (BACKEND_PROOF.md). The endpoint is built and **switched off** (NAV_HISTORY_PUBLIC) until the founder decides on Chainlink data rights.
+- Supabase tables are live (empty until the first scheduled run after merge).
+- Next: founder merges the PR → the scheduled run fills Supabase → founder decides on rights → enable → send MAXXAGENT the test link. Independent reviewer pass before go-live. Then Phase 6 (market-context) on approval.

@@ -16,3 +16,5 @@ Append dated lesson with evidence, failure mode, proposed action and reviewer ve
 
 - 2026-11-27: Pipeline commands always write evidence to records/, even when pointed at a test database. Run local or test pipelines with a clean check of `git status records/` before committing (a throwaway-DB run slipped into a commit once and was reverted).
 - 2026-11-27: When rewriting a workflow, diff its env against the previous version: dropping BASE_RPC_BEARER broke the first scheduled run. Also, any change under src/ that the API imports needs `npm run build:api` (CI checks the bundle).
+- 2026-11-27: Never infer the end of a Chainlink phase from empty ids; ask the aggregator (latestRound). A gap at a window edge would have truncated silently, and a verifier that only probed max+1 would have confirmed it.
+- 2026-11-27: Writing the test for 'every phase indexed' exposed that the verifier only checked stored phases; test the absence cases, not just the present ones.

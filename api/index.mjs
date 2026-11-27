@@ -14,8 +14,8 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
 var __commonJS = (cb, mod) => function __require2() {
   try {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-  } catch (e) {
-    throw mod = 0, e;
+  } catch (e2) {
+    throw mod = 0, e2;
   }
 };
 var __copyProps = (to, from, except, desc) => {
@@ -303,9 +303,9 @@ var require_postgres_interval = __commonJS({
     var NUMBER = "([+-]?\\d+)";
     var YEAR = NUMBER + "\\s+years?";
     var MONTH = NUMBER + "\\s+mons?";
-    var DAY = NUMBER + "\\s+days?";
+    var DAY2 = NUMBER + "\\s+days?";
     var TIME = "([+-])?([\\d]*):(\\d\\d):(\\d\\d)\\.?(\\d{1,6})?";
-    var INTERVAL = new RegExp([YEAR, MONTH, DAY, TIME].map(function(regexString) {
+    var INTERVAL = new RegExp([YEAR, MONTH, DAY2, TIME].map(function(regexString) {
       return "(" + regexString + ")?";
     }).join("\\s*"));
     var positions = {
@@ -1222,7 +1222,7 @@ var require_utils2 = __commonJS({
     async function md5(string) {
       try {
         return nodeCrypto.createHash("md5").update(string, "utf-8").digest("hex");
-      } catch (e) {
+      } catch (e2) {
         const data = typeof string === "string" ? textEncoder.encode(string) : string;
         const hash = await subtleCrypto.digest("MD5", data);
         return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -1602,7 +1602,7 @@ var require_pg_connection_string = __commonJS({
       try {
         try {
           result = new URL(str, "postgres://base");
-        } catch (e) {
+        } catch (e2) {
           result = new URL(str.replace("@/", "@___DUMMY___/"), "postgres://base");
           dummyHost = true;
         }
@@ -3922,8 +3922,8 @@ var require_client = __commonJS({
               }
               cb();
             });
-          } catch (e) {
-            this.emit("error", e);
+          } catch (e2) {
+            this.emit("error", e2);
           }
         }
       }
@@ -3937,8 +3937,8 @@ var require_client = __commonJS({
           try {
             const hashedPassword = await crypto.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
-          } catch (e) {
-            this.emit("error", e);
+          } catch (e2) {
+            this.emit("error", e2);
           }
         });
       }
@@ -4941,8 +4941,8 @@ var require_client2 = __commonJS({
     var Native;
     try {
       Native = __require("pg-native");
-    } catch (e) {
-      throw e;
+    } catch (e2) {
+      throw e2;
     }
     var TypeOverrides2 = require_type_overrides();
     var EventEmitter = __require("events").EventEmitter;
@@ -5380,7 +5380,7 @@ var keldrin_v1_default = {
   openapi: "3.1.0",
   info: {
     title: "Keldrin API",
-    version: "0.3.0",
+    version: "0.4.0",
     description: "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
   },
   servers: [
@@ -5962,6 +5962,190 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/assets/{contract}/nav/history": {
+      get: {
+        summary: "Chainlink NAV history for one token (verified feeds only)",
+        description: "Verbatim Chainlink rounds with feed, phase, aggregator and round id per point, so each value can be re-read onchain with getRoundData. Total-return NAV: it already includes dividends and splits. interval=daily returns the last round on each New York trading day at or before the session close; trading days without a round are listed in meta.quality.missing_trading_days and never filled. Served only when the feed's latest independent review is CONFIRMED.",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          },
+          {
+            name: "interval",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: [
+                "daily",
+                "round"
+              ],
+              default: "daily"
+            }
+          },
+          {
+            name: "from",
+            in: "query",
+            schema: {
+              type: "string",
+              format: "date"
+            },
+            description: "Default: 90 days before `to` (daily) or 2026-01-01 (round)"
+          },
+          {
+            name: "to",
+            in: "query",
+            schema: {
+              type: "string",
+              format: "date"
+            },
+            description: "Default: today (UTC)"
+          },
+          {
+            name: "limit",
+            in: "query",
+            schema: {
+              type: "integer",
+              minimum: 1,
+              maximum: 1e3,
+              default: 500
+            },
+            description: "round interval only"
+          },
+          {
+            name: "cursor",
+            in: "query",
+            schema: {
+              type: "string"
+            },
+            description: "round interval only; pass meta.next_cursor back unchanged"
+          }
+        ],
+        responses: {
+          "200": {
+            description: "NAV points",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: [
+                    "data",
+                    "meta"
+                  ],
+                  properties: {
+                    data: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/NavPoint"
+                      }
+                    },
+                    meta: {
+                      type: "object",
+                      properties: {
+                        token: {
+                          type: "string"
+                        },
+                        symbol: {
+                          type: "string"
+                        },
+                        feed: {
+                          type: "string"
+                        },
+                        decimals: {
+                          type: "integer"
+                        },
+                        interval: {
+                          type: "string"
+                        },
+                        semantics: {
+                          type: "string"
+                        },
+                        next_cursor: {
+                          type: [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        quality: {
+                          type: "object",
+                          properties: {
+                            rounds_indexed: {
+                              type: "integer"
+                            },
+                            first_round_at: {
+                              type: [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            last_round_at: {
+                              type: [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            missing_trading_days: {
+                              type: "array",
+                              items: {
+                                type: "string"
+                              }
+                            },
+                            not_covered_days: {
+                              type: "array",
+                              items: {
+                                type: "string"
+                              }
+                            },
+                            verification: {
+                              type: "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Bad input",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "Unknown token or no NAV feed (NO_NAV_FEED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Feed not independently verified (NAV_NOT_VERIFIED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
@@ -6217,6 +6401,86 @@ var keldrin_v1_default = {
             description: "Anything that does not add up beyond timing, e.g. multiplier_change_unusually_large_for_cash_dividend. Any warning lowers confidence."
           }
         }
+      },
+      NavPoint: {
+        type: "object",
+        required: [
+          "chain_id",
+          "token",
+          "feed",
+          "round_id",
+          "phase_id",
+          "answer_raw",
+          "decimals",
+          "nav",
+          "updated_at",
+          "retrieved_at"
+        ],
+        properties: {
+          session_day: {
+            type: "string",
+            format: "date",
+            description: "daily interval only"
+          },
+          session_close: {
+            type: "string",
+            format: "date-time"
+          },
+          chain_id: {
+            type: "integer"
+          },
+          token: {
+            type: "string"
+          },
+          feed: {
+            type: "string"
+          },
+          round_id: {
+            type: "string",
+            description: "proxy round id (phaseId<<64 | aggregatorRoundId), decimal string"
+          },
+          phase_id: {
+            type: "integer"
+          },
+          aggregator_round_id: {
+            type: "string"
+          },
+          aggregator: {
+            type: "string"
+          },
+          answer_raw: {
+            type: "string"
+          },
+          decimals: {
+            type: "integer"
+          },
+          nav: {
+            type: "string",
+            description: "exact decimal"
+          },
+          started_at: {
+            type: "string",
+            format: "date-time"
+          },
+          updated_at: {
+            type: "string",
+            format: "date-time"
+          },
+          answered_in_round: {
+            type: "string"
+          },
+          retrieved_at: {
+            type: "string",
+            format: "date-time"
+          },
+          retrieved_block: {
+            type: "string"
+          },
+          provisional: {
+            type: "boolean",
+            description: "daily interval only: true while that session has not closed yet"
+          }
+        }
       }
     }
   }
@@ -6255,7 +6519,7 @@ async function listEvents(db2, f = {}) {
     const a = r.payload.action;
     const decl = recon?.payload?.declaration ?? null;
     const cls = classifyApplied(a.effective.time, decl, { type: eventType(a.operator_description), ratio: a.ratio });
-    const applyTx = (r.payload.announcements ?? []).find((x) => (x.inner_events ?? []).some((e) => /Multiplier/.test(e)))?.tx_hash ?? null;
+    const applyTx = (r.payload.announcements ?? []).find((x) => (x.inner_events ?? []).some((e2) => /Multiplier/.test(e2)))?.tx_hash ?? null;
     out.push({
       event_id: r.record_id,
       chain_id: 8453,
@@ -6289,20 +6553,20 @@ async function listEvents(db2, f = {}) {
        FROM calendar_entries c WHERE c.snapshot_id = $1 AND c.review_verdict = 'CONFIRMED' AND c.state IN ('upcoming','announced','not_observed')`,
       [snap.snapshot_id]
     )).rows;
-    for (const { payload: e, first_seen } of rows) {
-      const d = e.declaration;
-      const ia = e.issuer_announcement;
+    for (const { payload: e2, first_seen } of rows) {
+      const d = e2.declaration;
+      const ia = e2.issuer_announcement;
       const both = !!d && !!ia;
-      const status = e.state === "not_observed" ? "late" : "predicted";
+      const status = e2.state === "not_observed" ? "late" : "predicted";
       out.push({
-        event_id: e.entry_id,
+        event_id: e2.entry_id,
         chain_id: 8453,
-        ticker: e.token.symbol,
-        contract_address: e.token.contract_address,
+        ticker: e2.token.symbol,
+        contract_address: e2.token.contract_address,
         event_type: eventType(ia?.description ?? (d ? "dividend" : null)),
         status,
         confidence: status === "late" ? "high" : both ? "high" : "medium",
-        expected_adjustment_date: e.expected_adjustment_date,
+        expected_adjustment_date: e2.expected_adjustment_date,
         adjusted_at: null,
         multiplier_before_wad: null,
         multiplier_after_wad: null,
@@ -6315,7 +6579,7 @@ async function listEvents(db2, f = {}) {
         onchain_tx: ia?.announcements?.at(-1)?.tx_hash ?? null,
         issuer_corporate_action_uuid: ia?.corporate_action_uuid ?? null,
         record_id: null,
-        basis: e.basis,
+        basis: e2.basis,
         warnings: [],
         updated_at: new Date(first_seen).toISOString()
       });
@@ -6323,6 +6587,192 @@ async function listEvents(db2, f = {}) {
   }
   const appliedUuids = new Set(out.filter((x) => x.adjusted_at).map((x) => x.issuer_corporate_action_uuid));
   return out.filter((x) => x.adjusted_at || !x.issuer_corporate_action_uuid || !appliedUuids.has(x.issuer_corporate_action_uuid)).filter((x) => !f.contract || x.contract_address.toLowerCase() === f.contract.toLowerCase()).filter((x) => !f.status || x.status === f.status).sort((a, b) => (b.adjusted_at ?? b.expected_adjustment_date ?? "").localeCompare(a.adjusted_at ?? a.expected_adjustment_date ?? "") || a.ticker.localeCompare(b.ticker));
+}
+
+// src/lib/sessions.ts
+var CALENDAR_VERSION = "nyse-2026-2027.1";
+var COVERAGE = { from: "2026-01-01", to: "2027-12-31" };
+var HOLIDAYS = /* @__PURE__ */ new Set([
+  "2026-01-01",
+  "2026-01-19",
+  "2026-02-16",
+  "2026-04-03",
+  "2026-05-25",
+  "2026-06-19",
+  "2026-07-03",
+  "2026-09-07",
+  "2026-11-26",
+  "2026-12-25",
+  "2027-01-01",
+  "2027-01-18",
+  "2027-02-15",
+  "2027-03-26",
+  "2027-05-31",
+  "2027-06-18",
+  "2027-07-05",
+  "2027-09-06",
+  "2027-11-25",
+  "2027-12-24"
+]);
+var EARLY_CLOSES = /* @__PURE__ */ new Set(["2026-11-27", "2026-12-24", "2027-11-26"]);
+var fmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+function nyParts(unixSec) {
+  const p = Object.fromEntries(fmt.formatToParts(new Date(unixSec * 1e3)).map((x) => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, weekday: p.weekday, minutes: Number(p.hour) * 60 + Number(p.minute) };
+}
+var covered = (date) => date >= COVERAGE.from && date <= COVERAGE.to;
+function isTradingDay(date) {
+  if (!covered(date)) return null;
+  const wd = (/* @__PURE__ */ new Date(`${date}T12:00:00Z`)).getUTCDay();
+  if (wd === 0 || wd === 6) return false;
+  return !HOLIDAYS.has(date);
+}
+function nyTime(date, hh, mm) {
+  const target = hh * 60 + mm;
+  for (const offsetH of [4, 5]) {
+    const t = Date.parse(`${date}T00:00:00Z`) / 1e3 + (target + offsetH * 60) * 60;
+    const p = nyParts(t);
+    if (p.date === date && p.minutes === target) return t;
+  }
+  throw new Error(`cannot place ${date} ${hh}:${mm} in New York time`);
+}
+var sessionOpen = (date) => nyTime(date, 9, 30);
+var sessionClose = (date) => EARLY_CLOSES.has(date) ? nyTime(date, 13, 0) : nyTime(date, 16, 0);
+function dateRange(from, to) {
+  const out = [];
+  for (let d = Date.parse(`${from}T12:00:00Z`); d <= Date.parse(`${to}T12:00:00Z`); d += 864e5) out.push(new Date(d).toISOString().slice(0, 10));
+  return out;
+}
+
+// src/api/nav.ts
+function formatNav(answer, decimals) {
+  const neg = answer.startsWith("-");
+  const digits = (neg ? answer.slice(1) : answer).padStart(decimals + 1, "0");
+  const int = digits.slice(0, digits.length - decimals);
+  const frac = digits.slice(digits.length - decimals).replace(/0+$/, "");
+  return (neg ? "-" : "") + int + (frac ? "." + frac : "");
+}
+function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3)) {
+  const byDay = /* @__PURE__ */ new Map();
+  for (const r of rows) {
+    const t = Number(r.updated_unix);
+    const day = nyParts(t).date;
+    if (isTradingDay(day) !== true || t < sessionOpen(day) || t > sessionClose(day)) continue;
+    const prev = byDay.get(day);
+    if (!prev || BigInt(r.round_id) > BigInt(prev.round_id)) byDay.set(day, r);
+  }
+  const closes = [];
+  const missing_trading_days = [];
+  const not_covered_days = [];
+  for (const d of dateRange(from, to)) {
+    const td = isTradingDay(d);
+    if (td === null) not_covered_days.push(d);
+    if (td !== true) continue;
+    const r = byDay.get(d);
+    if (r) closes.push({ session_day: d, session_close: new Date(sessionClose(d) * 1e3).toISOString(), provisional: sessionClose(d) > nowSec, row: r });
+    else if (sessionClose(d) <= nowSec) missing_trading_days.push(d);
+  }
+  return { closes, missing_trading_days, not_covered_days };
+}
+var e = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
+var DAY = /^\d{4}-\d{2}-\d{2}$/;
+var validDay = (d) => DAY.test(d) && !Number.isNaN(Date.parse(d + "T00:00:00Z")) && (/* @__PURE__ */ new Date(d + "T00:00:00Z")).toISOString().slice(0, 10) === d;
+var iso = `'YYYY-MM-DD"T"HH24:MI:SS"Z"'`;
+var isoMs = `'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'`;
+async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
+  const interval = q.get("interval") ?? "daily";
+  if (interval !== "daily" && interval !== "round") return e(400, "BAD_INTERVAL", "interval must be daily or round");
+  const today = now.toISOString().slice(0, 10);
+  const to = q.get("to") ?? today;
+  const from = q.get("from") ?? (interval === "daily" ? new Date(Date.parse(to + "T00:00:00Z") - 90 * 864e5).toISOString().slice(0, 10) : "2026-01-01");
+  if (!validDay(from) || !validDay(to)) return e(400, "BAD_DATE", "from and to must be real dates (YYYY-MM-DD)");
+  if (from > to) return e(400, "BAD_RANGE", "from must be on or before to");
+  if (interval === "daily" && Date.parse(to) - Date.parse(from) > 400 * 864e5) return e(400, "RANGE_TOO_LONG", "daily ranges are limited to 400 days", "page by date range");
+  const limit = Number(q.get("limit") ?? 500);
+  if (!Number.isInteger(limit) || limit < 1 || limit > 1e3) return e(400, "BAD_LIMIT", "limit must be an integer 1-1000");
+  const cursor = q.get("cursor");
+  if (cursor !== null && !/^\d{1,30}$/.test(cursor)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
+  const feed = (await db2.query(
+    "SELECT feed_address, token_address, symbol, decimals, description FROM nav_feeds WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY discovered_at DESC LIMIT 1",
+    [CHAIN_ID, contract]
+  )).rows[0];
+  if (!feed) return e(404, "NO_NAV_FEED", `no Chainlink NAV feed is indexed for ${contract}`, "about 14 tokenized stocks have a NAV feed; GET /v1/assets lists all tokens");
+  const rev = (await db2.query(
+    `SELECT review_id, verdict, sampled, mismatches, rounds_indexed, to_char(checked_at AT TIME ZONE 'UTC', ${isoMs}) AS checked_at FROM nav_reviews WHERE chain_id=$1 AND feed_address=$2 ORDER BY checked_at DESC LIMIT 1`,
+    [CHAIN_ID, feed.feed_address]
+  )).rows[0];
+  if (!rev || rev.verdict !== "CONFIRMED") return e(503, "NAV_NOT_VERIFIED", `NAV history for ${feed.symbol} is not independently verified (${rev ? rev.verdict : "no review yet"})`, "Keldrin fails closed; read the feed onchain meanwhile: " + feed.feed_address);
+  const cols = `round_id::text AS round_id, phase_id, aggregator_round_id::text AS aggregator_round_id, aggregator_address, answer::text AS answer, decimals,
+    to_char(started_at AT TIME ZONE 'UTC', ${iso}) AS started_at, to_char(updated_at AT TIME ZONE 'UTC', ${iso}) AS updated_at, answered_in_round::text AS answered_in_round,
+    to_char(retrieved_at AT TIME ZONE 'UTC', ${iso}) AS retrieved_at, retrieved_block::text AS retrieved_block, extract(epoch from updated_at)::bigint::text AS updated_unix`;
+  const lo = interval === "daily" ? new Date(Date.parse(from + "T00:00:00Z") - 864e5).toISOString() : from + "T00:00:00Z";
+  const hi = new Date(Date.parse(to + "T00:00:00Z") + (interval === "daily" ? 2 : 1) * 864e5).toISOString();
+  const ny = "(updated_at AT TIME ZONE 'America/New_York')";
+  const rows = interval === "round" ? (await db2.query(
+    `SELECT ${cols} FROM nav_rounds WHERE chain_id=$1 AND feed_address=$2 AND updated_at >= $3::timestamptz AND updated_at < $4::timestamptz AND retrieved_at <= $5::timestamptz
+           AND ($6::numeric IS NULL OR round_id > $6::numeric) ORDER BY round_id LIMIT ${limit + 1}`,
+    [CHAIN_ID, feed.feed_address, lo, hi, rev.checked_at, cursor]
+  )).rows : (
+    // daily: the database returns at most two candidates per New York day (last in-session round up to 13:00 and up to 16:00);
+    // dailyCloses() then applies the exact calendar (holidays, early closes, provisional sessions)
+    (await db2.query(
+      `SELECT DISTINCT ON (${ny}::date, ${ny}::time <= '13:00') ${cols} FROM nav_rounds
+           WHERE chain_id=$1 AND feed_address=$2 AND updated_at >= $3::timestamptz AND updated_at < $4::timestamptz AND retrieved_at <= $5::timestamptz
+             AND ${ny}::time >= '09:30' AND ${ny}::time <= '16:00'
+           ORDER BY ${ny}::date, ${ny}::time <= '13:00', round_id DESC`,
+      [CHAIN_ID, feed.feed_address, lo, hi, rev.checked_at]
+    )).rows
+  );
+  const item = (r) => ({
+    chain_id: CHAIN_ID,
+    token: feed.token_address,
+    feed: feed.feed_address,
+    round_id: r.round_id,
+    phase_id: r.phase_id,
+    aggregator_round_id: r.aggregator_round_id,
+    aggregator: r.aggregator_address,
+    answer_raw: r.answer,
+    decimals: r.decimals,
+    nav: formatNav(r.answer, r.decimals),
+    started_at: r.started_at,
+    updated_at: r.updated_at,
+    answered_in_round: r.answered_in_round,
+    retrieved_at: r.retrieved_at,
+    retrieved_block: r.retrieved_block
+  });
+  const span = (await db2.query(
+    `SELECT to_char(min(updated_at) AT TIME ZONE 'UTC', ${iso}) AS first, to_char(max(updated_at) AT TIME ZONE 'UTC', ${iso}) AS last, count(*)::int AS n FROM nav_rounds WHERE chain_id=$1 AND feed_address=$2 AND retrieved_at <= $3::timestamptz`,
+    [CHAIN_ID, feed.feed_address, rev.checked_at]
+  )).rows[0];
+  const quality = {
+    rounds_indexed: span.n,
+    first_round_at: span.first,
+    last_round_at: span.last,
+    verification: { verdict: rev.verdict, review_id: rev.review_id, checked_at: rev.checked_at, sampled: rev.sampled, mismatches: rev.mismatches }
+  };
+  const meta = {
+    token: feed.token_address,
+    symbol: feed.symbol,
+    feed: feed.feed_address,
+    feed_description: feed.description,
+    decimals: feed.decimals,
+    interval,
+    from,
+    to,
+    semantics: "Chainlink total-return NAV per token: it already includes dividends and splits, so do not apply the multiplier again. A last published value outside market hours is a reference, not a live equity price.",
+    source: "Chainlink NAV proxy on Base (feed listed by Coinbase /v1/tokenized-stocks/nav-feeds, cross-checked onchain); every point carries its round id so it can be re-read with getRoundData."
+  };
+  if (interval === "round") {
+    const page = rows.slice(0, limit);
+    meta.next_cursor = rows.length > limit ? page[page.length - 1].round_id : null;
+    return { status: 200, body: { data: page.map(item), meta: { ...meta, count: page.length, quality } } };
+  }
+  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3));
+  quality.missing_trading_days = d.missing_trading_days;
+  quality.not_covered_days = d.not_covered_days;
+  meta.calendar_version = CALENDAR_VERSION;
+  meta.daily_rule = "last round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet";
+  return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row) })), meta: { ...meta, count: d.closes.length, quality } } };
 }
 
 // src/api/server.ts
@@ -6357,6 +6807,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
 - GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
 - GET /v1/actions/{record_id} \u2014 full record, evidence, review claims, revisions, and company_context (SEC reconciliation, when confirmed)
@@ -6365,8 +6816,8 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /health \u2014 coverage, last run, limitations
 Errors: {"error":{"code","message","hint"}}. 404 unknown, 400 bad input, 409 ambiguous symbol.
 `;
-function dbFailureReason(e) {
-  const x = e;
+function dbFailureReason(e2) {
+  const x = e2;
   const code = String(x?.code ?? "");
   const msg = String(x?.message ?? "").toLowerCase();
   if (code === "28P01" || code === "28000" || /password authentication|authentication failed|tenant or user not found/.test(msg)) return "auth_failed";
@@ -6390,7 +6841,7 @@ async function handle(db2, req, res) {
     }
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
-    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/health"] }));
+    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -6402,7 +6853,7 @@ async function handle(db2, req, res) {
         since = s ? Date.parse(s) : NaN;
         if (!s || Number.isNaN(since)) return send(res, 400, err("BAD_SINCE", "since must be an ISO 8601 timestamp", "use meta.as_of from your previous call"));
       }
-      const events = (await listEvents(db2, { contract, status })).filter((e) => since === null || Date.parse(e.updated_at) > since);
+      const events = (await listEvents(db2, { contract, status })).filter((e2) => since === null || Date.parse(e2.updated_at) > since);
       return send(res, 200, ok(events, { count: events.length, ...since !== null ? { since: new Date(since).toISOString() } : {} }));
     }
     if (p === "/llms.txt") return send(res, 200, LLMS_TXT, "text/plain; charset=utf-8");
@@ -6410,9 +6861,9 @@ async function handle(db2, req, res) {
     if (p === "/health") {
       try {
         await db2.query("SELECT 1");
-      } catch (e) {
-        console.error("keldrin health: database unavailable:", e.stack ?? e);
-        return send(res, 503, { ...err("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e) });
+      } catch (e2) {
+        console.error("keldrin health: database unavailable:", e2.stack ?? e2);
+        return send(res, 503, { ...err("DB_UNAVAILABLE", "database unavailable", "see reason"), reason: dbFailureReason(e2) });
       }
       const [a, r, c, run] = await Promise.all([
         db2.query("SELECT count(*)::int n, count(*) FILTER (WHERE identity_state='verified')::int verified FROM assets"),
@@ -6448,6 +6899,14 @@ async function handle(db2, req, res) {
     if (p === "/v1/assets") {
       const rows = await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+    }
+    const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
+    if (nm) {
+      if (!ADDR.test(nm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "NAV history is not publicly enabled yet", "read the Chainlink feed onchain meanwhile; GET /llms.txt lists what is live"));
+      const out = await navHistory(db2, nm[1], url.searchParams);
+      const body = out.status === 200 ? { ...out.body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...out.body.meta } } : out.body;
+      return send(res, out.status, body);
     }
     const am = p.match(/^\/v1\/assets\/([^/]+)$/);
     if (am) {
@@ -6513,8 +6972,8 @@ async function handle(db2, req, res) {
       return send(res, 200, ok({ company_context: recon ? { ...recon.payload, review: recon.review, reconciled_at: recon.created_at } : null, record: { ...rec.payload, verification: { ...rec.payload.verification, state: "confirmed", review_id: rec.review_id, reviewed_at: rec.reviewed_at } }, review, revisions }));
     }
     return send(res, 404, err("NOT_FOUND", `no route ${p}`, "see /llms.txt"));
-  } catch (e) {
-    console.error("keldrin api error:", e.stack ?? e);
+  } catch (e2) {
+    console.error("keldrin api error:", e2.stack ?? e2);
     return send(res, 500, err("INTERNAL", "internal error", "retry later; if it persists the service is degraded (see /health)"));
   }
 }

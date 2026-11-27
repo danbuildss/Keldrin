@@ -12,5 +12,7 @@
 | 2026-11-27 | keldrin.vercel.app is the production API | Founder: "my production API, yes". Public, read-only. |
 | 2026-11-27 | Data rights handled for publicly served fields | Founder stated data rights are handled ("data rights. Field API as well"). Wording was brief; the founder holds the details. Recorded as the founder's decision, not independently reviewed. |
 | 2026-11-27 | Vercel Pro plan; x402 payments later | Founder is on Vercel Pro; x402 to be added in a later phase (needs separate approval). |
+| 2026-11-27 | Direction: Keldrin is the trusted, verifiable record for tokenized stocks (what happened, what's coming, what it's worth and how fresh, transfer rules, risk), served to apps and agents with proof | Founder: "approve the direction and Phase 5". Not a trading agent, adviser, execution oracle or token-gated product. Roadmap stages 1–5 as presented 2026-11-27 (docs/PLAN_DEVELOPER_RELEASE.md). Each later phase needs its own approval. |
+| 2026-11-27 | Phase 5 approved: NAV history (`/v1/assets/{contract}/nav/history`), NVDAc first, then all feed-backed tokens | Acceptance criteria in docs/PLAN_DEVELOPER_RELEASE.md §2. Open founder decisions: Chainlink data-rights label, edge rate limit, DEX price timing. |
 
 Pending: exact stack, source entitlements, watchlist, runtime cadence, budget, deployment, external publishing, outreach, payments, pricing and domain. Do not treat proposed files as approvals. Founder approves phase scope; record date, scope and reason here.

@@ -44,6 +44,9 @@ test("writer role: pipeline writes work, are idempotent, and nothing beyond appe
     assert.deepEqual([again.created, again.revision], [false, 1], "rerun is a no-op (jsonb round trip through real Postgres)");
     await insertReview(w, { review_id: "r1", record_id: fx.record.record_id, revision: 1, payload_sha256: first.hash, reviewer: "test", checked_at: new Date().toISOString(), verdict: "CONFIRMED", claims: [], limitations: [] });
     await w.query("INSERT INTO runs (run_id, kind, started_at, head_block, rpc_calls, outcome, summary) VALUES ($1,'discover',now(),$2,$3,'ok',$4)", ["run-test", 123n, 5, JSON.stringify({ ok: true })]);
+    // Phase 5 NAV tables: writer appends, cannot rewrite
+    await w.query("INSERT INTO nav_feeds (chain_id, token_address, feed_address, symbol, description, decimals, source) VALUES (8453,$1,$2,'GOOGLc','Coinbase GOOGL',8,'test')", [GOOGL, "0x5bF49E0ffA937CE2FfF033c739aD7C634c4D34F2"]);
+    await w.query("INSERT INTO nav_rounds (chain_id, feed_address, round_id, phase_id, aggregator_round_id, aggregator_address, answer, decimals, started_at, updated_at, answered_in_round, retrieved_at, retrieved_block) VALUES (8453,$1,'36893488147419103233',2,1,$2,'1',8,now(),now(),'36893488147419103233',now(),1)", ["0x5bF49E0ffA937CE2FfF033c739aD7C634c4D34F2", "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675"]);
     const denied = async (sql: string) => assert.rejects(w.query(sql), /permission denied|append-only|must be owner/i, sql);
     await denied("DELETE FROM runs");
     await denied("DELETE FROM records");
@@ -53,6 +56,8 @@ test("writer role: pipeline writes work, are idempotent, and nothing beyond appe
     await denied("SELECT * FROM schema_migrations");
     await denied("CREATE TABLE x_probe (a int)");
     await denied("DROP TABLE records");
+    await denied("UPDATE nav_rounds SET answer = 2");
+    await denied("DELETE FROM nav_rounds");
     // the read-only API role sees what the writer wrote
     const r = openPg(readerUrl + "?sslmode=disable");
     assert.equal((await r.query<{ n: number }>("SELECT count(*)::int AS n FROM confirmed_records")).rows[0].n, 1);
