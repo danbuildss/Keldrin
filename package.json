@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.16",
+    "@vercel/analytics": "^2.0.1",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "pg": "8.23.1",
