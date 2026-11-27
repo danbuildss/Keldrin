@@ -9,8 +9,16 @@ import type { Review } from "../verify/verify.ts";
 
 const MIGRATIONS = join(dirname(fileURLToPath(import.meta.url)), "migrations");
 
-/** Open the database. `dataDir` undefined = in-memory (tests); "supabase" = the Supabase primary store. */
+/**
+ * Open the database. `dataDir` undefined = in-memory (tests); "supabase" = the Supabase primary store
+ * over the Management API (admin; cloud sessions only); "pg" = the same store through the
+ * least-privilege `keldrin_writer` login in KELDRIN_WRITER_URL (scheduled runs).
+ */
 export async function openDb(dataDir?: string): Promise<PGlite> {
+  if (dataDir === "pg") {
+    const { openPgWriter } = await import("./pg.ts");
+    return openPgWriter(process.env.KELDRIN_WRITER_URL ?? "") as unknown as PGlite; // schema managed by `supabase migrate`
+  }
   if (dataDir === "supabase") {
     const { SupabaseDb } = await import("./supabase.ts");
     return new SupabaseDb() as unknown as PGlite; // schema managed by `supabase migrate`, not here

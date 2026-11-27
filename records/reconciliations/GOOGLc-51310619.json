@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec:9c0b6cf1e045",
+  "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec:e292b9a4e35f",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
-   "payload_sha256": "9c0b6cf1e045043b19dacf51b3f7c3e7be7ae2cd59e9a97fd719eae8c6fce503"
+   "payload_sha256": "e292b9a4e35f96bf99a7b649e8492ec83c152e461d30392af41818ac47ed8579"
   },
   "company": {
    "cik": "0001652044",
@@ -19,7 +19,7 @@
     "GOOGN"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Alphabet%20Inc. sha256=f11e05445e2f8068",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Alphabet%20Inc. sha256=90240a64ef80ce99",
     "https://data.sec.gov/submissions/CIK0001652044.json sha256=ab48e93cbc5bfaa5"
    ]
   },
@@ -167,16 +167,16 @@
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T10:41:39.309Z"
+  "generated_at": "2026-11-27T11:52:13.732Z"
  },
- "payload_sha256": "86a034c9408b03747c5f96dea1fae6ee18862835e9dbf00a959debf1aa423d4e",
+ "payload_sha256": "9041198260b1970958cdc617b54168a74d8e63531de3b5e90b08fa0b365b8106",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 9c0b6cf1e045043b"
+    "evidence": "record hash e292b9a4e35f96bf"
    },
    {
     "claim": "SEC XBRL fact re-fetched",
@@ -229,6 +229,6 @@
     "evidence": "recomputed 0.13089789"
    }
   ],
-  "checked_at": "2026-11-27T10:41:40.974Z"
+  "checked_at": "2026-11-27T11:52:15.414Z"
  }
 }

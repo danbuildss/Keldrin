@@ -46,3 +46,11 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - PMc served as verified_matched/medium with warning `multiplier_change_unusually_large_for_cash_dividend`.
 - Issues found during deployment and fixed: catch-all routing (PR #6), root path (PR #7), TLS verification needed the Supabase CA (config). 
 - Limitations: data refreshes only when a research run writes to Supabase (no schedule yet — Phase 4); Coinbase registry rights still unknown while some registry-derived fields (symbol, ISIN, issuer status) are now publicly served; Vercel plan/commercial use to confirm before charging.
+
+## Phase 4 — scheduled research (2026-11-27, in progress)
+- Approved by the founder ("approve Phase 4").
+- Built: least-privilege `keldrin_writer` role (supabase/006_writer.sql), a direct Postgres writer adapter (`--db=pg`, KELDRIN_WRITER_URL), and a 6-hourly schedule in research.yml (still gated by RESEARCH_ENABLED). Runbook: docs/PHASE4_SCHEDULE.md.
+- Live Supabase: migration applied; `supabase check` shows the writer can read confirmed records and is denied DELETE, UPDATE on records, schema_migrations and CREATE TABLE; anon/authenticated still denied; records still append-only.
+- Real Postgres 16 (local, throwaway): test/pg-writer.test.ts passes (writes, idempotent rerun, same payload hash as PGlite, 8 denied operations, reader sees the writer's rows). The full pipeline as keldrin_writer: discover 13/13 CONFIRMED → reconcile 13 (partially_reconciled/CONFIRMED) → calendar 54 entries (47 issuer-announced) → discover again added 0 revisions. 9m07s total.
+- Not yet proven: a run inside GitHub Actions against Supabase (needs the founder's writer password and environment secrets).
+- Known behaviour: changing the RPC provider changes `sources[].url`, which creates a new record revision (a correction, by design).

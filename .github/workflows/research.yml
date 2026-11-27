@@ -1,7 +1,11 @@
-name: Keldrin research (manual)
-# Manual dispatch only. No schedule until the founder approves one (AUTOMATION.md).
-# Disabled unless the repository variable RESEARCH_ENABLED is "true".
+name: Keldrin research (scheduled)
+# Phase 4 (founder approved 2026-11-27): every 6 hours plus manual dispatch. Writes to Supabase only through
+# the least-privilege `keldrin_writer` login (append + asset upsert; no delete, no DDL).
+# Disabled unless the repository variable RESEARCH_ENABLED is "true". GitHub cron can be delayed or skipped:
+# freshness is shown by /health, not promised.
 on:
+  schedule:
+    - cron: "23 1,7,13,19 * * *"
   workflow_dispatch:
     inputs:
       symbols:
@@ -27,20 +31,22 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm test
-      - name: Discover, verify and store (fresh local database)
-        run: node src/cli.ts discover ${SYMBOLS:+--symbols=$SYMBOLS}
+      - name: Discover, verify and store (Supabase, writer role)
+        run: node src/cli.ts discover --db=pg ${SYMBOLS:+--symbols=$SYMBOLS}
         env:
           SYMBOLS: ${{ inputs.symbols }}
-          BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
-          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+          KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
+          DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       - name: Reconcile with SEC and build the calendar
-        run: node src/cli.ts reconcile && node src/cli.ts calendar
+        run: node src/cli.ts reconcile --db=pg && node src/cli.ts calendar --db=pg
         env:
-          BASE_RPC_URL: ${{ vars.BASE_RPC_URL }}
-          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
-      # Results are a private artifact for review; nothing is committed, published or deployed.
+          KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
+          DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+      # The run's evidence files are a private artifact for review; nothing is committed or published.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: keldrin-records-${{ github.run_id }}
