@@ -27,3 +27,5 @@
 - Blocked: Alchemy key (network secret must be added by founder; secure form tool unavailable), Supabase project.
 
 2026-11-27 — Phase 2 completed (Claude). Founder: "keep going and finish Phase 2". Keys added by founder (Alchemy, Supabase). Built Alchemy indexer, Supabase schema/hardening/primary store, issuer-announced calendar, not-applicable rule. Gate: 3/3 runs passed against Supabase (research/phase2/runs). Bugs fixed: revision divergence on sync; SQL literal corruption. Costs: Alchemy and Supabase free-tier usage only; $0 billed to my knowledge (not verified on the providers' dashboards).
+
+2026-11-27 — Customer Discovery 001 (Claude). Founder decisions recorded: production API, data rights handled, Vercel Pro, x402 later. Created CUSTOMER_DISCOVERY.md (CD-001 Hector, prospect only; CD-002 Bankr), DEMAND_MATRIX, INTEGRATION_PIPELINE, TOKEN_RESEARCH. Proposed (not approved) T020–T026; token kept exploratory. Nothing built.
