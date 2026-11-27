@@ -5,7 +5,7 @@ import { marketContext } from "./marketContext.ts";
 import { liveDex } from "./dex.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { PACKAGE_VERSION } from "../version.ts";
-import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
+import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Remote MCP server (Phase 9): Streamable HTTP, stateless, JSON responses (no SSE). POST /mcp with one JSON-RPC
 // message. Read-only tools that call the same functions as the REST API, so an agent gets exactly what the API
@@ -63,7 +63,7 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol",
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
         const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
-        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with a verified NAV feed.`);
+        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
         const out = await assetCorporateActions(db, await resolveToken(db, args.token));
@@ -97,7 +97,9 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
       }
       case "get_snapshot":
       case "get_report": {
-        if ((await triesLeft(db as never, client)) === 0) {
+        const before = await triesLeft(db as never, client);
+        if (before === -1) return { content: [{ type: "text", text: `FREE_TRIES_UNAVAILABLE: free tries can't be counted right now, so none are given. Paid (${PAID.price}, x402, ask the user first): ${name === "get_snapshot" ? PAID.snapshot : PAID.report}` }], structuredContent: trialUnavailable().body, isError: true };
+        if (before === 0) {
           const used = trialUsedUp();
           return { content: [{ type: "text", text: `FREE_TRIES_USED: today's 3 free snapshots/reports are used. Each further answer is ${PAID.price} via x402: ${name === "get_snapshot" ? PAID.snapshot : PAID.report}${name === "get_report" ? "?token=<token>" : ""}. Ask the user before paying; never pay automatically.` }], structuredContent: used.body, isError: true };
         }

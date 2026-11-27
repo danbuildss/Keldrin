@@ -65,6 +65,7 @@ for (const [name, url] of [["paid snapshot terms", `${BANKR}/keldrin-snapshot`],
     must(req.x402Version === TERMS.x402Version, `x402Version ${req.x402Version}`);
     for (const k of ["scheme", "network", "amount"]) must(String(a[k]) === TERMS[k], `${k} ${a[k]}`);
     for (const k of ["asset", "payTo"]) must(String(a[k]).toLowerCase() === TERMS[k], `${k} ${a[k]}`);
+    must(Number(a.maxTimeoutSeconds) > 0 && Number(a.maxTimeoutSeconds) <= 60, `maxTimeoutSeconds ${a.maxTimeoutSeconds}`);
     return `402 · $0.05 USDC · payTo Bankr router`;
   });
 }

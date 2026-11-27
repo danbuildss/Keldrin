@@ -5,7 +5,7 @@ description: Verified record for Coinbase tokenized stocks on Base (chain 8453).
 
 # keldrin: the verified record for tokenized stocks on Base
 
-keldrin tells you what happened, what is coming and what a Coinbase tokenized stock on Base is worth, and how fresh that is. Every value names its source (a Chainlink round id, an SEC filing, an onchain transaction or a DEX pool at a block) and was independently re-checked before it is served.
+keldrin tells you what happened, what is coming and what a Coinbase tokenized stock on Base is worth, and how fresh that is. Every value names its source (a Chainlink round id, an SEC filing, an onchain transaction or a DEX pool at a block). Corporate-action records are independently re-verified before they are served; NAV feeds and DEX pools are served only after an independent check of the feed or pool, and their live values are read onchain at request time (re-check them yourself with `verify-nav` / `verify-dex`).
 
 ## Safety rules for agents
 
@@ -43,7 +43,7 @@ Tokens are given as a contract address (preferred) or an exact symbol such as `N
 ## Reading the answers
 
 - **Multiplier, not balance.** Corporate actions change the token's `multiplier` (WAD, 1e18 = 1 share per token); balances never change. Shares per token = `multiplier_wad / 1e18`.
-- **Event status.** `verified_matched` = applied onchain and matched to the issuer's filing. `predicted` = announced and expected on a date; not yet applied. `late` = the expected date passed without the onchain change. Act on applied changes only.
+- **Event status.** `verified_matched` = applied onchain and matched to the issuer's dated filing. `confirmed_onchain` = applied onchain and independently verified, but no dated filing matched. `late` has two meanings: an applied change that landed more than 1 day after the payable date (it has `adjusted_at`; it *has* happened), or an announced change whose expected date passed without the onchain change (no `adjusted_at`). `predicted` = announced and expected on a date; not yet applied. Check `adjusted_at` (or the onchain transaction) to know whether the multiplier already changed.
 - **NAV is total-return.** Chainlink's NAV for these tokens already includes dividends and splits. Don't apply the multiplier again. It is the last published reference, not a live equity price.
 - **Freshness.** `staleness.state`: `fresh` (updated within the feed's normal rhythm), `expected_closed` (market closed, the NAV correctly holds its last value), `unexpectedly_stale` (should have updated and didn't: don't rely on it), `unknown`.
 - **DEX gap.** `dex.nav_premium_pct` is the main DEX price versus the last NAV. It is withheld (`null` with `premium_unavailable_reason`) when the NAV is stale or unknown. When the market is closed, a gap reflects the closure, not necessarily mispricing.
@@ -77,12 +77,12 @@ Rules:
 
 | HTTP | `error.code` | Meaning |
 |---|---|---|
-| 400 | `TOKEN_REQUIRED`, `BAD_ADDRESS` | Pass an exact symbol or a 0x address |
+| 400 | `TOKEN_REQUIRED` (snapshot/report), `BAD_ADDRESS` (`/v1/assets/{contract}/…`) | Pass an exact symbol or a 0x address |
 | 404 | `UNKNOWN_ASSET`, `NO_NAV_FEED` | Not tracked, or no verified Chainlink NAV feed for this token |
 | 402 | `FREE_TRIES_USED` | The 3 free snapshots/reports for today are used; `pay` lists the x402 links |
 | 409 | `AMBIGUOUS_SYMBOL` | Several tokens share the symbol; pass the address |
 | 429 | `RATE_LIMITED` | Slow down; see `retry-after` |
-| 503 | `INCOMPLETE`, `NAV_NOT_ENABLED` | Could not build a complete answer right now; retry in a minute |
+| 503 | `INCOMPLETE`, `NAV_NOT_ENABLED`, `NAV_NOT_VERIFIED`, `FREE_TRIES_UNAVAILABLE` | Could not build a complete or verified answer right now; retry in a minute (or use the paid link) |
 
 ## Privacy
 

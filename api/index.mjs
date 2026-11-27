@@ -4119,9 +4119,9 @@ var require_utils2 = __commonJS({
         return Array.from(new Uint8Array(hash2)).map((b) => b.toString(16).padStart(2, "0")).join("");
       }
     }
-    async function postgresMd5PasswordHash(user, password, salt) {
+    async function postgresMd5PasswordHash(user, password, salt2) {
       const inner = await md5(password + user);
-      const outer = await md5(Buffer.concat([Buffer.from(inner), salt]));
+      const outer = await md5(Buffer.concat([Buffer.from(inner), salt2]));
       return "md5" + outer;
     }
     async function sha256(text) {
@@ -4134,9 +4134,9 @@ var require_utils2 = __commonJS({
       const key = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
       return await subtleCrypto.sign("HMAC", key, textEncoder.encode(msg));
     }
-    async function deriveKey(password, salt, iterations) {
+    async function deriveKey(password, salt2, iterations) {
       const key = await subtleCrypto.importKey("raw", textEncoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-      const params = { name: "PBKDF2", hash: "SHA-256", salt, iterations };
+      const params = { name: "PBKDF2", hash: "SHA-256", salt: salt2, iterations };
       return await subtleCrypto.deriveBits(params, key, 32 * 8, ["deriveBits"]);
     }
   }
@@ -4381,10 +4381,10 @@ var require_sasl = __commonJS({
       } else if (!isPrintableChars(nonce)) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: nonce must only contain printable characters");
       }
-      const salt = attrPairs.get("s");
-      if (!salt) {
+      const salt2 = attrPairs.get("s");
+      if (!salt2) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: salt missing");
-      } else if (!isBase64(salt)) {
+      } else if (!isBase64(salt2)) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: salt must be base64");
       }
       const iterationText = attrPairs.get("i");
@@ -4396,7 +4396,7 @@ var require_sasl = __commonJS({
       const iteration = parseInt(iterationText, 10);
       return {
         nonce,
-        salt,
+        salt: salt2,
         iteration
       };
     }
@@ -5210,9 +5210,9 @@ var require_messages = __commonJS({
     };
     exports.ParameterStatusMessage = ParameterStatusMessage;
     var AuthenticationMD5Password = class {
-      constructor(length, salt) {
+      constructor(length, salt2) {
         this.length = length;
-        this.salt = salt;
+        this.salt = salt2;
         this.name = "authenticationMD5Password";
       }
     };
@@ -5905,8 +5905,8 @@ var require_parser = __commonJS({
         case 5:
           if (message.length === 12) {
             message.name = "authenticationMD5Password";
-            const salt = reader.bytes(4);
-            return new messages_1.AuthenticationMD5Password(LATEINIT_LENGTH, salt);
+            const salt2 = reader.bytes(4);
+            return new messages_1.AuthenticationMD5Password(LATEINIT_LENGTH, salt2);
           }
           break;
         case 10:
@@ -11024,38 +11024,43 @@ var PAID = {
 };
 var ADDR = /^0x[0-9a-fA-F]{40}$/;
 var TRANSIENT = /* @__PURE__ */ new Set(["rpc_unavailable", "rpc_result_invalid"]);
-var UNVERIFIED = /* @__PURE__ */ new Set(["feed_not_verified", "phase_not_reviewed"]);
+var UNVERIFIED = /* @__PURE__ */ new Set(["feed_not_verified", "phase_not_reviewed", "aggregator_decimals_differ_from_proxy"]);
 var err = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var incomplete = (why) => err(503, "INCOMPLETE", `could not build a complete answer right now (${why}); this did not use a free try`, "retry in a minute");
-var mem = /* @__PURE__ */ new Map();
 var dayOf = (now) => now.toISOString().slice(0, 10);
+function salt() {
+  if (process.env.TRIAL_SALT) return process.env.TRIAL_SALT;
+  if (process.env.DATABASE_URL) return createHash("sha256").update("keldrin-trial-salt|" + process.env.DATABASE_URL).digest("hex");
+  if (process.env.VERCEL) throw new Error("no secret salt configured");
+  return "keldrin-local-test-only";
+}
 function clientHash(client) {
-  return createHash("sha256").update((process.env.TRIAL_SALT ?? "keldrin-trial-v1") + "|" + client).digest("hex").slice(0, 32);
+  return createHash("sha256").update(salt() + "|" + client).digest("hex").slice(0, 32);
 }
 async function triesLeft(db2, client, now = /* @__PURE__ */ new Date()) {
-  const h = clientHash(client);
   try {
-    const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
+    const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [clientHash(client), dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
   } catch (e2) {
-    console.warn("free-try counter read failed; using the in-memory count:", e2.message);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
+    console.warn("free-try counter unavailable (failing closed):", e2.message);
+    return -1;
   }
 }
 async function useTry(db2, client, now = /* @__PURE__ */ new Date()) {
-  const h = clientHash(client);
   try {
-    const sql = TRIAL_CONSUME_SQL;
-    const r = db2.writeOne ? await db2.writeOne(sql, [h, dayOf(now)]) : await db2.query(sql, [h, dayOf(now)]);
-    return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY));
+    const args = [clientHash(client), dayOf(now)];
+    const r = db2.writeOne ? await db2.writeOne(TRIAL_CONSUME_SQL, args) : await db2.query(TRIAL_CONSUME_SQL, args);
+    const n = Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY + 1);
+    return Math.max(0, FREE_TRIES_PER_DAY - n);
   } catch (e2) {
-    console.warn("free-try counter write failed; using the in-memory count:", e2.message);
-    if (mem.size > 5e4) mem.clear();
-    const k = h + dayOf(now);
-    mem.set(k, (mem.get(k) ?? 0) + 1);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(k) ?? 0));
+    console.warn("free-try counter write failed:", e2.message);
+    return 0;
   }
 }
+var trialUnavailable = () => ({
+  status: 503,
+  body: { error: { code: "FREE_TRIES_UNAVAILABLE", message: "free tries can't be counted right now, so none are given; this did not use a try", hint: "retry in a minute, use the paid link, or use the free one-stock routes" }, pay: PAID }
+});
 var trialUsedUp = () => ({
   status: 402,
   body: { error: { code: "FREE_TRIES_USED", message: `the ${FREE_TRIES_PER_DAY} free tries for today are used; each further answer is ${PAID.price} via x402`, hint: "call the paid endpoint with an x402 client (e.g. Bankr); the one-stock routes under /v1/assets stay free" }, pay: PAID }
@@ -11170,7 +11175,7 @@ async function callTool(db2, name, args, client) {
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
         const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
-        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with a verified NAV feed.`);
+        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
         const out = await assetCorporateActions(db2, await resolveToken(db2, args.token));
@@ -11204,7 +11209,9 @@ async function callTool(db2, name, args, client) {
       }
       case "get_snapshot":
       case "get_report": {
-        if (await triesLeft(db2, client) === 0) {
+        const before = await triesLeft(db2, client);
+        if (before === -1) return { content: [{ type: "text", text: `FREE_TRIES_UNAVAILABLE: free tries can't be counted right now, so none are given. Paid (${PAID.price}, x402, ask the user first): ${name === "get_snapshot" ? PAID.snapshot : PAID.report}` }], structuredContent: trialUnavailable().body, isError: true };
+        if (before === 0) {
           const used = trialUsedUp();
           return { content: [{ type: "text", text: `FREE_TRIES_USED: today's 3 free snapshots/reports are used. Each further answer is ${PAID.price} via x402: ${name === "get_snapshot" ? PAID.snapshot : PAID.report}${name === "get_report" ? "?token=<token>" : ""}. Ask the user before paying; never pay automatically.` }], structuredContent: used.body, isError: true };
         }
@@ -11315,7 +11322,7 @@ var err3 = (code, message, hint) => ({ error: { code, message, ...hint ? { hint 
 var OPENAPI = keldrin_v1_default;
 var LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
-Every record is derived from chain state and independently re-verified; values are exact integers (WAD = 1e18).
+Corporate-action records are derived from chain state and independently re-verified; values are exact integers (WAD = 1e18). NAV and DEX values are read onchain at request time from independently checked feeds and pools.
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
@@ -11471,6 +11478,7 @@ async function handle(db2, req, res) {
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
       let left = await triesLeft(db2, client);
+      if (left === -1) return send(res, 503, trialUnavailable().body, void 0, "no-store");
       if (left === 0) return send(res, 402, trialUsedUp().body, void 0, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db2) : await report(db2, url.searchParams.get("token") ?? "");
       if (out.status === 200) left = await useTry(db2, client);

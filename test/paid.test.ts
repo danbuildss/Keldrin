@@ -207,3 +207,18 @@ test("MCP get_snapshot / get_report use the same free tries, then return the pai
     await db.close();
   }
 });
+
+test("free-try counter fails closed (503 FREE_TRIES_UNAVAILABLE, no free answer) when it can't be read, and refuses past 3 in the database", async () => {
+  const db = await seededDb(false);
+  const { triesLeft: left, useTry: use } = await import("../src/api/trial.ts");
+  try {
+    const now = new Date("2026-11-27T12:00:00Z");
+    for (let i = 0; i < 3; i++) await use(db as never, "8.8.8.8", now);
+    assert.equal(await use(db as never, "8.8.8.8", now), 0);
+    assert.equal((await db.query<{ n: number }>("SELECT n FROM trial_usage")).rows[0].n, 3, "the database refuses past the limit");
+    const broken = { query: async () => { throw new Error("db down"); } };
+    assert.equal(await left(broken as never, "8.8.8.8", now), -1, "unavailable, not unlimited");
+  } finally {
+    await db.close();
+  }
+});

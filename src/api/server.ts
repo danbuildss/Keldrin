@@ -10,7 +10,7 @@ import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
-import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
+import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -46,7 +46,7 @@ const OPENAPI = OPENAPI_DOC as unknown as Json;
 
 export const LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
-Every record is derived from chain state and independently re-verified; values are exact integers (WAD = 1e18).
+Corporate-action records are derived from chain state and independently re-verified; values are exact integers (WAD = 1e18). NAV and DEX values are read onchain at request time from independently checked feeds and pools.
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
@@ -214,6 +214,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
       let left = await triesLeft(db as never, client);
+      if (left === -1) return send(res, 503, trialUnavailable().body as Json, undefined, "no-store");
       if (left === 0) return send(res, 402, trialUsedUp().body as Json, undefined, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db) : await report(db, url.searchParams.get("token") ?? "");
       if (out.status === 200) left = await useTry(db as never, client);

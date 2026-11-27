@@ -143,3 +143,17 @@ For each proof append date, commit, command, actual exit code, output path, sour
 ## Phase 12: website + feedback (2026-11-27)
 - PR #21 merged; https://keldrin.vercel.app/ serves the site (200, text/html); /v1, /health unchanged (200).
 - Feedback storage approved and applied (008_feedback.sql, supabase/011_feedback_grants.sql). Per-role check on Supabase: keldrin_reader can call feedback_submit; reader and writer reading feedback → permission denied; anon → denied. Live check: a bad email → 400 BAD_EMAIL; one self-test submission through production → 200, stored (hashed client, 32 hex), then deleted.
+
+## Phase 13: independent launch review (2026-11-27)
+Reviewer in a separate context, branch claude/awesome-brahmagupta-9y3hiy; 133/133 tests; only unpaid GETs. Live 402 terms matched skill.md (v2, exact, eip155:8453, USDC, 50000, payTo 0x8AEE…01a0, 60 s).
+1. Blocker: the live site predates this branch (/skill.md, /api/* 404). → Resolved by merging; status-check re-run after deploy.
+2. skill.md misdescribed `late` (also means applied-late) and omitted `confirmed_onchain`. → Fixed.
+3. Free-try check and count were separate; trial_consume never refused; DB failure fell back to per-instance memory. → trial_consume refuses past 3 (009 + supabase/012, applied; checked on Supabase: 1, 2, 3, then NULL; SECURITY DEFINER kept); counter fails closed (503 FREE_TRIES_UNAVAILABLE). Remaining race (parallel calls on the last try) accepted, bounded by the rate limit.
+4. Salt fell back to a public string. → Salt is TRIAL_SALT or derived from the secret DATABASE_URL; refuses on Vercel with neither.
+5. Overclaim: "every value independently re-checked". → Wording: records re-verified; NAV/DEX read live from independently checked feeds/pools (skill.md, site, llms.txt).
+6. Snapshot included decimals-conflict stocks; list_assets said "verified". → Excluded in both snapshot builds; wording "indexed".
+7. Error tables / Bankr report schema mismatched. → Fixed (NAV_NOT_VERIFIED, FREE_TRIES_UNAVAILABLE, BAD_ADDRESS scope; schema lists dex_pools).
+8. Paid report does two DEX reads (two blocks possible). → Accepted, documented in its meta note.
+9. Paid snapshot fan-out (~28 calls from Bankr's IP) vs per-instance 120/min. → Accepted; edge rule set at 300/min/IP.
+10. status-check did not check maxTimeoutSeconds. → Added.
+Tests after fixes: 137/137 with a real Postgres, 0 skipped. Bankr snapshot handler bumped to 1.0.1 (needs a redeploy from Bankr chat).

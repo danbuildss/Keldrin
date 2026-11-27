@@ -1,4 +1,4 @@
-// Keldrin snapshot 1.0.0 (x402 on Bankr). Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed,
+// Keldrin snapshot 1.0.1 (x402 on Bankr). Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed,
 // in one answer, built from Keldrin's free public API. Bankr charges only on a 2xx, so anything incomplete is a 503.
 const API = "https://keldrin.vercel.app";
 const TRANSIENT = ["rpc_unavailable", "rpc_result_invalid"];
@@ -22,7 +22,7 @@ export default async function handler(req: Request): Promise<Response> {
       return { symbol: d.symbol, token: d.token, nav: d.nav, nav_unavailable_reason: d.nav_unavailable_reason ?? null, staleness: d.staleness, dex: d.dex, next_corporate_action: next ? { event_type: next.event_type, expected_adjustment_date: next.expected_adjustment_date ?? null, per_share: next.per_share ?? null } : null };
     }));
     // only stocks whose feed passed Keldrin's independent verification
-    const verified = stocks.filter((s) => s.nav_unavailable_reason !== "feed_not_verified" && s.nav_unavailable_reason !== "phase_not_reviewed");
+    const verified = stocks.filter((s) => !["feed_not_verified", "phase_not_reviewed", "aggregator_decimals_differ_from_proxy"].includes(s.nav_unavailable_reason));
     const market = (await get("/v1/market/session")).data;
     return Response.json({ data: { market, count: verified.length, stocks: verified }, meta: { as_of: new Date().toISOString(), source: API, note: "Verified data with provenance, not advice. The NAV is Chainlink's last published total-return reference, not a live equity price." } });
   } catch (e) {
