@@ -9,6 +9,7 @@ import { assetCorporateActions } from "./assetActions.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
+import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -55,6 +56,8 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/assets/{contract}/dex — live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
 - POST /mcp — remote MCP server (Streamable HTTP, stateless): tools list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
 - GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
+- GET /v1/snapshot — every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
+- GET /v1/report?token=<symbol or address> — everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -126,7 +129,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/mcp", "/health"] }));
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -191,6 +194,16 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }), undefined, "no-store"); // time-sensitive: never CDN-cached
+    // Snapshot and report: 3 free complete answers per client per day, then 402 with the paid x402 links.
+    if (p === "/v1/snapshot" || p === "/v1/report") {
+      const client = fwd || req.socket?.remoteAddress || "unknown";
+      if (triesLeft(client) === 0) return send(res, 402, trialUsedUp().body as Json, undefined, "no-store");
+      const out = p === "/v1/snapshot" ? await snapshot(db) : await report(db, url.searchParams.get("token") ?? "");
+      if (out.status === 200) res.setHeader("x-keldrin-free-tries-left", String(useTry(client)));
+      const b = out.body as Json;
+      const body = out.status === 200 ? { ...b, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((b.meta as Json) ?? {}), free_tries_left_today: triesLeft(client), paid: PAID } } : b;
+      return send(res, out.status, body, undefined, "no-store");
+    }
     const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);
     if (dm) {
       if (!ADDR.test(dm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
