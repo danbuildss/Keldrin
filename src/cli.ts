@@ -129,6 +129,46 @@ async function calendar(symbols?: string[]) {
   await db.close();
 }
 
+/** Score pipeline output against independently annotated gold events (research/gold/events.json). */
+async function gold() {
+  const g = JSON.parse(readFileSync("research/gold/events.json", "utf8"));
+  const db = await openDb(DB_DIR);
+  const fields = ["multiplier_before_wad", "multiplier_after_wad", "per_share", "record_date", "payable_date"] as const;
+  const tally: Record<string, { match: number; mismatch: number }> = {};
+  let annotated = 0;
+  const mismatches: string[] = [];
+  for (const ev of g.events) {
+    if (!ev.annotated_by) continue;
+    annotated++;
+    const rec = ev.effective_block
+      ? (await db.query<{ payload: IssuerActionRecord }>("SELECT payload FROM confirmed_records WHERE lower(contract_address)=lower($1) AND effective_block=$2", [ev.token.contract_address, ev.effective_block])).rows[0]?.payload
+      : undefined;
+    const recon = rec ? (await db.query<{ payload: any }>("SELECT payload FROM reconciliations WHERE record_id=$1 AND review_verdict='CONFIRMED' ORDER BY created_at DESC LIMIT 1", [rec.record_id])).rows[0]?.payload : undefined;
+    const got: Record<string, string | null | undefined> = {
+      multiplier_before_wad: rec?.action.multiplier_before_wad,
+      multiplier_after_wad: rec?.action.multiplier_after_wad,
+      per_share: recon?.declaration?.per_share,
+      record_date: recon?.declaration?.record_date,
+      payable_date: recon?.declaration?.payable_date,
+    };
+    for (const f of fields) {
+      if (!(f in ev.expected) || ev.expected[f] === null) continue;
+      const t = (tally[f] ??= { match: 0, mismatch: 0 });
+      if (got[f] === ev.expected[f]) t.match++;
+      else {
+        t.mismatch++;
+        mismatches.push(ev.event_key + " " + f + ": expected " + ev.expected[f] + ", pipeline " + (got[f] ?? "none"));
+      }
+    }
+  }
+  console.log("gold: " + annotated + " of " + g.events.length + " events annotated");
+  for (const [f, t] of Object.entries(tally)) console.log("  " + f.padEnd(22) + " " + t.match + "/" + (t.match + t.mismatch) + " match");
+  for (const m of mismatches) console.log("  MISMATCH " + m);
+  if (!annotated) console.log("  no annotations yet: see research/gold/README.md (accuracy is not claimed until annotated)");
+  await db.close();
+  process.exit(mismatches.length ? 1 : 0);
+}
+
 async function verifyFile() {
   const f = args[1];
   const doc = JSON.parse(readFileSync(f, "utf8"));
@@ -142,6 +182,7 @@ const commands: Record<string, () => Promise<void>> = {
   discover: run,
   reconcile: () => reconcileAll(flag("symbols")?.split(",")),
   calendar: () => calendar(flag("symbols")?.split(",")),
+  gold,
   "proof-googl": () => reconcileAll(["GOOGLc"]),
   "verify-file": verifyFile,
   serve: async () => {

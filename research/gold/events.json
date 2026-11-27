@@ -1,0 +1,412 @@
+{
+ "note": "TEMPLATE. Expected values are intentionally null; fill them from primary_sources only (research/gold/README.md).",
+ "events": [
+  {
+   "event_key": "SANc@53559803",
+   "token": {
+    "symbol": "SANc",
+    "contract_address": "0xB20000000000000000000017BB66E9301E913A99"
+   },
+   "effective_block": "53559803",
+   "primary_sources": [
+    "https://basescan.org/tx/0x11a2c1b230bc7d73ecc2ddef1d2425c3bdcde874d2eacbc844a6104619beb43d",
+    "https://basescan.org/tx/0x60ded8fc227ccc3e7e301ab20f398ed046bb117dc50c584d93b3d4261b11cf58",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+    "https://www.sec.gov/Archives/edgar/data/891478/000089147826000098/financieroq326ingles.htm",
+    "https://www.sec.gov/Archives/edgar/data/891478/000095010326016289/dp255721_6k.htm",
+    "https://www.sec.gov/Archives/edgar/data/891478/000089147826000095/q32026earningspresentati.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "GOOGLc@51310619",
+   "token": {
+    "symbol": "GOOGLc",
+    "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7"
+   },
+   "effective_block": "51310619",
+   "primary_sources": [
+    "https://basescan.org/tx/0xb5aa54fb26131123a7bb931e31d63baf466e1a1075d74450d048da88ad6a1444",
+    "https://basescan.org/tx/0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33",
+    "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm",
+    "https://www.sec.gov/Archives/edgar/data/1652044/000119312526342390/d171253d8k.htm",
+    "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/goog-20260722.htm",
+    "https://www.sec.gov/Archives/edgar/data/1652044/000119312526259830/d36818d8k.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "ORCLc@52991540",
+   "token": {
+    "symbol": "ORCLc",
+    "contract_address": "0xb200000000000000000000347AFbA223D7B6b63C"
+   },
+   "effective_block": "52991540",
+   "primary_sources": [
+    "https://basescan.org/tx/0xc132e87c7d1c631f38801646e988c96a94faa281a047661247a5c1972c75a675",
+    "https://basescan.org/tx/0x296ddc4320686aecf7c1a2c44f31dc0056cd99b6dbcacc4ac4d3151f9f969b17",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/67deae04-adc5-4308-a1c8-d32ea2134fac",
+    "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm",
+    "https://www.sec.gov/Archives/edgar/data/1341439/000119312526389753/d20034d8k.htm",
+    "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-20260910.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "SNDKc@59802122",
+   "token": {
+    "symbol": "SNDKc",
+    "contract_address": "0xb200000000000000000000397293Cb8cda9a10c5"
+   },
+   "effective_block": "59802122",
+   "primary_sources": [
+    "https://basescan.org/tx/0xa7bf39d215adc43ca33f56922f8a81f90b43ec8161e207a283e3df26ba9c1446",
+    "https://basescan.org/tx/0x3f1dbf9658e3fc8f6d38d57793c7d864fe58647c9aae2fbf6c88eb25b67bdf65",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/4d449eba-9206-4c35-8c1e-921c20e864d5",
+    "https://www.sec.gov/Archives/edgar/data/2023554/000162828026075127/sndk-20261119.htm",
+    "https://www.sec.gov/Archives/edgar/data/2023554/000162828026068243/sndk-20261029.htm",
+    "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/sndk-20260805.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "NOKc@55661764",
+   "token": {
+    "symbol": "NOKc",
+    "contract_address": "0xB2000000000000000000005ac674f707E357409c"
+   },
+   "effective_block": "55661764",
+   "primary_sources": [
+    "https://basescan.org/tx/0x35d0b47eb8a6ad4403d45fd5854cd59d1a118b342831c9db94be4a46f9026a72",
+    "https://basescan.org/tx/0x5026af113d8ac997ad30974e4f0510baac41d3e1aa0f54d43351e074424e0ad7",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b80863d5-db65-43a7-8578-59adf6922e78",
+    "https://www.sec.gov/Archives/edgar/data/924613/000110465926124366/tm2629353d1_6k.htm",
+    "https://www.sec.gov/Archives/edgar/data/924613/000110465926117972/tm2628115d1_6k.htm",
+    "https://www.sec.gov/Archives/edgar/data/924613/000110465926116141/tm2627676d1_6k.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "NVDAc@52041960",
+   "token": {
+    "symbol": "NVDAc",
+    "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C"
+   },
+   "effective_block": "52041960",
+   "primary_sources": [
+    "https://basescan.org/tx/0x7aef5d1292d0f78b1cdc05518301553fc7220e5a0022d98b822dc09ac925ddcd",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
+    "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+    "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000078/nvda-20260902.htm",
+    "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm",
+    "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000069/nvda-20260817.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "METAc@51910997",
+   "token": {
+    "symbol": "METAc",
+    "contract_address": "0xb2000000000000000000008bC8786B856E61707C"
+   },
+   "effective_block": "51910997",
+   "primary_sources": [
+    "https://basescan.org/tx/0x1219ccb952aab976f83a67ec998b34c951a867e2ea8409484b8cd657f1dc6a5a",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+    "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/meta-20260729.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "PMc@53116034",
+   "token": {
+    "symbol": "PMc",
+    "contract_address": "0xB2000000000000000000008FC2A8C23cf5937b66"
+   },
+   "effective_block": "53116034",
+   "primary_sources": [
+    "https://basescan.org/tx/0xd29ffee168e47554f1ceec75d4cd1ce565cf01c43edf0265d93a079e23e5d298",
+    "https://basescan.org/tx/0xf2a1b9ef2dcb909ce294a590c326decf6fdcbc1e08b069a11aae4b3ec0aafa3c",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e4071568-89ad-4f41-9a31-565225066857",
+    "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/september2026dividend.htm",
+    "https://www.sec.gov/Archives/edgar/data/1413329/000162828026066596/pm-20261021.htm",
+    "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/pm-20260918.htm",
+    "https://www.sec.gov/Archives/edgar/data/1413329/000162828026060822/pm-20260908.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "AAPLc@58271537",
+   "token": {
+    "symbol": "AAPLc",
+    "contract_address": "0xb200000000000000000000C2e324d24d7eEcd1fb"
+   },
+   "effective_block": "58271537",
+   "primary_sources": [
+    "https://basescan.org/tx/0x550e8608beff144bf7ee7ce20c397936749ae1f2db701324a0931cf8ded59c98",
+    "https://basescan.org/tx/0x194cf3f65e657060df3425c76cf9b03c5cc19ca0c2afe647e4f882c18c50de40",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/399166b9-8068-42a5-8924-8ce881d49376",
+    "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/a8-kex991q4202609262026.htm",
+    "https://www.sec.gov/Archives/edgar/data/320193/000114036126042798/ef20085077_8k.htm",
+    "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/aapl-20261102.htm",
+    "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/aapl-20260730.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "MRVLc@53926631",
+   "token": {
+    "symbol": "MRVLc",
+    "contract_address": "0xB200000000000000000000eC3c4c7395Cc609813"
+   },
+   "effective_block": "53926631",
+   "primary_sources": [
+    "https://basescan.org/tx/0x1b8f5f46a2d7728ae283f2019a56b399e19f7f66647ef455073c95bf2a061119",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e3ab4ebc-927d-466e-aa32-47313a5aab41",
+    "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/a20260925dividendpressrele.htm",
+    "https://www.sec.gov/Archives/edgar/data/1835632/000119312526442714/d81187d8k.htm",
+    "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/mrvl-20260925.htm",
+    "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/mrvl-20260827.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "CAKEc@61758087",
+   "token": {
+    "symbol": "CAKEc",
+    "contract_address": "0xb200000000000000000000f215E4C890CFb7176B"
+   },
+   "effective_block": "61758087",
+   "primary_sources": [
+    "https://basescan.org/tx/0xb8bc0c46d747c0f268349b19ea6fa8aca99dbd93e90255feb9a92eadeb18e6e9",
+    "https://basescan.org/tx/0x9fcc2c59446bd30178244913e0e3fb0a66b6c5f3fa3a6bd66c37efdaee55257b",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
+    "https://www.sec.gov/Archives/edgar/data/887596/000110465926119176/tm2628239d1_ex99-1.htm",
+    "https://www.sec.gov/Archives/edgar/data/887596/000110465926119176/tm2628239d1_8k.htm",
+    "https://www.sec.gov/Archives/edgar/data/887596/000110465926087561/tm2621325d1_8k.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "INFYc@58281439",
+   "token": {
+    "symbol": "INFYc",
+    "contract_address": "0xb200000000000000000000F6b0417af5F52341FC"
+   },
+   "effective_block": "58281439",
+   "primary_sources": [
+    "https://basescan.org/tx/0xc443c043144d945d32c02a1e2096380da27871cbed999e7700ff7ade9a790791",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/4c12706d-8ecb-417a-aeb2-46e758628536",
+    "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000044/index.htm",
+    "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000042/index.htm",
+    "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000040/index.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "MUc@53245709",
+   "token": {
+    "symbol": "MUc",
+    "contract_address": "0xb200000000000000000000Fd2f87532B90095211"
+   },
+   "effective_block": "53245709",
+   "primary_sources": [
+    "https://basescan.org/tx/0xe109b4c898e85661a8148629f2ead0aebe31e98c308b87aa837d45cb1148ac37",
+    "https://basescan.org/tx/0x4ad32992750617fd585827467808665d2d17915759923c3cbd4111c6743f5766",
+    "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
+    "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/a2026q4ex991-pressrelease.htm",
+    "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/mu-20260930.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "multiplier_before_wad": null,
+    "multiplier_after_wad": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": ""
+  },
+  {
+   "event_key": "GOOGLc@upcoming-2026-12-14",
+   "token": {
+    "symbol": "GOOGLc",
+    "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7"
+   },
+   "effective_block": null,
+   "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": "upcoming at template creation; annotate the declaration only"
+  },
+  {
+   "event_key": "NVDAc@upcoming-2026-12-23",
+   "token": {
+    "symbol": "NVDAc",
+    "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C"
+   },
+   "effective_block": null,
+   "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27pr.htm"
+   ],
+   "expected": {
+    "kind": null,
+    "per_share": null,
+    "record_date": null,
+    "payable_date": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": "upcoming at template creation; annotate the declaration only"
+  },
+  {
+   "event_key": "TSLAc@no-dividend",
+   "token": {
+    "symbol": "TSLAc",
+    "contract_address": "0xb2000000000000000000001e800a7f5189430cD0"
+   },
+   "effective_block": null,
+   "primary_sources": [
+    "https://data.sec.gov/submissions/CIK0001318605.json"
+   ],
+   "expected": {
+    "kind": null,
+    "has_dividend_declared_since_2026_08_12": null
+   },
+   "annotated_by": null,
+   "annotated_at": null,
+   "notes": "negative case; CIK 0001318605 verified 2026-11-27 via data.sec.gov submissions (Tesla, Inc., TSLA)"
+  }
+ ]
+}
