@@ -37,3 +37,5 @@
 2026-11-27 — CD-003 MAXXAGENT research. Read their MIT repo (995c4a2), the Base B20/Denim posts, BaseHub's Coinbase API reference and the Chainlink historical-data docs; measured all 14 NAV feeds onchain (36k rounds since 2026-08-03). Wrote the feasibility report and 5 research docs. The web-fetch helper couldn't resolve allowlisted hosts; curl from the session worked. maxxagent.xyz isn't on the allowlist. Nothing built; awaiting the founder's choice of plan.
 
 2026-11-27 — CD-003 follow-up: MAXXAGENT agreed to test. Reviewed the implementation vs their 4 requirements (no restart needed); wrote PLAN_DEVELOPER_RELEASE.md with acceptance criteria, developer docs (live vs planned) and a partner page. Nothing built.
+
+2026-11-27 — Phase 5 built: NAV indexer, independent verifier, session calendar, /nav/history (off by default). 13/13 feeds CONFIRMED locally (36,375 rounds). Fixed 7 of 8 review findings; the independent-context review is still owed.

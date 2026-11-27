@@ -60,3 +60,6 @@ ALTER ROLE keldrin_reader NOLOGIN;
 | `permission_denied`, `schema_missing` | Tell Claude; the migrations may need re-applying. |
 
 After changing an environment variable in Vercel, **redeploy** (Deployments → ⋯ → Redeploy); the change doesn't apply to running deployments.
+
+## NAV history switch (Phase 5)
+`/v1/assets/{contract}/nav/history` is built but **off by default** (503 `NAV_NOT_ENABLED`). When the founder has decided on Chainlink data rights: Vercel → Settings → Environment Variables → add `NAV_HISTORY_PUBLIC` = `true` (Production) → Redeploy. To turn it off again, remove the variable and redeploy.

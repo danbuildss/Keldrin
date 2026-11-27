@@ -3,6 +3,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { CHAIN_ID, SCHEMA_VERSION } from "../config.ts";
 import OPENAPI_DOC from "../../openapi/keldrin.v1.json" with { type: "json" };
 import { listEvents } from "./events.ts";
+import { navHistory } from "./nav.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -44,6 +45,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z — events added or changed since a timestamp (poll this)
 - GET /v1/assets — tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
 - GET /v1/actions/{record_id} — full record, evidence, review claims, revisions, and company_context (SEC reconciliation, when confirmed)
@@ -81,7 +83,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/health"] }));
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -143,6 +145,15 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/v1/assets") {
       const rows = await db.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+    }
+    const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
+    if (nm) {
+      if (!ADDR.test(nm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      // Off until the founder records a decision on Chainlink data rights (DECISIONS.md); set NAV_HISTORY_PUBLIC=true to serve.
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "NAV history is not publicly enabled yet", "read the Chainlink feed onchain meanwhile; GET /llms.txt lists what is live"));
+      const out = await navHistory(db, nm[1], url.searchParams);
+      const body = out.status === 200 ? { ...(out.body as Json), meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((out.body as Json).meta as Json) } } : out.body;
+      return send(res, out.status, body);
     }
     const am = p.match(/^\/v1\/assets\/([^/]+)$/);
     if (am) {
