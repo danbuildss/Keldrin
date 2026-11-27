@@ -1,7 +1,8 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { PGlite } from "@electric-sql/pglite";
-import { readFileSync } from "node:fs";
 import { CHAIN_ID, SCHEMA_VERSION } from "../config.ts";
+import OPENAPI_DOC from "../../openapi/keldrin.v1.json" with { type: "json" };
+import { listEvents } from "./events.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -9,20 +10,39 @@ import { CHAIN_ID, SCHEMA_VERSION } from "../config.ts";
 type Json = Record<string, unknown>;
 const ADDR = /^0x[0-9a-fA-F]{40}$/;
 
+// Successful reads may be cached at the CDN briefly (data changes at most once per research run);
+// errors are never cached.
 function send(res: ServerResponse, status: number, body: Json | string, type = "application/json") {
-  res.writeHead(status, { "content-type": type, "cache-control": "no-store", "x-content-type-options": "nosniff", "access-control-allow-origin": "*" });
+  const cache = status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store";
+  res.writeHead(status, { "content-type": type, "cache-control": cache, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
   res.end(typeof body === "string" ? body : JSON.stringify(body, null, 1));
+}
+
+/** Per-client fixed-window rate limit (per instance; the CDN cache absorbs most repeat reads). */
+const RATE = { limit: Number(process.env.RATE_LIMIT_PER_MIN ?? 120), windowMs: 60_000 };
+const hits = new Map<string, { n: number; reset: number }>();
+export function rateLimited(client: string, now = Date.now()): number | null {
+  const h = hits.get(client);
+  if (!h || now >= h.reset) {
+    hits.set(client, { n: 1, reset: now + RATE.windowMs });
+    if (hits.size > 10_000) for (const [k, v] of hits) if (now >= v.reset) hits.delete(k);
+    return null;
+  }
+  h.n++;
+  return h.n > RATE.limit ? Math.ceil((h.reset - now) / 1000) : null;
 }
 const ok = (data: unknown, extra: Json = {}) => ({ data, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, served: "independently_confirmed_records_only", ...extra } });
 const err = (code: string, message: string, hint?: string) => ({ error: { code, message, ...(hint ? { hint } : {}) } });
 
-const OPENAPI = JSON.parse(readFileSync(new URL("../../openapi/keldrin.v1.json", import.meta.url), "utf8")) as Json;
+const OPENAPI = OPENAPI_DOC as unknown as Json;
 
-export const LLMS_TXT = `# Keldrin (local Phase 1 build)
+export const LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
 Every record is derived from chain state and independently re-verified; values are exact integers (WAD = 1e18).
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
+- GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
+- GET /v1/changes?since=2026-11-27T00:00:00Z — events added or changed since a timestamp (poll this)
 - GET /v1/assets — tokens, identity checks, current multiplier (WAD)
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -35,9 +55,33 @@ Errors: {"error":{"code","message","hint"}}. 404 unknown, 400 bad input, 409 amb
 
 export async function handle(db: PGlite, req: IncomingMessage, res: ServerResponse) {
   try {
+    if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
     if (req.method !== "GET") return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", "use GET"));
+    const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
+    const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
+    if (retry !== null) {
+      res.setHeader("retry-after", String(retry));
+      return send(res, 429, err("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
+    }
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
+
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/health"] }));
+
+    if (p === "/v1/events" || p === "/v1/changes") {
+      const contract = url.searchParams.get("contract");
+      if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      const status = url.searchParams.get("status");
+      if (status && !["predicted", "confirmed_onchain", "verified_matched", "late", "unknown"].includes(status)) return send(res, 400, err("BAD_STATUS", "status must be predicted, confirmed_onchain, verified_matched, late or unknown"));
+      let since: number | null = null;
+      if (p === "/v1/changes") {
+        const s = url.searchParams.get("since");
+        since = s ? Date.parse(s) : NaN;
+        if (!s || Number.isNaN(since)) return send(res, 400, err("BAD_SINCE", "since must be an ISO 8601 timestamp", "use meta.as_of from your previous call"));
+      }
+      const events = (await listEvents(db, { contract, status })).filter((e) => since === null || Date.parse(e.updated_at) > since);
+      return send(res, 200, ok(events, { count: events.length, ...(since !== null ? { since: new Date(since).toISOString() } : {}) }));
+    }
 
     if (p === "/llms.txt") return send(res, 200, LLMS_TXT, "text/plain; charset=utf-8");
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
@@ -148,7 +192,9 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     return send(res, 404, err("NOT_FOUND", `no route ${p}`, "see /llms.txt"));
   } catch (e) {
-    return send(res, 500, err("INTERNAL", "internal error", String((e as Error).message).slice(0, 200)));
+    // Never return internal details (SQL, hosts) to clients; log them server-side.
+    console.error("keldrin api error:", (e as Error).stack ?? e);
+    return send(res, 500, err("INTERNAL", "internal error", "retry later; if it persists the service is degraded (see /health)"));
   }
 }
 

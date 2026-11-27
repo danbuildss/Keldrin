@@ -2,10 +2,19 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Keldrin API",
-  "version": "0.2.0",
-  "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Phase 2: local deployment only."
+  "version": "0.3.0",
+  "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
  },
  "servers": [
+  {
+   "url": "https://{host}",
+   "variables": {
+    "host": {
+     "default": "keldrin.vercel.app",
+     "description": "deployment host (set at deploy time)"
+    }
+   }
+  },
   {
    "url": "http://127.0.0.1:8787",
    "description": "local"
@@ -414,6 +423,167 @@
      }
     }
    }
+  },
+  "/v1/events": {
+   "get": {
+    "operationId": "listEvents",
+    "summary": "Applied and upcoming corporate actions in one list",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "schema": {
+       "enum": [
+        "predicted",
+        "confirmed_onchain",
+        "verified_matched",
+        "late",
+        "unknown"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Events",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/Event"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad input",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited (see retry-after)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/changes": {
+   "get": {
+    "operationId": "listChanges",
+    "summary": "Events added or whose status changed since a timestamp (poll with meta.as_of)",
+    "parameters": [
+     {
+      "name": "since",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "date-time"
+      }
+     },
+     {
+      "name": "contract",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "schema": {
+       "enum": [
+        "predicted",
+        "confirmed_onchain",
+        "verified_matched",
+        "late",
+        "unknown"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Changed events",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/Event"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad input",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limited (see retry-after)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -516,6 +686,157 @@
      },
      "observed_block": {
       "type": "string"
+     }
+    }
+   },
+   "Event": {
+    "type": "object",
+    "required": [
+     "event_id",
+     "chain_id",
+     "ticker",
+     "contract_address",
+     "event_type",
+     "status",
+     "confidence",
+     "expected_adjustment_date",
+     "updated_at",
+     "warnings"
+    ],
+    "properties": {
+     "event_id": {
+      "type": "string"
+     },
+     "chain_id": {
+      "const": 8453
+     },
+     "ticker": {
+      "type": "string",
+      "description": "B20 token symbol, e.g. NVDAc. Store contract_address, not the ticker."
+     },
+     "contract_address": {
+      "type": "string"
+     },
+     "event_type": {
+      "enum": [
+       "dividend",
+       "split",
+       "reverse_split",
+       "other"
+      ]
+     },
+     "status": {
+      "enum": [
+       "predicted",
+       "confirmed_onchain",
+       "verified_matched",
+       "late",
+       "unknown"
+      ],
+      "description": "predicted: declared/announced, not applied yet. confirmed_onchain: applied, no dated company declaration matched. verified_matched: applied and matches the declared payable date. late: applied (or expected) more than 1 day after the payable date."
+     },
+     "confidence": {
+      "enum": [
+       "high",
+       "medium",
+       "unknown"
+      ],
+      "description": "high: two independent sources agree (SEC declaration and onchain). medium: one source. Never guessed."
+     },
+     "expected_adjustment_date": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "Payable date of the declaration (observed issuer pattern, not a guarantee). null when no dated declaration is evidenced."
+     },
+     "adjusted_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "multiplier_before_wad": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "multiplier_after_wad": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "multiplier_delta": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "after/before as an exact decimal string"
+     },
+     "per_share": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "record_date": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "payable_date": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "sec_filing_url": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "quoted_text": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "onchain_tx": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "issuer_corporate_action_uuid": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "record_id": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "basis": {
+      "type": "string"
+     },
+     "updated_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "warnings": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Anything that does not add up beyond timing, e.g. multiplier_change_unusually_large_for_cash_dividend. Any warning lowers confidence."
      }
     }
    }

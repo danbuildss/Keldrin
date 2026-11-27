@@ -22,3 +22,5 @@ jobs:
       - run: npm ci
       # Offline: replays recorded real responses; no network secrets needed.
       - run: npm test
+      # The deployed function is the committed bundle; it must match the source.
+      - run: npm run build:api && git diff --exit-code -- 'api/'
