@@ -1,0 +1,6 @@
+# Launch and hackathon execution
+Internal target: Dec 5, 2026; official Base page and rules checked Nov 27 list Dec 12 at 23:59 UTC for final submission. Initial application submitted; acceptance unknown. Check current rules and eligibility before submission. No token launch required in our proposed product. No US trading features; Keldrin is read-only.
+
+Nov 27–28: Phase 0 source/reuse audit; Phase 1 first proof after approval. Nov 29–Dec 2: backend adapters, registry, event store, gold tests, REST. Dec 3–5: approved UI, manual/controlled schedule, one integration and x402 only if ready. Dec 6–10: external integrations, measured feedback, fixes. Dec 11: record demo and submit early. If late, cut MCP, Telegram, webhooks, additional metrics, extra assets before cutting verification. No fake records or synthetic adoption.
+
+Demo: official source → verified contract → review verdict → API response → external sample consuming event → real paid request if approved → usage with internal/demo/external split. Provide source citations, coverage and latency, GitHub commits, real transaction evidence where applicable. Confirm x402 payments count as traction with organizer; do not label them stock volume. Founder posts Loom on X tagging @buildonbase and completes official form. No automatic posting or submission.

@@ -1,0 +1,8 @@
+# Research and publication policy
+Use public authoritative sources or explicitly licensed APIs. Respect SEC fair access, source terms, attribution, redistribution restrictions, caching rules and deletion/correction policies. Source access is not automatic redistribution permission. Minimize raw text redistribution. Record access date and source URL, document ID and extraction pointer; retain hashes where permissible.
+
+Source hierarchy: official filing/IR for company facts; issuer for token terms and corporate-action implementation; designated feed for reference values; chain evidence for contract state; licensed provider for raw equity prices. Secondary news is discovery, not sole confirmation for material claims. Separate official facts, calculations and interpretation; no speculation as fact. No investment advice, personalized recommendations or guarantees.
+
+Gate: deterministic schema and identity validation PASS; source evidence present for every material claim; independent reviewer CONFIRMED; data entitlements verified; timestamps/freshness known; no unresolved source conflicts. Otherwise draft, stale, disputed or rejected. A future scheduled event is not an effective event. Never apply a B20 multiplier twice to a total-return reference. Check market session and comparable units before a divergence calculation.
+
+No external publishing/outreach/submission without explicit per-action owner approval. API serving and polling require explicit deployment and data-policy approval. Corrections are append-only revisions; preserve audit trail and mark superseded data. No unauthorized scanning, scraping, signing or financial execution.

@@ -1,0 +1,12 @@
+# Event investigation
+- Event ID / revision:
+- Underlying ticker / class / CIK:
+- Chain ID / contract / issuer / mapping evidence:
+- Event type / status:
+- Announcement / effective / observation timestamps:
+- Facts with source locator and units:
+- Reference observations, semantics and freshness (if applicable):
+- Interpretation and limitations:
+- Schema and deterministic checks:
+- Independent reviewer verdict and evidence:
+- Release decision / correction history:

@@ -1,0 +1,8 @@
+# Architecture proposal
+Source adapters (SEC, IR, issuer, Base RPC / authorized market provider) → deterministic normalizer and mapping registry → evidence store → event extraction/synthesis → independent verifier → versioned event store → REST / public evidence UI / optional MCP & x402. Research worker is separate from API request serving; cache approved records and never run arbitrary web searches on paid requests by default.
+
+Suggested stack: TypeScript/Node; Zod or JSON Schema; Postgres/Supabase for events, assets, sources, observations, reviews, revisions, usage; GitHub Actions/Aeon for orchestration; Vercel API/UI if compatible. Confirm current provider APIs and versions. Store secrets in managed secret store; least privileges; separate x402 facilitator/receiving address from research agent. No research wallet signing. Use official x402 verification/settlement flow, verify amount/network/resource, avoid replay, return service only per settlement policy. Do not charge for unsupported/stale-as-current data.
+
+Reuse Orric guard, verification, memory, scorecard, content drafts and scoped improvement patterns only after reviewing actual source. Inspect Aeon skill runner and scheduling format rather than inventing configuration. Proposed schedules: manual first; approved 30–60 minute event polling during suitable windows, daily digest, weekly evaluation; actual cadence subject to rate limits, freshness goals and cost. Use exchange timezone/calendar, UTC storage, locks, retry/backoff, budget caps and failure notification. Disabled until owner approval.
+
+v0.2: DATABASE.md, SECURITY.md and AUTOMATION.md expand the proposed stack. Use one orchestrator, not duplicate native cron and Aeon; no schedule until gate.

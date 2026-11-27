@@ -1,0 +1,54 @@
+name: Keldrin research (TEMPLATE ONLY)
+on:
+  workflow_dispatch:
+# Add schedule only after explicit approval and successful manual runs.
+permissions:
+  contents: read
+concurrency:
+  group: keldrin-research
+  cancel-in-progress: false
+jobs:
+  research:
+    if: vars.RESEARCH_ENABLED == 'true'
+    environment: keldrin-research
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run research:guard
+        env:
+          DAILY_BUDGET_USD: ${{ vars.DAILY_BUDGET_USD }}
+      - run: npm run research:collect
+        env:
+          RESEARCH_RUN_ID: ${{ github.run_id }}
+          DAILY_BUDGET_USD: ${{ vars.DAILY_BUDGET_USD }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_WORKER_KEY: ${{ secrets.SUPABASE_WORKER_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  review:
+    needs: research
+    environment: keldrin-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run research:verify
+        env:
+          RESEARCH_RUN_ID: ${{ github.run_id }}
+          DAILY_BUDGET_USD: ${{ vars.DAILY_BUDGET_USD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_REVIEWER_KEY: ${{ secrets.SUPABASE_REVIEWER_KEY }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+# Release is a separately approved workflow, not an automatic next step.

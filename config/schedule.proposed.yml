@@ -1,0 +1,22 @@
+# Planning only — NOT an Aeon configuration. No execution implied.
+activation: disabled
+orchestrator: pending_aeon_review
+timezone: UTC
+jobs:
+  discover-and-review:
+    cron: '17 * * * *'
+    enabled: false
+  daily-brief-draft:
+    cron: '45 21 * * *'
+    enabled: false
+  health:
+    cron: '37 * * * *'
+    enabled: false
+  weekly-evaluation:
+    cron: '0 18 * * 0'
+    enabled: false
+limits:
+  max_attempts: 3
+  max_run_minutes: 15
+  max_pages_per_source: 10
+  budget_usd_per_day: null # founder must approve a non-null budget before activation

@@ -1,0 +1,31 @@
+name: Keldrin record release (TEMPLATE ONLY)
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_id:
+        description: Exact independently reviewed candidate revision ID
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: keldrin-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: vars.RELEASE_ENABLED == 'true'
+    environment: keldrin-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run research:release
+        env:
+          CANDIDATE_ID: ${{ inputs.candidate_id }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_RELEASE_KEY: ${{ secrets.SUPABASE_RELEASE_KEY }}
+# No social posting or trading. Release worker validates exact hash and approved rights.

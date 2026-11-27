@@ -1,0 +1,57 @@
+{
+  "event_id": "synthetic-example-001",
+  "revision": 1,
+  "schema_version": "0.1",
+  "synthetic": true,
+  "underlying": {
+    "ticker": "DEMO",
+    "cik": null,
+    "share_class": null,
+    "isin": null
+  },
+  "asset": {
+    "chain_id": 8453,
+    "contract_address": "0x0000000000000000000000000000000000000000",
+    "issuer": "SYNTHETIC ONLY",
+    "mapping_source": "fixture-source"
+  },
+  "event_type": "earnings_release",
+  "status": "announced",
+  "announced_at": null,
+  "effective_at": null,
+  "observed_at": "2026-11-27T00:00:00Z",
+  "facts": [
+    {
+      "key": "fixture_value",
+      "value": "123.45",
+      "unit": "USD",
+      "evidence_ids": [
+        "fixture-source"
+      ]
+    }
+  ],
+  "interpretation": null,
+  "sources": [
+    {
+      "id": "fixture-source",
+      "url": "https://example.invalid/synthetic-only",
+      "document_id": null,
+      "retrieved_at": "2026-11-27T00:00:00Z",
+      "locator": "synthetic fixture",
+      "rights_state": "unknown"
+    }
+  ],
+  "verification": {
+    "state": "draft",
+    "reviewed_at": null,
+    "review_id": null,
+    "limitations": [
+      "Synthetic example; never serve publicly."
+    ]
+  },
+  "freshness": {
+    "as_of": "2026-11-27T00:00:00Z",
+    "state": "unknown"
+  },
+  "supersedes": null
+}

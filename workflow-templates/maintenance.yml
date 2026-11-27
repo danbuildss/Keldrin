@@ -1,0 +1,39 @@
+name: Keldrin maintenance (TEMPLATE ONLY)
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        type: choice
+        required: true
+        options:
+          - health
+          - brief-draft
+          - evaluation
+permissions:
+  contents: read
+jobs:
+  maintenance:
+    if: vars.RESEARCH_ENABLED == 'true'
+    environment: keldrin-maintenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: |
+          case "$JOB" in
+            health) npm run ops:health ;;
+            brief-draft) npm run ops:brief-draft ;;
+            evaluation) npm run ops:evaluate ;;
+            *) exit 1 ;;
+          esac
+        env:
+          JOB: ${{ inputs.job }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_READONLY_KEY: ${{ secrets.SUPABASE_READONLY_KEY }}
+          DAILY_BUDGET_USD: ${{ vars.DAILY_BUDGET_USD }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+# Drafts only, no automatic publishing; use approved private storage.

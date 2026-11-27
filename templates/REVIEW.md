@@ -1,0 +1,2 @@
+# Independent review
+Record event ID/revision/payload SHA-256; reviewer run ID and timestamp; primary URLs re-opened; per-claim verdict with evidence locator; identity, units, effective date, contradictions, rights, freshness and limitations. Verdict CONFIRMED / UNSURE / REJECTED. UNSURE and REJECTED block release. Reviewer must not be the original author. A correction creates a new revision and new review.
