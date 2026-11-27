@@ -133,6 +133,7 @@ async function calendar(symbols?: string[]) {
   const built = await buildCalendar(db, secScope, asOf);
   const entries = mergeIssuerAnnounced(built.entries, pending, asOf);
   const skipped = built.skipped;
+  if (built.notApplicable.length) console.log("calendar: " + built.notApplicable.length + " past declaration(s) not applicable to the token: " + built.notApplicable.map((n) => n.symbol + " (" + n.reason + ")").join("; "));
   const out: unknown[] = [];
   for (const e of entries) {
     const parts = [] as { verdict: string; claims: unknown[] }[];
@@ -148,7 +149,7 @@ async function calendar(symbols?: string[]) {
     console.log("  " + review.verdict.padEnd(9) + " " + e.token.symbol.padEnd(7) + " " + e.state.padEnd(12) + (e.declaration ? " $" + e.declaration.per_share + " record " + e.declaration.record_date + " payable " + e.declaration.payable_date : " " + (e.issuer_announcement?.description ?? "")) + (e.issuer_announcement ? " [issuer-announced]" : "") + (e.applied_record_id ? " -> applied" : ""));
   }
   mkdirSync(OUT, { recursive: true });
-  writeFileSync(join(OUT, "calendar-latest.json"), JSON.stringify({ snapshot_id: snapshotId, as_of: asOf.toISOString(), scope: secScope, skipped, entries: out }, null, 1) + "\n");
+  writeFileSync(join(OUT, "calendar-latest.json"), JSON.stringify({ snapshot_id: snapshotId, as_of: asOf.toISOString(), scope: secScope, skipped, not_applicable: built.notApplicable, entries: out }, null, 1) + "\n");
   console.log("calendar: " + entries.length + " entr(ies) for " + scope.length + " token(s); skipped " + JSON.stringify(skipped));
   await db.close();
 }

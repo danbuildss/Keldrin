@@ -26,13 +26,14 @@ export type CalendarEntry = {
 
 export type IssuerAnnouncement = { corporate_action_uuid: string; status: string; description: string; announced_at: string | null; announcements: { tx_hash: string; block: string; log_index: number; id: string; uri: string; caller: string }[] };
 
-export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Date(), lookbackDays = 120): Promise<{ entries: CalendarEntry[]; skipped: { symbol: string; reason: string }[] }> {
+export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Date(), lookbackDays = 120): Promise<{ entries: CalendarEntry[]; skipped: { symbol: string; reason: string }[]; notApplicable: { symbol: string; record_date: string; payable_date: string; reason: string }[] }> {
   const pattern = await observedPattern(db);
   const entries: CalendarEntry[] = [];
   const skipped: { symbol: string; reason: string }[] = [];
+  const notApplicable: { symbol: string; record_date: string; payable_date: string; reason: string }[] = [];
   const today = asOf.toISOString().slice(0, 10);
   for (const symbol of symbols) {
-    const asset = (await db.query<{ contract_address: string; name: string }>("SELECT contract_address, name FROM assets WHERE symbol=$1", [symbol])).rows[0];
+    const asset = (await db.query<{ contract_address: string; name: string; first_mint: string | null }>("SELECT contract_address, name, identity->>'first_mint_date' AS first_mint FROM assets WHERE symbol=$1", [symbol])).rows[0];
     const ticker = underlyingTicker(symbol);
     if (!asset || !ticker) {
       skipped.push({ symbol, reason: asset ? "no underlying ticker" : "not a tracked asset" });
@@ -50,6 +51,15 @@ export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Da
       for (const d of await filingDocuments(r.cik, cand.accession)) {
         for (const x of extractDividendDeclarations(d.text)) {
           if (!x.payable_date || !x.record_date) continue;
+          // A declaration whose record date precedes the token's first mint (or a token never minted)
+          // cannot adjust the token: it is not applicable, not "late".
+          if (!asset.first_mint || x.record_date < asset.first_mint.slice(0, 10)) {
+            if (x.payable_date <= today) {
+              const reason = asset.first_mint ? `record date ${x.record_date} is before the token's first mint ${asset.first_mint.slice(0, 10)}` : "token has no supply (never minted)";
+              if (!notApplicable.some((n) => n.symbol === symbol && n.payable_date === x.payable_date)) notApplicable.push({ symbol, record_date: x.record_date, payable_date: x.payable_date, reason });
+              continue;
+            }
+          }
           const key = `${x.per_share}|${x.payable_date}`;
           if (seen.has(key)) continue;
           seen.add(key);
@@ -75,7 +85,7 @@ export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Da
       }
     }
   }
-  return { entries: entries.sort((a, b) => (a.declaration.payable_date ?? "").localeCompare(b.declaration.payable_date ?? "")), skipped };
+  return { entries: entries.sort((a, b) => (a.declaration?.payable_date ?? "").localeCompare(b.declaration?.payable_date ?? "")), skipped, notApplicable };
 }
 
 /** Measured rate at which confirmed actions took effect on the declared payable date. */
