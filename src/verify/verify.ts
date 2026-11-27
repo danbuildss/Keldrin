@@ -296,13 +296,33 @@ export async function verifyReconciliation(recon: Rec, actionRecord: Rec, tx: Tr
   if (ev) {
     try {
       const j = await tx.getJson(ev.source_url);
-      const facts: Rec[] = j?.units?.["USD/shares"] ?? [];
-      const hit = facts.find((f) => f.accn === ev.accession && f.start === ev.period_start && f.end === ev.period_end);
-      add("SEC XBRL fact re-fetched", hit && String(hit.val) === ev.per_share_usd && hit.form === ev.form ? "CONFIRMED" : "REJECTED", hit ? `${hit.val} ${hit.form} ${hit.accn}` : "fact not found");
-      const eff = String(actionRecord.action.effective.time).slice(0, 10);
-      add("action date falls inside the fact's period", ev.period_start <= eff && eff <= ev.period_end ? "CONFIRMED" : "REJECTED", `${eff} in ${ev.period_start}..${ev.period_end}`);
+      const facts: Rec[] = j?.units?.[ev.unit === "pure" ? "pure" : "USD/shares"] ?? [];
+      const hit = facts.find((f) => f.accn === ev.accession && (f.start ?? f.end) === ev.period_start && f.end === ev.period_end);
+      add("SEC XBRL fact re-fetched", hit && String(hit.val) === ev.value && hit.form === ev.form ? "CONFIRMED" : "REJECTED", hit ? `${hit.val} ${hit.form} ${hit.accn}` : "fact not found");
+      if (ev.unit !== "pure") {
+        const eff = String(actionRecord.action.effective.time).slice(0, 10);
+        add("action date falls inside the fact's period", ev.period_start <= eff && eff <= ev.period_end ? "CONFIRMED" : "REJECTED", `${eff} in ${ev.period_start}..${ev.period_end}`);
+      } else {
+        const r = (BigInt(actionRecord.action.multiplier_after_wad) * 10n ** 18n) / BigInt(actionRecord.action.multiplier_before_wad);
+        add("split ratio equals multiplier ratio", r === BigInt(ev.value) * 10n ** 18n ? "CONFIRMED" : "REJECTED", `ratio ${r} vs ${ev.value}`);
+      }
     } catch (e) {
       add("SEC XBRL fact re-fetched", "UNSURE", (e as Error).message.slice(0, 120));
+    }
+  }
+  // Declaration candidates must exist in SEC's own filing index with the stated form, date and items.
+  if (recon.company?.cik && (recon.declaration_candidates ?? []).length) {
+    try {
+      const sub = await tx.getJson(`https://data.sec.gov/submissions/CIK${recon.company.cik}.json`);
+      const r = sub.filings.recent;
+      const bad = recon.declaration_candidates.filter((d: Rec) => {
+        const i = r.accessionNumber.indexOf(d.accession);
+        return i < 0 || r.form[i] !== d.form || r.filingDate[i] !== d.filed || (r.items[i] ?? "") !== d.items;
+      });
+      add("declaration candidate filings exist as stated", bad.length ? "REJECTED" : "CONFIRMED", `${recon.declaration_candidates.length} checked, ${bad.length} mismatched`);
+      add("company name and tickers match SEC", sub.name === recon.company.name && JSON.stringify(sub.tickers) === JSON.stringify(recon.company.sec_tickers) ? "CONFIRMED" : "REJECTED", `${sub.name} ${sub.tickers}`);
+    } catch (e) {
+      add("declaration candidate filings exist as stated", "UNSURE", (e as Error).message.slice(0, 120));
     }
   }
   const ref = recon.reference;

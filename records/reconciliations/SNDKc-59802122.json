@@ -1,0 +1,112 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5:sec:b07047256f84",
+  "action_kind": "stock_split",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5",
+   "payload_sha256": "b07047256f84b45aec10d9b49268da47ee475df4fded5458367295c5acfeef02"
+  },
+  "company": {
+   "cik": "0002023554",
+   "name": "Sandisk Corp",
+   "sec_tickers": [
+    "SNDK"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3a72f0a3ac4d31cb",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=5117e592008640aa",
+    "https://data.sec.gov/submissions/CIK0002023554.json sha256=6f59d8f061f93fd6"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001628280-26-075127",
+    "form": "8-K",
+    "filed": "2026-11-19",
+    "items": "5.03,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026075127/sndk-20261119.htm"
+   },
+   {
+    "accession": "0001628280-26-068243",
+    "form": "8-K",
+    "filed": "2026-10-29",
+    "items": "2.02,8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026068243/sndk-20261029.htm"
+   },
+   {
+    "accession": "0001628280-26-053346",
+    "form": "8-K",
+    "filed": "2026-08-05",
+    "items": "2.02,8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/sndk-20260805.htm"
+   }
+  ],
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Sandisk Corp\" token=\"Sandisk Corporation\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers SNDK"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "80004C200"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "sec_split_ratio_matches_multiplier",
+    "result": "unknown",
+    "detail": "no XBRL split ratio fact yet (reporting lag or not tagged)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "Split ratio not yet evidenced in SEC structured data."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:27:51.167Z"
+ },
+ "payload_sha256": "c990d7fa0c45de1d80a127275c4e2bc2a434f240aea7de3baf17b1de9610b1e1",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash b07047256f84b45a"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "3 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Sandisk Corp SNDK"
+   }
+  ],
+  "checked_at": "2026-11-27T08:27:51.613Z"
+ }
+}

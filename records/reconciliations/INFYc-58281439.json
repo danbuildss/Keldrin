@@ -1,0 +1,138 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536:sec:da3a8ecbe571",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
+   "payload_sha256": "da3a8ecbe571e5d58a3751808381b083d25d8f84e290231d9464bcf2204c470a"
+  },
+  "company": {
+   "cik": "0001067491",
+   "name": "Infosys Ltd",
+   "sec_tickers": [
+    "INFY"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Infosys%20Limited sha256=fe817998a145c319",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=INFY sha256=e31d9ac31047cfd9",
+    "https://data.sec.gov/submissions/CIK0001067491.json sha256=1ff21b6c886bcead"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001067491-26-000044",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000044/index.htm"
+   },
+   {
+    "accession": "0001067491-26-000042",
+    "form": "6-K",
+    "filed": "2026-10-23",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000042/index.htm"
+   },
+   {
+    "accession": "0001067491-26-000040",
+    "form": "6-K",
+    "filed": "2026-10-13",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000040/index.htm"
+   },
+   {
+    "accession": "0001067491-26-000038",
+    "form": "6-K",
+    "filed": "2026-07-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000038/index.htm"
+   },
+   {
+    "accession": "0001067491-26-000036",
+    "form": "6-K",
+    "filed": "2026-07-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000036/index.htm"
+   },
+   {
+    "accession": "0001067491-26-000034",
+    "form": "6-K",
+    "filed": "2026-07-23",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000034/index.htm"
+   }
+  ],
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Infosys Ltd\" token=\"Infosys Limited\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers INFY"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "456788108"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "6 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.021642990925283286"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "no us-gaap dividend-per-share facts (e.g. a foreign filer reporting under IFRS)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "No us-gaap dividend-per-share facts for this company."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:27:49.760Z"
+ },
+ "payload_sha256": "a87d1c8b544deb238229de4cd6ffde8130781b108762c4d99f5fcd6a2b0c4ed6",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash da3a8ecbe571e5d5"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "6 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Infosys Ltd INFY"
+   }
+  ],
+  "checked_at": "2026-11-27T08:27:50.224Z"
+ }
+}

@@ -1,0 +1,180 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec:d2e66841e30f",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
+   "payload_sha256": "d2e66841e30fc92ad0006a9518d926958fa80b2aab4fc518d2898096b7f20597"
+  },
+  "company": {
+   "cik": "0001652044",
+   "name": "Alphabet Inc.",
+   "sec_tickers": [
+    "GOOGL",
+    "GOOG",
+    "GOOGM",
+    "GOOGN"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Alphabet%20Inc. sha256=a02a20d1d55eae81",
+    "https://data.sec.gov/submissions/CIK0001652044.json sha256=ab48e93cbc5bfaa5"
+   ]
+  },
+  "company_event": {
+   "type": "cash_dividend_declared_per_share",
+   "value": "0.22",
+   "unit": "USD/share",
+   "period_start": "2026-07-01",
+   "period_end": "2026-09-30",
+   "accession": "0001652044-26-000084",
+   "form": "10-Q",
+   "filed": "2026-10-29",
+   "source_url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0001652044/us-gaap/CommonStockDividendsPerShareDeclared.json",
+   "source_sha256": "232fd0cfb93bb194693ddd6fb8b861f537c372d833af3aab3c1c542f0bcc2d2e"
+  },
+  "declaration_candidates": [
+   {
+    "accession": "0001193125-26-342390",
+    "form": "8-K",
+    "filed": "2026-08-10",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000119312526342390/d171253d8k.htm"
+   },
+   {
+    "accession": "0001652044-26-000066",
+    "form": "8-K",
+    "filed": "2026-07-22",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/goog-20260722.htm"
+   },
+   {
+    "accession": "0001193125-26-259830",
+    "form": "8-K",
+    "filed": "2026-06-05",
+    "items": "1.01,3.03,5.03,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000119312526259830/d36818d8k.htm"
+   },
+   {
+    "accession": "0001193125-26-257724",
+    "form": "8-K",
+    "filed": "2026-06-04",
+    "items": "1.01,7.01,8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000119312526257724/d83560d8k.htm"
+   },
+   {
+    "accession": "0001193125-26-234488",
+    "form": "8-K",
+    "filed": "2026-05-21",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000119312526234488/d144566d8k.htm"
+   }
+  ],
+  "reference": {
+   "feed": "0x5bF49E0ffA937CE2FfF033c739aD7C634c4D34F2",
+   "description": "Coinbase GOOGL",
+   "answer_raw": "34710000000",
+   "decimals": 8,
+   "value_usd": "347.1",
+   "updated_at": "2026-09-14T18:25:03.000Z",
+   "read_at_block": "51310618"
+  },
+  "interpretation": {
+   "implied_net_reinvested_per_share_usd": "0.13089789",
+   "ratio_to_declared": "0.59499",
+   "caveat": "Interpretation, not fact: assumes reinvestment at the feed's total-return reference just before the action. The issuer does not publish its per-action tax/fee breakdown, so the gap to the declared amount is unexplained, not an error."
+  },
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Alphabet Inc.\" token=\"Alphabet Inc.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers GOOGL,GOOG,GOOGM,GOOGN"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "02079K305"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "5 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000377118676784179"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "pass",
+    "detail": "0.22 USD/share for 2026-07-01..2026-09-30 (10-Q 0001652044-26-000084)"
+   },
+   {
+    "name": "implied_net_not_above_declared",
+    "result": "pass",
+    "detail": "implied 0.13089789 vs declared 0.22"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2)."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:27:31.300Z"
+ },
+ "payload_sha256": "16bd91a606028ae63a8303da0dff725dacb22414b4efe3f94b95387ff2698b4a",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash d2e66841e30fc92a"
+   },
+   {
+    "claim": "SEC XBRL fact re-fetched",
+    "verdict": "CONFIRMED",
+    "evidence": "0.22 10-Q 0001652044-26-000084"
+   },
+   {
+    "claim": "action date falls inside the fact's period",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-09-14 in 2026-07-01..2026-09-30"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "5 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Alphabet Inc. GOOGL,GOOG,GOOGM,GOOGN"
+   },
+   {
+    "claim": "reference value at block",
+    "verdict": "CONFIRMED",
+    "evidence": "answer 34710000000 at 51310618"
+   },
+   {
+    "claim": "implied net per share arithmetic",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed 0.13089789"
+   }
+  ],
+  "checked_at": "2026-11-27T08:27:32.421Z"
+ }
+}

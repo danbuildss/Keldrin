@@ -1,0 +1,130 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da:sec:790f55d0436f",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
+   "payload_sha256": "790f55d0436f3c3e44ed6ef6b186483f767caafd4e9b4834a3a85e48d6c75763"
+  },
+  "company": {
+   "cik": "0001045810",
+   "name": "NVIDIA CORP",
+   "sec_tickers": [
+    "NVDA"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=2526a7ba88160d88",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=6e339aec2b0bbd92",
+    "https://data.sec.gov/submissions/CIK0001045810.json sha256=7c07b0a81346ce33"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001045810-26-000078",
+    "form": "8-K",
+    "filed": "2026-09-03",
+    "items": "8.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000078/nvda-20260902.htm"
+   },
+   {
+    "accession": "0001045810-26-000073",
+    "form": "8-K",
+    "filed": "2026-08-26",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm"
+   },
+   {
+    "accession": "0001193125-26-275783",
+    "form": "8-K",
+    "filed": "2026-06-18",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000119312526275783/d48176d8k.htm"
+   }
+  ],
+  "reference": {
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "description": "Coinbase NVDA",
+   "answer_raw": "23025000000",
+   "decimals": 8,
+   "value_usd": "230.25",
+   "updated_at": "2026-10-01T16:18:27.000Z",
+   "read_at_block": "52041959"
+  },
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"NVIDIA CORP\" token=\"NVIDIA Corporation\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers NVDA"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "67066G104"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000537939576369481"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "not yet reported in XBRL (latest quarterly fact ends 2026-07-26)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:27:36.556Z"
+ },
+ "payload_sha256": "f20a1213627b6c2d4dd9efab11b56e22acc3f74dc10f6f80feb8906d5fe45040",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash 790f55d0436f3c3e"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "3 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "NVIDIA CORP NVDA"
+   },
+   {
+    "claim": "reference value at block",
+    "verdict": "CONFIRMED",
+    "evidence": "answer 23025000000 at 52041959"
+   }
+  ],
+  "checked_at": "2026-11-27T08:27:37.222Z"
+ }
+}

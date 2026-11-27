@@ -1,0 +1,129 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376:sec:67c1129934b1",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
+   "payload_sha256": "67c1129934b13c8825177a1e5ad563d34d87071bbcbbe284eccb8fc5bfefdd20"
+  },
+  "company": {
+   "cik": "0000320193",
+   "name": "Apple Inc.",
+   "sec_tickers": [
+    "AAPL"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=07279d12774865fe",
+    "https://data.sec.gov/submissions/CIK0000320193.json sha256=7c22869dc335882f"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001140361-26-042798",
+    "form": "8-K",
+    "filed": "2026-11-09",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/320193/000114036126042798/ef20085077_8k.htm"
+   },
+   {
+    "accession": "0000320193-26-000024",
+    "form": "8-K",
+    "filed": "2026-11-02",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/aapl-20261102.htm"
+   },
+   {
+    "accession": "0000320193-26-000018",
+    "form": "8-K",
+    "filed": "2026-07-30",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/aapl-20260730.htm"
+   }
+  ],
+  "reference": {
+   "feed": "0x787f13dEa48Db0897CbCDD985de77809D837F988",
+   "description": "Coinbase AAPL",
+   "answer_raw": "35550825000",
+   "decimals": 8,
+   "value_usd": "355.50825",
+   "updated_at": "2026-11-16T15:56:26.000Z",
+   "read_at_block": "58271536"
+  },
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Apple Inc.\" token=\"Apple Inc.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers AAPL"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "037833100"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000500389301980219"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "not yet reported in XBRL (latest quarterly fact ends 2026-06-27)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:27:47.884Z"
+ },
+ "payload_sha256": "93173df494d052893469b0d9060ac9be54c2b35a8b4392b0737b51937c4098c5",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash 67c1129934b13c88"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "3 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Apple Inc. AAPL"
+   },
+   {
+    "claim": "reference value at block",
+    "verdict": "CONFIRMED",
+    "evidence": "answer 35550825000 at 58271536"
+   }
+  ],
+  "checked_at": "2026-11-27T08:27:48.551Z"
+ }
+}

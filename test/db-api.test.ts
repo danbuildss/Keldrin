@@ -121,6 +121,9 @@ test("API input errors are structured and specific", async () => {
     assert.equal((await get(`/v1/assets/${GOOGL}`)).status, 200);
     assert.equal((await get("/v1/assets/0xb2000000000000000000000000000000000000ff")).status, 404);
     assert.match((await get("/llms.txt")).body as string, /confirmed/);
+    const spec = (await get("/openapi.json")).body;
+    assert.equal(spec.openapi, "3.1.0");
+    for (const route of ["/v1/assets", "/v1/actions", "/v1/actions/{record_id}", "/health"]) assert.ok(spec.paths[route], route);
     assert.equal((await get("/nope")).status, 404);
     const post = await fetch(`http://127.0.0.1:${(srv.address() as AddressInfo).port}/v1/assets`, { method: "POST" });
     assert.equal(post.status, 405);
@@ -155,6 +158,26 @@ test("pagination never skips records sharing a block, and reaches pending (null-
     }
     assert.equal(seen.length, blocks.length);
     assert.equal(new Set(seen).size, blocks.length);
+  } finally {
+    srv.close();
+    await db.close();
+  }
+});
+
+test("company_context is served only when its review CONFIRMED and it links the current revision's hash", async () => {
+  const { db, srv, get } = await setup();
+  try {
+    const ins = await insertRecord(db, structuredClone(fx.record));
+    await insertReview(db, review({ ...fx.record, revision: 1 }, ins.hash, "CONFIRMED", "r1"));
+    const url = `/v1/actions/${encodeURIComponent(fx.record.record_id)}`;
+    const add = (key: string, linked: string, verdict: string) =>
+      db.query("INSERT INTO reconciliations (reconciliation_id, record_id, record_payload_sha256, status, payload, payload_sha256, review_verdict, review) VALUES ($1,$2,$3,'partially_reconciled',$4,$5,$6,'{}')", [key, fx.record.record_id, linked, JSON.stringify({ k: key }), key.padEnd(64, "0").slice(0, 64), verdict]);
+    await add("a", ins.hash, "UNSURE");
+    assert.equal((await get(url)).body.data.company_context, null, "UNSURE reconciliation not served");
+    await add("b", "f".repeat(64), "CONFIRMED");
+    assert.equal((await get(url)).body.data.company_context, null, "reconciliation of another payload not served");
+    await add("c", ins.hash, "CONFIRMED");
+    assert.equal((await get(url)).body.data.company_context.k, "c");
   } finally {
     srv.close();
     await db.close();

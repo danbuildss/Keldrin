@@ -11,6 +11,7 @@ export const ALLOWED_HOSTS = new Set([
   "mainnet.base.org",
   "api.coinbase.com",
   "data.sec.gov",
+  "efts.sec.gov",
   ...(process.env.BASE_RPC_URL ? [new URL(process.env.BASE_RPC_URL).host] : []),
 ]);
 

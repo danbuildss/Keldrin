@@ -6,7 +6,7 @@ import { serve } from "./api/server.ts";
 import { insertRecord, insertReview, openDb, recordSource, upsertAsset } from "./db/db.ts";
 import { findChangePoints, gatherEvidence } from "./pipeline/discover.ts";
 import { buildIssuerActionRecord, hashRecord, type IssuerActionRecord } from "./pipeline/records.ts";
-import { hashReconciliation, reconcileDividend } from "./pipeline/reconcile.ts";
+import { hashReconciliation, reconcileAction } from "./pipeline/reconcile.ts";
 import { verifyIdentities } from "./pipeline/registry.ts";
 import { verifyIssuerAction, verifyReconciliation } from "./verify/verify.ts";
 import { canonicalJson } from "./lib/canonical.ts";
@@ -79,24 +79,29 @@ async function run() {
   await db.close();
 }
 
-async function proofGoogl() {
+async function reconcileAll(only?: string[]) {
   const db = await openDb(DB_DIR);
-  const row = (await db.query<{ payload: IssuerActionRecord; payload_sha256: string }>("SELECT payload, payload_sha256 FROM confirmed_records WHERE payload->'asset'->>'symbol' = 'GOOGLc' AND payload->'action'->>'corporate_action_uuid' = 'e82812a6-0b24-41c4-8ed1-322d1b466d33'")).rows[0];
-  if (!row) throw new Error("GOOGLc action not confirmed yet: run `npm run discover -- --symbols=GOOGLc` first");
-  const recon = await reconcileDividend(row.payload, row.payload_sha256, { cik: "0001652044", secTicker: "GOOGL" });
-  const review = await verifyReconciliation(JSON.parse(JSON.stringify(recon)), JSON.parse(JSON.stringify(row.payload)));
-  const h = hashReconciliation(recon);
-  await db.query(
-    "INSERT INTO reconciliations (reconciliation_id, record_id, record_payload_sha256, status, payload, payload_sha256, review_verdict, review) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (reconciliation_id) DO NOTHING",
-    [recon.reconciliation_id, row.payload.record_id, row.payload_sha256, recon.status, JSON.stringify(recon), h, review.verdict, JSON.stringify(review)],
-  );
-  mkdirSync(OUT, { recursive: true });
-  writeFileSync(join(OUT, "googlc-sec-reconciliation.json"), JSON.stringify({ reconciliation: recon, payload_sha256: h, review }, null, 1) + "\n");
-  console.log(`reconciliation ${recon.status}; review ${review.verdict}`);
-  for (const c of recon.checks) console.log(`  ${c.result.padEnd(7)} ${c.name} ${c.detail ?? ""}`);
-  for (const c of review.claims) console.log(`  review ${c.verdict.padEnd(9)} ${c.claim} | ${c.evidence}`);
-  if (recon.interpretation) console.log(`  interpretation: implied net ${recon.interpretation.implied_net_reinvested_per_share_usd} USD vs declared ${recon.company_event?.per_share_usd} (ratio ${recon.interpretation.ratio_to_declared})`);
-  console.log(`  unknown: ${recon.unknown.join(" | ")}`);
+  const rows = (await db.query<{ payload: IssuerActionRecord; payload_sha256: string }>("SELECT payload, payload_sha256 FROM confirmed_records WHERE payload->'action'->>'status' = 'applied' ORDER BY effective_block")).rows.filter((r) => !only || only.includes(r.payload.asset.symbol));
+  if (!rows.length) throw new Error("no confirmed applied actions: run `npm run discover` first");
+  const dir = join(OUT, "reconciliations");
+  mkdirSync(dir, { recursive: true });
+  const tally: Record<string, number> = {};
+  for (const row of rows) {
+    const recon = await reconcileAction(row.payload, row.payload_sha256);
+    const review = await verifyReconciliation(JSON.parse(JSON.stringify(recon)), JSON.parse(JSON.stringify(row.payload)));
+    const h = hashReconciliation(recon);
+    await db.query(
+      "INSERT INTO reconciliations (reconciliation_id, record_id, record_payload_sha256, status, payload, payload_sha256, review_verdict, review) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (reconciliation_id) DO NOTHING",
+      [`${recon.reconciliation_id}:${h.slice(0, 12)}`, row.payload.record_id, row.payload_sha256, recon.status, JSON.stringify(recon), h, review.verdict, JSON.stringify(review)],
+    );
+    writeFileSync(join(dir, `${row.payload.asset.symbol}-${row.payload.action.effective!.block}.json`), JSON.stringify({ reconciliation: recon, payload_sha256: h, review }, null, 1) + "\n");
+    tally[`${recon.status}/${review.verdict}`] = (tally[`${recon.status}/${review.verdict}`] ?? 0) + 1;
+    const ev = recon.company_event ? `${recon.company_event.type}=${recon.company_event.value} (${recon.company_event.accession})` : "no SEC fact";
+    console.log(`  ${row.payload.asset.symbol.padEnd(7)} ${recon.action_kind.padEnd(13)} ${recon.status.padEnd(20)} review ${review.verdict.padEnd(9)} cik ${recon.company?.cik ?? "-"} ${ev}; candidates ${recon.declaration_candidates.length}${recon.interpretation ? `; implied/declared ${recon.interpretation.ratio_to_declared}` : ""}`);
+    for (const c of recon.checks.filter((x) => x.result === "fail")) console.log(`      FAIL ${c.name}: ${c.detail ?? ""}`);
+    for (const c of review.claims.filter((x) => x.verdict !== "CONFIRMED")) console.log(`      review ${c.verdict} ${c.claim}: ${c.evidence}`);
+  }
+  console.log(`reconcile: ${rows.length} action(s); ${JSON.stringify(tally)}`);
   await db.close();
 }
 
@@ -111,7 +116,8 @@ async function verifyFile() {
 
 const commands: Record<string, () => Promise<void>> = {
   discover: run,
-  "proof-googl": proofGoogl,
+  reconcile: () => reconcileAll(flag("symbols")?.split(",")),
+  "proof-googl": () => reconcileAll(["GOOGLc"]),
   "verify-file": verifyFile,
   serve: async () => {
     const db = await openDb(DB_DIR);
@@ -121,7 +127,7 @@ const commands: Record<string, () => Promise<void>> = {
   },
   proof: async () => {
     await run();
-    await proofGoogl();
+    await reconcileAll();
   },
 };
 
