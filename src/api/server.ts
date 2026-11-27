@@ -59,6 +59,8 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/snapshot — every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> — everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
+- Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= — x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
+- GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -137,7 +139,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       } catch {
         return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, undefined, "no-store");
       }
-      const out = await handleMcp(db, msg);
+      const out = await handleMcp(db, msg, fwd || req.socket?.remoteAddress || "unknown");
       if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
       return send(res, out.status, out.body as Json, undefined, "no-store");
     }

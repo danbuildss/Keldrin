@@ -5,6 +5,7 @@ import { marketContext } from "./marketContext.ts";
 import { liveDex } from "./dex.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { PACKAGE_VERSION } from "../version.ts";
+import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
 
 // Remote MCP server (Phase 9): Streamable HTTP, stateless, JSON responses (no SSE). POST /mcp with one JSON-RPC
 // message. Read-only tools that call the same functions as the REST API, so an agent gets exactly what the API
@@ -20,6 +21,8 @@ export const TOOLS = [
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1000, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from Keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_report", title: "Everything on one stock", description: "Corporate actions with evidence, market context (live NAV, freshness, DEX gap), 30 daily NAV closes with round ids and every verified DEX pool, for one token. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link and never pays by itself.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_market_session", title: "US equity session now", description: "Whether the US stock market is open right now, with next open/close and last close (NYSE calendar 2026-2027; beyond it: calendar_not_covered).", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
 ];
 
@@ -49,7 +52,7 @@ function toolResult(out: Out, lead: (data: any) => string) {
   return { content: [{ type: "text", text: lead(body) }, { type: "text", text: JSON.stringify(body) }], structuredContent: body, isError: false };
 }
 
-async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>) {
+async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>, client: string) {
   const navOn = process.env.NAV_HISTORY_PUBLIC === "true";
   const navOff = { status: 503, body: { error: { code: "NAV_NOT_ENABLED", message: "NAV data is not publicly enabled on this server" } } };
   try {
@@ -92,6 +95,19 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
           return d.main ? `${d.symbol}: $${Number(d.main.price_usd).toFixed(2)} on ${d.main.venue} (${d.main.quote}), est. 2% depth $${Math.round(d.main.depth_2pct_usd)}${d.main.thin_market ? " (thin market)" : ""}, block ${d.block}.` : `${d.symbol}: no usable DEX price (${d.unavailable_reason}).`;
         });
       }
+      case "get_snapshot":
+      case "get_report": {
+        if ((await triesLeft(db as never, client)) === 0) {
+          const used = trialUsedUp();
+          return { content: [{ type: "text", text: `FREE_TRIES_USED: today's 3 free snapshots/reports are used. Each further answer is ${PAID.price} via x402: ${name === "get_snapshot" ? PAID.snapshot : PAID.report}${name === "get_report" ? "?token=<token>" : ""}. Ask the user before paying; never pay automatically.` }], structuredContent: used.body, isError: true };
+        }
+        const out = name === "get_snapshot" ? await snapshot(db) : await report(db, typeof args.token === "string" ? args.token : "");
+        if (out.status !== 200) return toolResult(out, () => "");
+        const left = await useTry(db as never, client);
+        const body = out.body as { data: any; meta?: Record<string, unknown> };
+        const withMeta = { ...body, meta: { ...(body.meta ?? {}), free_tries_left_today: left, paid: PAID } };
+        return toolResult({ status: 200, body: withMeta }, (b) => name === "get_snapshot" ? `${b.data.count} verified stocks; market ${b.data.market.session}. ${left} free snapshot/report tries left today.` : `${b.data.symbol}: ${b.data.corporate_actions.length} corporate action(s), ${b.data.nav_daily_30d ? b.data.nav_daily_30d.meta.count + " daily NAV closes" : "no NAV feed"}, ${b.data.dex_pools?.pools_total ?? 0} DEX pools. ${left} free tries left today.`);
+      }
       case "get_market_session": {
         const m = marketNow(Math.floor(Date.now() / 1000));
         return toolResult({ status: 200, body: { data: m } }, () => `US market: ${m.session} (${m.ny_date} ${m.ny_time} New York); next open ${m.next_open ?? "unknown"}.`);
@@ -106,7 +122,7 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
 }
 
 /** Handle one JSON-RPC message. Returns { status, body } where body null means "no response" (notification → 202). */
-export async function handleMcp(db: PGlite, raw: unknown): Promise<Out> {
+export async function handleMcp(db: PGlite, raw: unknown, client = "mcp"): Promise<Out> {
   if (!isObj(raw)) return { status: 400, body: { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request: one JSON-RPC object per POST (batches are not supported)" } } };
   const msg = raw as Msg;
   const isRequest = msg.id !== undefined && msg.id !== null;
@@ -121,7 +137,7 @@ export async function handleMcp(db: PGlite, raw: unknown): Promise<Out> {
           protocolVersion: version,
           capabilities: { tools: {} },
           serverInfo: { name: "keldrin", title: "Keldrin", version: PACKAGE_VERSION },
-          instructions: "Keldrin is a verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices. Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer.",
+          instructions: "Keldrin is a verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer.",
         });
       }
       case "ping":
@@ -130,7 +146,7 @@ export async function handleMcp(db: PGlite, raw: unknown): Promise<Out> {
         return reply({ tools: TOOLS });
       case "tools/call": {
         const p = isObj(msg.params) ? msg.params : {};
-        return reply(await callTool(db, p.name, isObj(p.arguments) ? p.arguments : {}));
+        return reply(await callTool(db, p.name, isObj(p.arguments) ? p.arguments : {}, client));
       }
       default:
         if (!isRequest) return { status: 202, body: null };

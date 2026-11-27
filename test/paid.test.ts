@@ -181,3 +181,29 @@ test("free tries are counted in the database (shared by every server instance), 
     await db.close();
   }
 });
+
+test("MCP get_snapshot / get_report use the same free tries, then return the paid link as an error (never pay)", async () => {
+  const { handleMcp } = await import("../src/api/mcp.ts");
+  const db = await seededDb(false);
+  const old = process.env.NAV_HISTORY_PUBLIC;
+  process.env.NAV_HISTORY_PUBLIC = "true";
+  resetTrials();
+  const call = (name: string, args: Record<string, unknown> = {}) => handleMcp(db as never, { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } }, "7.7.7.7");
+  try {
+    const list: any = await handleMcp(db as never, { jsonrpc: "2.0", id: 1, method: "tools/list" });
+    assert.ok(list.body.result.tools.some((t: any) => t.name === "get_snapshot") && list.body.result.tools.some((t: any) => t.name === "get_report"));
+    const a: any = await call("get_snapshot");
+    assert.equal(a.body.result.isError, false);
+    assert.equal(a.body.result.structuredContent.meta.free_tries_left_today, 2);
+    const bad: any = await call("get_report", { token: "ZZZc" });
+    assert.equal(bad.body.result.isError, true, "an unknown token is an error and uses no try");
+    assert.equal(((await call("get_report", { token: "NVDAc" })) as any).body.result.isError, false);
+    assert.equal(((await call("get_snapshot")) as any).body.result.isError, false);
+    const used: any = await call("get_snapshot");
+    assert.equal(used.body.result.isError, true);
+    assert.match(used.body.result.content[0].text, /FREE_TRIES_USED[\s\S]*x402\.bankr\.bot[\s\S]*never pay automatically/);
+  } finally {
+    process.env.NAV_HISTORY_PUBLIC = old;
+    await db.close();
+  }
+});

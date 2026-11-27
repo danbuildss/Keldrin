@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // src/npm/cli.ts
-var VERSION = "0.6.0";
+var VERSION = "0.7.0";
 var argv = process.argv.slice(2);
 var flags = new Map(argv.filter((a) => a.startsWith("--")).map((a) => {
   const [k, ...v] = a.slice(2).split("=");
@@ -22,7 +22,9 @@ async function api(path) {
     throw new CliError(`cannot reach ${API} (${e.message})`);
   }
   const body = await r.json().catch(() => null);
-  if (!r.ok) throw new CliError(body?.error ? `${body.error.code}: ${body.error.message}${body.error.hint ? " \u2192 " + body.error.hint : ""}` : `HTTP ${r.status}`);
+  if (!r.ok) throw new CliError((body?.error ? `${body.error.code}: ${body.error.message}${body.error.hint ? " \u2192 " + body.error.hint : ""}` : `HTTP ${r.status}`) + (body?.pay ? `
+  pay per call (${body.pay.price}, x402): ${path.startsWith("/v1/report") ? body.pay.report : body.pay.snapshot}
+  keldrin never pays by itself.` : ""));
   return body;
 }
 async function rpc(method, params) {
@@ -79,6 +81,25 @@ var commands = {
     const d = (await api(`/v1/assets/${await resolve(pos[1])}/dex`)).data;
     out(d.main ? `${d.symbol}: $${d.main.price_usd} on ${d.main.venue} (${d.main.quote}), est. 2% depth $${Math.round(d.main.depth_2pct_usd)}${d.main.thin_market ? " (thin)" : ""}, block ${d.block}
 ` + d.pools.map((p) => `  ${p.status.padEnd(10)} ${p.venue.padEnd(13)} ${p.quote.padEnd(4)} ${String(p.price_usd ?? "-").padStart(14)}  depth ${p.depth_2pct_usd === null ? "-" : "$" + Math.round(p.depth_2pct_usd)}  ${p.pool}`).join("\n") : `${d.symbol}: no usable DEX price (${d.unavailable_reason})`, d);
+    return 0;
+  },
+  async snapshot() {
+    const b = await api("/v1/snapshot");
+    const d = b.data;
+    out(`market ${d.market.session} \xB7 ${d.count} verified stocks \xB7 ${b.meta.free_tries_left_today} free tries left today
+` + d.stocks.map((s) => `  ${s.symbol.padEnd(7)} NAV ${s.nav ? String(s.nav.nav).padStart(12) : "unknown".padStart(12)}  ${String(s.staleness?.state ?? "").padEnd(18)} DEX ${s.dex?.price_usd ? String(Number(s.dex.price_usd).toFixed(2)).padStart(9) : "     none"}  ${typeof s.dex?.nav_premium_pct === "number" ? (s.dex.nav_premium_pct >= 0 ? "+" : "") + s.dex.nav_premium_pct + "%" : ""}  ${s.next_corporate_action ? "next " + s.next_corporate_action.event_type + " " + (s.next_corporate_action.expected_adjustment_date ?? "") : ""}`).join("\n"), b);
+    return 0;
+  },
+  async report() {
+    if (!pos[1]) throw new CliError("a token is required (contract address or exact symbol, e.g. NVDAc)");
+    const b = await api(`/v1/report?token=${encodeURIComponent(pos[1])}`);
+    const d = b.data;
+    const c = d.market_context;
+    out(`${d.symbol} (${d.token}) \xB7 ${b.meta.free_tries_left_today} free tries left today
+  corporate actions: ${d.corporate_actions.length}
+  NAV: ${c?.nav ? c.nav.nav + " (round " + c.nav.round_id + ", " + c.staleness.state + ")" : "unknown (" + (c?.nav_unavailable_reason ?? d.nav_unavailable_reason ?? "") + ")"}
+  DEX: ${c?.dex?.price_usd ? c.dex.price_usd + " on " + c.dex.venue : "none"}
+  daily NAV closes (30 d): ${d.nav_daily_30d ? d.nav_daily_30d.meta.count : "none"} \xB7 DEX pools: ${d.dex_pools?.pools_total ?? 0}`, b);
     return 0;
   },
   async session() {
@@ -159,6 +180,8 @@ async function main() {
   keldrin context <token>
   keldrin dex <token>
   keldrin session
+  keldrin snapshot
+  keldrin report <token>
   keldrin verify-nav <token> [--n=20]
   keldrin verify-dex <token>
   keldrin mcp
