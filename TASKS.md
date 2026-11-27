@@ -48,3 +48,9 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T029 | P1 (proposed) | Remote read-only MCP endpoint /mcp + MCP Registry listing | PROPOSED | Replaces the T015 shape; founder submits listings |
 | T030 | P1 (proposed) | Public self-verification of records | PROPOSED | Lesson 6 |
 | T031 | P1 | Decide the x402 host (Bankr x402 Cloud vs Vercel + facilitator) | OPEN (research) | Does Bankr support secrets? Phase 5 |
+| T032 | P0 (proposed) | NAV history indexer + `…/nav/history` (NVDAc first, then 14 feeds) | PROPOSED | docs/research/FEASIBILITY_CD003.md; Chainlink rights decision |
+| T033 | P0 (proposed) | Per-asset `…/corporate-actions` route | PROPOSED | Existing verified data |
+| T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | PROPOSED | docs/research/RISK_METHODOLOGY.md |
+| T035 | P1 (proposed) | `…/market-context` + sessions calendar | PROPOSED | docs/research/MARKET_SESSIONS.md |
+| T036 | P1 (proposed) | `…/transfer-policy` snapshot | PROPOSED | docs/research/B20_POLICIES.md |
+| T037 | P2 | DEX liquidity / NAV-DEX divergence | OPEN (terms check first) | — |

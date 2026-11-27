@@ -6,5 +6,6 @@ Stages, in order: **identified → contacted → conversation → requirements k
 |---|---|---|---|---|---|
 | Bankr (CD-002) | Index vaults holding B20 equities; swap routing; agent alerts | requirements known | Detailed field list and pricing view (docs/BUILDER_INTERVIEWS.md) | Founder sends the live API (`/v1/events`, `/llms.txt`) and asks them to test against GOOGLc Dec 14 / NVDAc Dec 23. x402 hosting offer to evaluate in Phase 5 | Founder |
 | Hector (CD-001) | Unknown; Stocks Maxxing Telegram admin | conversation | Telegram reply; DM agreed | Ask what he builds and what he would integrate (CUSTOMER_DISCOVERY.md questions) | Founder |
+| MAXXAGENT (CD-003) | Agent-picked baskets; would replace its own NAV-history, risk and market-hours code | conversation | Public post; MIT repo read | Founder replies with the CD-003 questions; offer an early NVDAc `nav/history` endpoint to test | Founder |
 
 Not yet contacted, all as hypotheses: the Stocks Maxxing partners (o1 Exchange, Stonks Exchange, BaseStonk, Hydrex, Sento, Clanker, Feel.cash) and BStocks (no event data in its API). The founder decides on and sends every outreach message; Claude only drafts.

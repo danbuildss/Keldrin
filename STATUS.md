@@ -42,3 +42,9 @@
 - Next (agreed route): founder sends Bankr and Hector the live link (Claude drafts); then SKILL.md + MCP (needs approval of T028/T029); demo and submission Dec 5–12.
 - Minor: GitHub warns that the pinned actions target Node 20 (still running on Node 24); bump the pins in a later PR.
 - Breakra study: docs/BREAKRA_STUDY.md (lessons for x402, MCP, SKILL.md and metrics; proposals not approved).
+
+## Customer Discovery CD-003 (2026-11-27)
+- MAXXAGENT: strongest signal so far (they built NAV history, risk, sessions and a B20 watcher themselves). Feasibility report: docs/research/FEASIBILITY_CD003.md.
+- Verified gaps: no NAV-history API; corporate actions only by UUID at Coinbase. Coverage limit: NAV feeds exist for 14 of 138 tokens.
+- Proposed revised plan (awaiting approval): Phase 5 NAV history → Phase 6 per-asset intelligence + skill.md → Phase 7 front page + launch check (Monday); MCP after Monday.
+- Open: Chainlink data rights; freshness (6-hourly vs hourly).

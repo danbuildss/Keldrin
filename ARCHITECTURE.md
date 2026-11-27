@@ -13,3 +13,8 @@ v0.3 (Phase 0, proposed): see PHASE0_PLAN.md §6.
 - **Data model:** separate company events (SEC), issuer actions (B20 announcement brackets and multiplier changes) and reconciliations.
 - **Verifier:** independent code path (raw JSON-RPC, separate SEC parser), bound to the payload sha256.
 - **Storage and API:** PGlite for local/tests with the same SQL on Supabase later; localhost read-only API in Phase 1.
+
+## Proposed changes (CD-003, 2026-11-27): NOT approved
+- New deterministic workers in the scheduled run: `nav-index` (feed discovery + phase-aware rounds), `risk` (pure functions over daily closes), `policy-snapshot` (onchain reads). No LLM in these paths.
+- The agent layer (Aeon/Orric patterns) stays for research, explanation and evaluation only.
+- Optional separate hourly NAV-only job if fresher data is required (cost decision).

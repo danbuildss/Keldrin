@@ -20,3 +20,11 @@ BStocks exposes tokenized-stock market and metadata APIs; issuer registry and Ch
 - audit trail
 
 This remains a hypothesis until builders confirm the need (T013). Not compared yet: commercial equity data vendors (corporate-action feeds exist but are not linked to Base contracts; licensing likely restrictive).
+
+## Added 2026-11-27 (CD-003 research)
+| Who | What they offer | Overlap with Keldrin | Gap Keldrin fills |
+|---|---|---|---|
+| Coinbase Tokenized Stocks API (official) | Token list, latest NAV, `/nav-feeds`, corporate action by UUID, prospectuses | Reference data | No NAV history; no action list per token; no SEC linkage or verification |
+| Chainlink feeds (onchain) | Total-return NAV rounds | Source for NAV | Raw rounds across phases; no daily closes, risk or session context |
+| MAXXAGENT (`/api/skill/stocks`, MIT repo) | Live NAV, DEX price, 24h, liquidity for 10 stocks; risk inside their app | Partly (live snapshot) | No history API; 10 stocks only; it's a product, not infrastructure |
+| DexScreener / GeckoTerminal | DEX prices, pools, liquidity | None today | Not pursued until terms are checked |
