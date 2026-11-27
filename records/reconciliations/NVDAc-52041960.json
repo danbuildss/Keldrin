@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da:sec:15e2e9b0f414",
+  "reconciliation_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da:sec:a307c84af1a2",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
-   "payload_sha256": "15e2e9b0f4144a2a0be290bce4f297d16d69c47902f7828c9030394e1f0303d9"
+   "payload_sha256": "a307c84af1a24f2eb0b3c355d3e1173fbf078b972458b19e53cb5fafa0f5091d"
   },
   "company": {
    "cik": "0001045810",
@@ -16,8 +16,8 @@
     "NVDA"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=094d48ccbd71ab47",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=19c0f7263fb57bb7",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=446cb802ddbc31b5",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=6e339aec2b0bbd92",
     "https://data.sec.gov/submissions/CIK0001045810.json sha256=7c07b0a81346ce33"
    ]
   },
@@ -134,16 +134,16 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T11:52:23.355Z"
+  "generated_at": "2026-11-27T10:41:51.942Z"
  },
- "payload_sha256": "6ac3cf9454d7f1ca7c4f974c29145782f9e7bb3bcf8353fd4c61ec6774e014c8",
+ "payload_sha256": "175592f08c17c044d7d88f9f4eb9121cf9c76817fe6e80dec6f135db4c248691",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 15e2e9b0f4144a2a"
+    "evidence": "record hash a307c84af1a24f2e"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -181,6 +181,6 @@
     "evidence": "answer 23025000000 at 52041959"
    }
   ],
-  "checked_at": "2026-11-27T11:52:24.560Z"
+  "checked_at": "2026-11-27T10:41:53.277Z"
  }
 }
