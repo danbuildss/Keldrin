@@ -27,3 +27,5 @@ Transactional release: validate schema + rights + active mapping + independently
 - `nav_index_state` (feed_address, phase_id, last_aggregator_round_id, closed)
 - `policy_observations` append-only (token_address, block, scope, policy_id, paused_features, probes jsonb)
 All under the private `keldrin` schema; the writer role gets INSERT; the reader gets SELECT.
+
+- CD-003 follow-up: `nav_rounds` must keep `aggregator_address`, `retrieved_at` and `decimals` per row for provenance; add `nav_reviews` (verification samples). (Proposed.)

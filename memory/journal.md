@@ -35,3 +35,5 @@
 2026-11-27 — Phase 4 live. Founder did the setup step by step (writer password, environment secrets, variables). Run #1 skipped (on-switch added as a secret, not a variable); run #2 failed (I had dropped BASE_RPC_BEARER; fixed in PR #11); run #3 succeeded in 8m51s and the live API showed it right away. Lesson: the founder is not technical; give one step per message, with exact clicks, and explain the why in plain words.
 
 2026-11-27 — CD-003 MAXXAGENT research. Read their MIT repo (995c4a2), the Base B20/Denim posts, BaseHub's Coinbase API reference and the Chainlink historical-data docs; measured all 14 NAV feeds onchain (36k rounds since 2026-08-03). Wrote the feasibility report and 5 research docs. The web-fetch helper couldn't resolve allowlisted hosts; curl from the session worked. maxxagent.xyz isn't on the allowlist. Nothing built; awaiting the founder's choice of plan.
+
+2026-11-27 — CD-003 follow-up: MAXXAGENT agreed to test. Reviewed the implementation vs their 4 requirements (no restart needed); wrote PLAN_DEVELOPER_RELEASE.md with acceptance criteria, developer docs (live vs planned) and a partner page. Nothing built.

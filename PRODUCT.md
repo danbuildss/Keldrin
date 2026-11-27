@@ -18,3 +18,5 @@ Acceptance: a third-party app retrieves a verified event by contract, validates 
 - Flagship framing: **corporate-action-aware NAV history**, meaning verified corporate actions for every token, plus NAV history, per-share values and NAV-based risk for the feed-backed tokens (14 today). See docs/research/FEASIBILITY_CD003.md.
 - Supporting: market context (session, expected vs unexpected staleness) and a read-only transfer-policy snapshot.
 - Not now: DEX liquidity, NAV/DEX divergence, alerts, earnings (after launch).
+
+- CD-003 follow-up: first developer release = `nav/history` + `market-context` (+ per-asset corporate actions). Risk after NAV coverage is verified. See docs/PLAN_DEVELOPER_RELEASE.md. (Proposed; awaiting approval.)

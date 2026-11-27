@@ -6,3 +6,6 @@ Dec 6–10: founder-led integration outreach, real usage feedback and fixes; bui
 Dec 11–12: verify live demo, honest metrics, official eligibility and rules; founder posts and submits before deadline. If blocked, ship a smaller demonstrable event feed and disclose missing features; no false claims.
 
 v0.2: begin November 27. The phased dates are targets, not approved schedule; see LAUNCH.md and TASKS.md for current plan. Backend proof before UI.
+
+## 2026-11-27 revision (proposed, awaiting approval)
+Phase 5 nav/history → Phase 6 market-context + per-asset corporate actions + developer testing package → Phase 7 launch check (Monday). Details: docs/PLAN_DEVELOPER_RELEASE.md.

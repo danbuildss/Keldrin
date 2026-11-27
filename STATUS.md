@@ -48,3 +48,4 @@
 - Verified gaps: no NAV-history API; corporate actions only by UUID at Coinbase. Coverage limit: NAV feeds exist for 14 of 138 tokens.
 - Proposed revised plan (awaiting approval): Phase 5 NAV history → Phase 6 per-asset intelligence + skill.md → Phase 7 front page + launch check (Monday); MCP after Monday.
 - Open: Chainlink data rights; freshness (6-hourly vs hourly).
+- CD-003 follow-up: MAXXAGENT agreed to test endpoints (not an integration). Plan with acceptance criteria: docs/PLAN_DEVELOPER_RELEASE.md. Developer docs drafted (live vs planned labelled). Waiting on founder: approve Phase 5; the Chainlink-data decision; rate-limit approach; DEX price now or later.

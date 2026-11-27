@@ -12,7 +12,7 @@ Detail lives in `docs/DEMAND_MATRIX.md` (needs → capabilities), `docs/INTEGRAT
 | ID | Who | Channel | Strongest evidence | Status | Next action (owner) |
 |---|---|---|---|---|---|
 | CD-001 | Hector, admin of a Stocks Maxxing Telegram group | Telegram, then DM | Specific request: earnings, dividends, onchain data | Conversation open; **not** a customer or partner | Founder continues in DM; ask what he would integrate and for what |
-| CD-003 | MAXXAGENT builder (Stocks Maxxing, Agentic Stock Finance) | Public post relayed by founder | **Built it themselves**: NAV history from raw rounds, risk, market hours, liquidity checks, B20 watcher; open-source code (MIT) | Potential design partner; **no commitment** | Founder replies; ask whether a NAV-history/corporate-actions API would replace their own code |
+| CD-003 | MAXXAGENT builder (Stocks Maxxing, Agentic Stock Finance) | Public post relayed by founder | **Built it themselves**: NAV history from raw rounds, risk, market hours, liquidity checks, B20 watcher; open-source code (MIT) | **Agreed to test endpoints**; no integration commitment | Deliver nav/history + market-context test URL (docs/partners/MAXXAGENT.md) |
 | CD-002 | Bankr (agent / team) | Reply to founder's brief | Specific requests (fields, statuses, diff feed, late flag) plus an offer to host x402 | Interested; no commitment | Founder shares the live API; ask them to test `/v1/events` against GOOGLc (Dec 14) and NVDAc (Dec 23) |
 
 ## CD-001 — Hector (2026-11-27)
@@ -57,3 +57,9 @@ Full record: `docs/BUILDER_INTERVIEWS.md` §1.
 - **Verified:** their code does what they describe (riskStats.ts walks Chainlink rounds; marketHours.ts hardcodes NYSE holidays to 2027; b20Guard.ts reads policies). Gaps checked against Coinbase's API: no NAV history, corporate actions only by UUID. Details: docs/research/FEASIBILITY_CD003.md.
 - **Evidence level:** described infrastructure they built themselves (stronger than a request). **Classification:** potential design partner; not a customer, partner or integration.
 - **Questions for the founder's reply:** Would a NAV-history + corporate-actions + risk API replace your code? Which interval (rounds or daily closes)? How fresh? Would you test an early endpoint for NVDAc?
+
+### CD-003 follow-up (2026-11-27): agreed to test
+(The founder's "Update 003" follows the "Update 002" post above; both are CD-003.)
+> "Yes, it would replace a good part of it: the Chainlink round history we read and cache for volatility/drawdown, and the session logic (market hours, holidays, the NAV vs DEX gap) … Happy to test it and give honest feedback. What would matter for us: Verifiable sources: Chainlink feed + round IDs behind each NAV point … Multipliers / corporate actions per B20 token (dividends, splits, uiMultiplier), with dates … Clear freshness … A free tier we can call from the server, plus reasonable rate limits. We'd keep our own onchain reads as a fallback … we're heads-down until the Dec 12 deadline, so we can test an endpoint or two now and integrate properly after."
+- **Evidence level:** willingness to test plus explicit requirements. **Classification:** design partner candidate; not a customer, partner or integration.
+- Plan: docs/PLAN_DEVELOPER_RELEASE.md · Partner page: docs/partners/MAXXAGENT.md

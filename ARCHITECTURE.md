@@ -18,3 +18,5 @@ v0.3 (Phase 0, proposed): see PHASE0_PLAN.md §6.
 - New deterministic workers in the scheduled run: `nav-index` (feed discovery + phase-aware rounds), `risk` (pure functions over daily closes), `policy-snapshot` (onchain reads). No LLM in these paths.
 - The agent layer (Aeon/Orric patterns) stays for research, explanation and evaluation only.
 - Optional separate hourly NAV-only job if fresher data is required (cost decision).
+
+- CD-003 follow-up: market context reads the latest NAV live from the public Base RPC at request time (no new secret); history comes from the indexed `nav_rounds`. A shared deterministic NYSE calendar module fails closed beyond its coverage. (Proposed.)

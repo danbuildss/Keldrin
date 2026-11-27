@@ -32,3 +32,11 @@ The evidence column counts distinct builders (CUSTOMER_DISCOVERY.md). The availa
 | Market session / stale vs closed | CD-003 | ❌ | `…/market-context` | Deterministic calendar + feed age | Holiday list must be maintained |
 | B20 transfer policy | CD-003 | ❌ | `…/transfer-policy` snapshot | Onchain (PolicyRegistry) | MIT reference code exists |
 | DEX liquidity / NAV-DEX gap | CD-001, CD-003 | ❌ | Partner or own pool indexing | DexScreener/GeckoTerminal terms unknown | Deferred |
+
+### CD-003 follow-up requirements (2026-11-27)
+| Need | Requested by | Keldrin today | Next |
+|---|---|---|---|
+| Round-level provenance for NAV | CD-003 | ❌ | nav/history fields (Phase 5) |
+| uiMultiplier with dates | CD-003 | Indexed and verified, not surfaced | corporate-actions route (Phase 6) |
+| Freshness across closures | CD-003 | Partial | market-context (Phase 6) |
+| Free server tier + limits | CD-003, CD-002 | ✅ keyless | Edge rate limit + docs |

@@ -23,3 +23,5 @@ Priority order by developer value ÷ effort:
 6. `GET /v1/assets/{chain_id}/{contract}/nav` (latest round with staleness classification)
 Deferred: `…/liquidity` (third-party terms or own pool indexing).
 Existing and unchanged: `/v1/assets`, `/v1/events`, `/v1/changes`, `/v1/calendar`, `/v1/actions`.
+
+- CD-003 follow-up: first test milestone = `nav/history` and `market-context`; field lists and acceptance criteria in docs/PLAN_DEVELOPER_RELEASE.md. (Proposed.)
