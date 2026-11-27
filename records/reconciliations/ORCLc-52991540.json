@@ -1,0 +1,166 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac:sec:059f35fe0aef",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac",
+   "payload_sha256": "059f35fe0aef972eac5cdc62de369e65323a090d416050559248597df9c3fb97"
+  },
+  "company": {
+   "cik": "0001341439",
+   "name": "ORACLE CORP",
+   "sec_tickers": [
+    "ORCL",
+    "ORCL-PD"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Oracle%20Corporation sha256=380fa5f102456e8d",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=ORCL sha256=33eca74e7bd422d0",
+    "https://data.sec.gov/submissions/CIK0001341439.json sha256=5f2cdc44ce03c0bc"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001193125-26-389753",
+    "form": "8-K",
+    "filed": "2026-09-14",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526389753/d20034d8k.htm"
+   },
+   {
+    "accession": "0001193125-26-387905",
+    "form": "8-K",
+    "filed": "2026-09-10",
+    "items": "2.02,8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-20260910.htm"
+   }
+  ],
+  "declaration": {
+   "per_share": "0.50",
+   "currency": "USD",
+   "payable_date": "2026-10-23",
+   "record_date": "2026-10-09",
+   "declared_on": null,
+   "declared_month": null,
+   "quote": "Common Stock Quarterly Dividend The board of directors declared a quarterly cash dividend of $0.50 per share of outstanding common stock … This dividend will be paid to stockholders of record as of the close of business on October 9, 2026, with a payment date of October 23, 2026",
+   "offset": 5264,
+   "accession": "0001193125-26-387905",
+   "form": "8-K",
+   "filed": "2026-09-10",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm",
+   "document_sha256": "a111a6f96626c3b92d153b19983291341b97e60dfb7430a6efa1c451590bd7b0"
+  },
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"ORACLE CORP\" token=\"Oracle Corporation\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers ORCL,ORCL-PD"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "68389X105"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "2 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.50 payable 2026-10-23 record 2026-10-09 (8-K 0001193125-26-387905)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-23, record 2026-10-09"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-23, payable 2026-10-23 (+0 d)"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000039988323338582"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "not yet reported in XBRL (latest quarterly fact ends 2011-02-28)"
+   },
+   {
+    "name": "reference_feed_available",
+    "result": "unknown",
+    "detail": "no NAV feed listed for this token"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag).",
+   "No reference value feed, so the implied amount per share cannot be computed."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:46:55.611Z"
+ },
+ "payload_sha256": "903681629b6797257a6a602cb0a62f74def011ff3d8fbaa8563aed9d889eb646",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash 059f35fe0aef972e"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "2 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "ORACLE CORP ORCL,ORCL-PD"
+   },
+   {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "a111a6f96626c3b9"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "2 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.50 dates 2026-10-09,2026-10-23"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-10-23 vs record 2026-10-09"
+   }
+  ],
+  "checked_at": "2026-11-27T08:46:56.648Z"
+ }
+}

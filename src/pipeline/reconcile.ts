@@ -5,101 +5,202 @@ import { concept, quarterlyFacts, submissions, type XbrlFact } from "../adapters
 import { payloadHash } from "../lib/canonical.ts";
 import { formatUnits } from "../lib/decimal.ts";
 import { cusipFromIsin } from "../lib/isin.ts";
+import { HttpError } from "../lib/http.ts";
+import { declarationCandidates, filingsIndex, resolveCik, underlyingTicker, type FilingRef } from "./company.ts";
+import { extractDividendDeclarations, filingDocuments, type Declaration } from "./declarations.ts";
 import type { Check, IssuerActionRecord } from "./records.ts";
 
-// Deep proof: link a confirmed issuer action (token side) to the underlying company's official SEC
-// disclosure. Facts and interpretation are kept apart; anything we cannot evidence is "unknown".
+// Link a confirmed issuer action (token side) to the underlying company's official SEC disclosures.
+// Facts, pointers and interpretation are kept apart; anything we cannot evidence is "unknown".
+// "fail" requires positive contrary evidence; missing or not-yet-reported data is never a fail.
 
-export type Reconciliation = ReturnType<typeof shape>;
+export type ActionKind = "cash_dividend" | "stock_split" | "other";
 
-const shape = (x: {
+export type Reconciliation = {
+  schema_version: "0.2";
+  record_type: "reconciliation";
+  synthetic: false;
   reconciliation_id: string;
+  action_kind: ActionKind;
   issuer_action: { record_id: string; payload_sha256: string };
-  company: { cik: string; name: string; sec_tickers: string[] };
-  company_event: { type: string; per_share_usd: string; period_start: string; period_end: string; accession: string; form: string; filed: string; source_url: string; source_sha256: string } | null;
+  company: { cik: string; name: string; sec_tickers: string[]; resolution_evidence: string[] } | null;
+  company_event: { type: string; value: string; unit: string; period_start: string; period_end: string; accession: string; form: string; filed: string; source_url: string; source_sha256: string } | null;
+  declaration_candidates: FilingRef[];
+  declaration: (Declaration & { accession: string; form: string; filed: string; document_url: string; document_sha256: string }) | null;
   reference: { feed: string; description: string | null; answer_raw: string; decimals: number; value_usd: string; updated_at: string; read_at_block: string } | null;
   interpretation: { implied_net_reinvested_per_share_usd: string; ratio_to_declared: string; caveat: string } | null;
   checks: Check[];
   unknown: string[];
   status: "consistent" | "partially_reconciled" | "inconsistent" | "unsure";
   generated_at: string;
-}) => ({ schema_version: "0.2", record_type: "reconciliation" as const, synthetic: false as const, ...x });
+};
 
-export async function reconcileDividend(rec: IssuerActionRecord, recHash: string, opts: { cik: string; secTicker: string }): Promise<Reconciliation> {
+/** Classify from the operator's description. Issuer text is untrusted, so this only chooses which SEC facts to look for. */
+export function actionKind(description: string | null): ActionKind {
+  const d = (description ?? "").toLowerCase();
+  if (/\bsplit\b/.test(d) && !/reverse/.test(d)) return "stock_split";
+  if (/\bdividend\b/.test(d)) return "cash_dividend";
+  return "other";
+}
+
+export async function reconcileAction(rec: IssuerActionRecord, recHash: string, opts: { cik?: string; secTicker?: string } = {}): Promise<Reconciliation> {
   const checks: Check[] = [];
   const c = (name: string, ok: boolean | null, detail?: string) => checks.push({ name, result: ok === null ? "unknown" : ok ? "pass" : "fail", ...(detail ? { detail } : {}) });
   const unknown: string[] = [];
   if (rec.action.status !== "applied" || !rec.action.effective || !rec.action.multiplier_before_wad) throw new Error("reconcile: needs an applied action");
+  const kind = actionKind(rec.action.operator_description);
   const effTime = rec.action.effective.time;
+  const effDate = effTime.slice(0, 10);
   const B = BigInt(rec.action.effective.block);
+  const ratioNum = (BigInt(rec.action.multiplier_after_wad) * 10n ** 18n) / BigInt(rec.action.multiplier_before_wad);
+  const base = { schema_version: "0.2" as const, record_type: "reconciliation" as const, synthetic: false as const, reconciliation_id: `${rec.record_id}:sec:${recHash.slice(0, 12)}`, action_kind: kind, issuer_action: { record_id: rec.record_id, payload_sha256: recHash } };
 
-  // Company identity (SEC submissions)
-  const sub = await submissions(opts.cik);
-  c("sec_company_name_matches_token_name", sub.data.name === rec.asset.name, `SEC="${sub.data.name}" token="${rec.asset.name}"`);
-  c("sec_lists_expected_ticker", sub.data.tickers.includes(opts.secTicker), `SEC tickers ${sub.data.tickers.join(",")}`);
+  // 1. Company identity: resolve the CIK from SEC's own indexes, never from memory.
+  const secTicker = opts.secTicker ?? underlyingTicker(rec.asset.symbol);
+  let company: Reconciliation["company"] = null;
+  if (opts.cik) {
+    const sub = await submissions(opts.cik);
+    company = { cik: opts.cik, name: sub.data.name, sec_tickers: sub.data.tickers, resolution_evidence: [`given CIK; ${sub.meta.url}`] };
+  } else if (secTicker) {
+    const r = await resolveCik(rec.asset.name, secTicker);
+    if (r.cik) company = { cik: r.cik, name: r.name, sec_tickers: r.tickers, resolution_evidence: r.evidence };
+    else unknown.push(`SEC company not resolved: ${r.reason}.`);
+  } else unknown.push("Underlying ticker not derivable from the token symbol.");
+  if (!company) {
+    c("sec_company_resolved", null, "no unique SEC entity");
+    return { ...base, company: null, company_event: null, declaration_candidates: [], declaration: null, reference: null, interpretation: null, checks, unknown, status: "unsure", generated_at: new Date().toISOString() };
+  }
+  // Identity is established by ticker in two SEC indexes; a differing display name is not contrary evidence.
+  c("sec_company_name_matches_token_name", normName(company.name) === normName(rec.asset.name) ? true : null, `SEC="${company.name}" token="${rec.asset.name}"`);
+  c("sec_lists_expected_ticker", secTicker ? company.sec_tickers.includes(secTicker) : null, `SEC tickers ${company.sec_tickers.join(",")}`);
   const cusip = rec.asset.isin ? cusipFromIsin(rec.asset.isin) : null;
-  c("isin_to_cusip_valid", cusip !== null, cusip ?? "no CUSIP derivable");
-  c("share_class_evidenced", null, `CUSIP ${cusip} → share class not yet evidenced from a primary source`);
-  unknown.push("Share class of the underlying (CUSIP → class mapping needs SEC filing text or the ADGM prospectus).");
+  c("isin_to_cusip_valid", rec.asset.isin?.startsWith("US") ? cusip !== null : null, cusip ?? `non-US ISIN ${rec.asset.isin ?? "missing"}`);
+  c("share_class_evidenced", null, "share class not yet evidenced from a primary source");
+  unknown.push("Share class of the underlying (needs SEC filing text or the ADGM prospectus).");
 
-  // Company event (XBRL dividends declared per share)
-  const con = await concept(opts.cik, "CommonStockDividendsPerShareDeclared");
-  const q = quarterlyFacts(con.data.units["USD/shares"] ?? []);
-  const cls = classifyDividendFact(q, effTime.slice(0, 10));
-  if (cls.fact?.amended_from) c("sec_fact_amended", null, `latest ${cls.fact.val} (${cls.fact.accn}) supersedes ${cls.fact.amended_from.map((h) => `${h.val} (${h.accn})`).join(", ")}`);
-  const f = cls.fact;
-  c("dividend_declared_in_quarter_of_action", cls.result === "unknown" ? null : cls.result === "pass", cls.detail);
-  if (cls.unknownNote) unknown.push(cls.unknownNote);
-  if (f && f.filed > effTime.slice(0, 10)) c("sec_fact_filed_after_action", true, `fact first filed ${f.filed}; the declaration itself predates it (date not yet evidenced)`);
-  unknown.push("Declaration, record and payment dates (in the declaring 8-K/press release on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).");
-  const ratioNum = BigInt(rec.action.multiplier_after_wad) * 10n ** 18n / BigInt(rec.action.multiplier_before_wad);
-  c("multiplier_increased_consistent_with_reinvestment", ratioNum > 10n ** 18n, `ratio ${rec.action.ratio}`);
-
-  // Reference value just before the action (Chainlink NAV feed, total-return semantics)
-  let reference: Reconciliation["reference"] = null;
-  let interpretation: Reconciliation["interpretation"] = null;
-  const feeds = await navFeeds();
-  const feed = feeds.data.nav_feeds.find((x) => getAddress(x.contract_address) === getAddress(rec.asset.contract_address));
-  if (feed) {
-    const rd = (await read(feed.nav_feed_address, "latestRoundData", [], B - 1n)) as readonly bigint[] | null;
-    const desc = (await read(feed.nav_feed_address, "description", [], B - 1n)) as string | null;
-    const dec = Number((await read(feed.nav_feed_address, "decimals", [], B - 1n)) as number | null ?? 8);
-    if (rd) {
-      reference = { feed: getAddress(feed.nav_feed_address), description: desc, answer_raw: rd[1].toString(), decimals: dec, value_usd: formatUnits(rd[1], dec), updated_at: new Date(Number(rd[3]) * 1000).toISOString(), read_at_block: (B - 1n).toString() };
-      // implied net per share = (ratio - 1) × reference; exact integer math in feed decimals
-      const implied = ((ratioNum - 10n ** 18n) * rd[1]) / 10n ** 18n;
-      const declared = f ? exactUnits(String(f.val), dec) : null;
-      if (f && declared !== null && declared > 0n) {
-        const toDeclared = (implied * 10n ** 6n) / declared;
-        interpretation = {
-          implied_net_reinvested_per_share_usd: formatUnits(implied, dec),
-          ratio_to_declared: formatUnits(toDeclared, 6),
-          caveat: "Interpretation, not fact: assumes reinvestment at the feed's total-return reference just before the action. The issuer does not publish its per-action tax/fee breakdown, so the gap to the declared amount is unexplained, not an error.",
-        };
-        c("implied_net_not_above_declared", implied > 0n && implied <= declared, `implied ${formatUnits(implied, dec)} vs declared ${f.val}`);
+  // 2. Declaration candidates: pointers to the filings that may contain the declaration.
+  const idx = await filingsIndex(company.cik);
+  const candidates = declarationCandidates(idx.recent, company.cik, effTime);
+  c("declaration_candidate_filings_found", candidates.length ? true : null, `${candidates.length} 8-K/6-K filing(s) in the 120 days before the action`);
+  // 2b. Read the candidates' text (dividends only) and extract a dated declaration deterministically.
+  let declaration: Reconciliation["declaration"] = null;
+  if (kind === "cash_dividend") {
+    const found: NonNullable<Reconciliation["declaration"]>[] = [];
+    for (const cand of candidates.slice(0, 8)) {
+      for (const d of await filingDocuments(company.cik, cand.accession)) {
+        for (const x of extractDividendDeclarations(d.text)) found.push({ ...x, accession: cand.accession, form: cand.form, filed: cand.filed, document_url: d.url, document_sha256: d.sha256 });
+      }
+    }
+    // The declaration this action implements: record date on/before the action, payable date nearest the action.
+    const dist = (x: { payable_date: string | null; record_date: string | null }) => Math.abs(Date.parse(x.payable_date ?? x.record_date!) - Date.parse(effDate));
+    declaration = found.filter((x) => !x.record_date || x.record_date <= effDate).sort((a, b) => dist(a) - dist(b))[0] ?? null;
+    if (!declaration) {
+      c("dated_declaration_found", null, found.length + " dated declaration(s) extracted; none fits this action");
+      unknown.push("No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).");
+    } else {
+      c("dated_declaration_found", true, "$" + declaration.per_share + " payable " + declaration.payable_date + " record " + declaration.record_date + " (" + declaration.form + " " + declaration.accession + ")");
+      if (declaration.record_date) c("token_adjusted_not_before_record_date", effDate >= declaration.record_date, "adjusted " + effDate + ", record " + declaration.record_date);
+      if (declaration.payable_date) {
+        const days = Math.round((Date.parse(effDate) - Date.parse(declaration.payable_date)) / 86_400_000);
+        // Observed issuer pattern, not a rule: a difference is reported, never treated as contradiction.
+        c("token_adjusted_on_payable_date", days === 0 ? true : null, "adjusted " + effDate + ", payable " + declaration.payable_date + " (" + (days >= 0 ? "+" : "") + days + " d)");
       }
     }
   } else {
-    c("reference_feed_available", null, "no NAV feed listed for this token");
-    unknown.push("No reference value feed, so the implied amount per share cannot be computed.");
+    unknown.push("Declaration dates for this action kind are not extracted yet.");
+  }
+
+  // 3. Typed company facts by action kind.
+  let companyEvent: Reconciliation["company_event"] = null;
+  let reference: Reconciliation["reference"] = null;
+  let interpretation: Reconciliation["interpretation"] = null;
+  if (kind === "cash_dividend") {
+    c("multiplier_increased_consistent_with_reinvestment", ratioNum > 10n ** 18n, `ratio ${rec.action.ratio}`);
+    // Declared is preferred; some filers only tag the cash paid per share.
+    const tag = (await conceptOrNull(company.cik, "CommonStockDividendsPerShareDeclared")) ? "CommonStockDividendsPerShareDeclared" : "CommonStockDividendsPerShareCashPaid";
+    const con = await conceptOrNull(company.cik, tag);
+    if (!con) {
+      c("dividend_declared_in_quarter_of_action", null, "no us-gaap dividend-per-share facts (e.g. a foreign filer reporting under IFRS)");
+      unknown.push("No us-gaap dividend-per-share facts for this company.");
+    } else {
+      const q = quarterlyFacts(con.data.units["USD/shares"] ?? []);
+      const cls = classifyDividendFact(q, effDate);
+      const f = cls.fact;
+      if (f?.amended_from) c("sec_fact_amended", null, `latest ${f.val} (${f.accn}) supersedes ${f.amended_from.map((h) => `${h.val} (${h.accn})`).join(", ")}`);
+      c("dividend_declared_in_quarter_of_action", cls.result === "unknown" ? null : cls.result === "pass", cls.detail);
+      if (cls.unknownNote) unknown.push(cls.unknownNote);
+      if (f && declaration) c("declared_amount_matches_sec_fact", exactUnits(declaration.per_share, 8) === exactUnits(String(f.val), 8), "text $" + declaration.per_share + " vs XBRL " + f.val);
+      if (f) companyEvent = { type: tag === "CommonStockDividendsPerShareDeclared" ? "cash_dividend_declared_per_share" : "cash_dividend_paid_per_share", value: String(f.val), unit: "USD/share", period_start: f.start!, period_end: f.end, accession: f.accn, form: f.form, filed: f.filed, source_url: con.meta.url, source_sha256: con.meta.sha256 };
+      // Reference value just before the action (Chainlink NAV feed, total-return semantics) → interpretation only.
+      const feeds = await navFeeds();
+      const feed = feeds.data.nav_feeds.find((x) => getAddress(x.contract_address) === getAddress(rec.asset.contract_address));
+      if (!feed) {
+        c("reference_feed_available", null, "no NAV feed listed for this token");
+        unknown.push("No reference value feed, so the implied amount per share cannot be computed.");
+      } else {
+        const rd = (await read(feed.nav_feed_address, "latestRoundData", [], B - 1n)) as readonly bigint[] | null;
+        const desc = (await read(feed.nav_feed_address, "description", [], B - 1n)) as string | null;
+        const dec = Number(((await read(feed.nav_feed_address, "decimals", [], B - 1n)) as number | null) ?? 8);
+        if (rd) {
+          reference = { feed: getAddress(feed.nav_feed_address), description: desc, answer_raw: rd[1].toString(), decimals: dec, value_usd: formatUnits(rd[1], dec), updated_at: new Date(Number(rd[3]) * 1000).toISOString(), read_at_block: (B - 1n).toString() };
+          const implied = ((ratioNum - 10n ** 18n) * rd[1]) / 10n ** 18n;
+          const declared = f ? exactUnits(String(f.val), dec) : null;
+          if (f && declared !== null && declared > 0n) {
+            interpretation = {
+              implied_net_reinvested_per_share_usd: formatUnits(implied, dec),
+              ratio_to_declared: formatUnits((implied * 10n ** 6n) / declared, 6),
+              caveat: "Interpretation, not fact: assumes reinvestment at the feed's total-return reference just before the action. The issuer does not publish its per-action tax/fee breakdown, so the gap to the declared amount is unexplained, not an error.",
+            };
+            c("implied_net_not_above_declared", implied > 0n && implied <= declared, `implied ${formatUnits(implied, dec)} vs declared ${f.val}`);
+          }
+        }
+      }
+    }
+  } else if (kind === "stock_split") {
+    const con = await conceptOrNull(company.cik, "StockholdersEquityNoteStockSplitConversionRatio1");
+    const facts = (con?.data.units.pure ?? []).filter((x) => x.end >= shiftDays(effDate, -400));
+    const hit = facts.find((x) => exactUnits(String(x.val), 18) === ratioNum);
+    if (hit && con) {
+      companyEvent = { type: "stock_split_conversion_ratio", value: String(hit.val), unit: "pure", period_start: hit.start ?? hit.end, period_end: hit.end, accession: hit.accn, form: hit.form, filed: hit.filed, source_url: con.meta.url, source_sha256: con.meta.sha256 };
+      c("sec_split_ratio_matches_multiplier", true, `XBRL ratio ${hit.val} (${hit.form} ${hit.accn}) = multiplier ratio ${rec.action.ratio}`);
+    } else {
+      c("sec_split_ratio_matches_multiplier", null, facts.length ? `XBRL split ratios ${facts.map((x) => x.val).join(",")} do not include ${rec.action.ratio}` : "no XBRL split ratio fact yet (reporting lag or not tagged)");
+      unknown.push("Split ratio not yet evidenced in SEC structured data.");
+    }
+  } else {
+    unknown.push("Action kind not recognised from the issuer's description; no SEC facts compared.");
   }
 
   const failed = checks.some((x) => x.result === "fail");
-  const status = failed ? "inconsistent" : unknown.length ? "partially_reconciled" : "consistent";
-  const body = shape({
-    reconciliation_id: `${rec.record_id}:sec-dividend`,
-    issuer_action: { record_id: rec.record_id, payload_sha256: recHash },
-    company: { cik: opts.cik, name: sub.data.name, sec_tickers: sub.data.tickers },
-    company_event: f ? { type: "cash_dividend_declared_per_share", per_share_usd: String(f.val), period_start: f.start!, period_end: f.end, accession: f.accn, form: f.form, filed: f.filed, source_url: con.meta.url, source_sha256: con.meta.sha256 } : null,
+  return {
+    ...base,
+    company,
+    company_event: companyEvent,
+    declaration_candidates: candidates,
+    declaration,
     reference,
     interpretation,
     checks,
     unknown,
-    status,
+    status: failed ? "inconsistent" : unknown.length ? "partially_reconciled" : "consistent",
     generated_at: new Date().toISOString(),
-  });
-  return body;
+  };
 }
+
+/** Backwards-compatible entry point used by the GOOGLc deep proof. */
+export const reconcileDividend = (rec: IssuerActionRecord, recHash: string, opts: { cik: string; secTicker: string }) => reconcileAction(rec, recHash, opts);
+
+async function conceptOrNull(cik: string, tag: string) {
+  try {
+    return await concept(cik, tag);
+  } catch (e) {
+    if (e instanceof HttpError && e.status === 404) return null;
+    throw e;
+  }
+}
+
+export const normName = (s: string) => s.toLowerCase().replace(/[.,]/g, "").replace(/\b(inc|incorporated|corp|corporation|co|company|ltd|limited|plc|sa|ag|nv|the)\b/g, "").replace(/\s+/g, " ").trim();
+const shiftDays = (d: string, n: number) => new Date(Date.parse(d) + n * 86_400_000).toISOString().slice(0, 10);
 
 /** Exact decimal string → integer scaled by 10^dec; null for exponent forms or excess precision. */
 export function exactUnits(s: string, dec: number): bigint | null {

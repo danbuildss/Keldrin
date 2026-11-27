@@ -1,0 +1,199 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857:sec:e06cd6299ecd",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857",
+   "payload_sha256": "e06cd6299ecd4daea7f676085fc75b7118c54932d93030f8509d0cc4decd7fcd"
+  },
+  "company": {
+   "cik": "0001413329",
+   "name": "Philip Morris International Inc.",
+   "sec_tickers": [
+    "PM"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Philip%20Morris%20International%20Inc. sha256=32b9347428b631b3",
+    "https://data.sec.gov/submissions/CIK0001413329.json sha256=69eb10d3876345bf"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001628280-26-066596",
+    "form": "8-K",
+    "filed": "2026-10-21",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026066596/pm-20261021.htm"
+   },
+   {
+    "accession": "0001628280-26-062621",
+    "form": "8-K",
+    "filed": "2026-09-18",
+    "items": "7.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/pm-20260918.htm"
+   },
+   {
+    "accession": "0001628280-26-060822",
+    "form": "8-K",
+    "filed": "2026-09-08",
+    "items": "7.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026060822/pm-20260908.htm"
+   },
+   {
+    "accession": "0001628280-26-060806",
+    "form": "8-K",
+    "filed": "2026-09-08",
+    "items": "7.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026060806/pm-20260908.htm"
+   },
+   {
+    "accession": "0001628280-26-058513",
+    "form": "8-K",
+    "filed": "2026-08-24",
+    "items": "7.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026058513/pm-20260824.htm"
+   },
+   {
+    "accession": "0001628280-26-049107",
+    "form": "8-K",
+    "filed": "2026-07-22",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026049107/pm-20260722.htm"
+   },
+   {
+    "accession": "0001104659-26-078814",
+    "form": "8-K",
+    "filed": "2026-06-29",
+    "items": "8.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1413329/000110465926078814/tm2618983d1_8k.htm"
+   }
+  ],
+  "declaration": {
+   "per_share": "1.60",
+   "currency": "USD",
+   "payable_date": "2026-10-26",
+   "record_date": "2026-10-02",
+   "declared_on": null,
+   "declared_month": null,
+   "quote": "The new quarterly dividend of $1.60 per share, up from $1.47 per share, is payable on October 26, 2026, to shareholders of record as of October 2, 2026",
+   "offset": 581,
+   "accession": "0001628280-26-062621",
+   "form": "8-K",
+   "filed": "2026-09-18",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/september2026dividend.htm",
+   "document_sha256": "28b133ba2e0210475a014117fc3f09b954f1faf5f77c261006106e0d31ea0413"
+  },
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Philip Morris International Inc.\" token=\"Philip Morris International Inc.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers PM"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "718172109"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "7 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$1.60 payable 2026-10-26 record 2026-10-02 (8-K 0001628280-26-062621)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-26, record 2026-10-02"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-26, payable 2026-10-26 (+0 d)"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.558821201905386994"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "not yet reported in XBRL (latest quarterly fact ends 2026-09-30)"
+   },
+   {
+    "name": "reference_feed_available",
+    "result": "unknown",
+    "detail": "no NAV feed listed for this token"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag).",
+   "No reference value feed, so the implied amount per share cannot be computed."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:47:02.365Z"
+ },
+ "payload_sha256": "81c990d2a079f5228cea86275dcb3171cac3a8222dfaad62b114cf3275cd3444",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash e06cd6299ecd4dae"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "7 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Philip Morris International Inc. PM"
+   },
+   {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "28b133ba2e021047"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "1 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$1.60 dates 2026-10-26,2026-10-02"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-10-26 vs record 2026-10-02"
+   }
+  ],
+  "checked_at": "2026-11-27T08:47:03.334Z"
+ }
+}

@@ -1,0 +1,524 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Keldrin API",
+  "version": "0.2.0",
+  "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Phase 2: local deployment only."
+ },
+ "servers": [
+  {
+   "url": "http://127.0.0.1:8787",
+   "description": "local"
+  }
+ ],
+ "paths": {
+  "/health": {
+   "get": {
+    "operationId": "getHealth",
+    "summary": "Coverage, last run and limitations",
+    "responses": {
+     "200": {
+      "description": "Health",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "object"
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/assets": {
+   "get": {
+    "operationId": "listAssets",
+    "summary": "Tracked tokens with identity state and current multiplier",
+    "responses": {
+     "200": {
+      "description": "Assets",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/Asset"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/assets/{contract}": {
+   "get": {
+    "operationId": "getAsset",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Asset with identity checks",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/Asset"
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad address",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Unknown asset",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/actions": {
+   "get": {
+    "operationId": "listActions",
+    "summary": "Confirmed corporate actions, newest first",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     },
+     {
+      "name": "symbol",
+      "in": "query",
+      "description": "Exact token symbol (e.g. GOOGLc). Prefer contract.",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "cursor",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Page of issuer_action records",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "$ref": "https://keldrin.invalid/schemas/issuer-action-v0.2.schema.json"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad input",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Unknown symbol",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "Ambiguous symbol",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/actions/{record_id}": {
+   "get": {
+    "operationId": "getAction",
+    "parameters": [
+     {
+      "name": "record_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Record, review, revisions and company context",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "object",
+           "required": [
+            "record",
+            "review",
+            "revisions",
+            "company_context"
+           ],
+           "properties": {
+            "record": {
+             "$ref": "https://keldrin.invalid/schemas/issuer-action-v0.2.schema.json"
+            },
+            "review": {
+             "type": "object"
+            },
+            "revisions": {
+             "type": "array"
+            },
+            "company_context": {
+             "type": [
+              "object",
+              "null"
+             ],
+             "description": "SEC reconciliation (record_type=reconciliation); null when none is confirmed for this revision."
+            }
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad record id",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "No confirmed record",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/llms.txt": {
+   "get": {
+    "operationId": "getLlmsTxt",
+    "responses": {
+     "200": {
+      "description": "Agent index",
+      "content": {
+       "text/plain": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/openapi.json": {
+   "get": {
+    "operationId": "getOpenApi",
+    "responses": {
+     "200": {
+      "description": "This document",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/calendar": {
+   "get": {
+    "operationId": "getCalendar",
+    "summary": "Declared dividends and the date each token is expected to adjust (leading calendar)",
+    "description": "Entries come from SEC filing text (quote, document URL and sha256) and are independently re-verified. expected_adjustment_date is the payable date: an observed issuer pattern whose measured rate is stated in each entry's basis, not a guarantee.",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     },
+     {
+      "name": "state",
+      "in": "query",
+      "schema": {
+       "enum": [
+        "upcoming",
+        "applied",
+        "not_observed"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Calendar entries",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "type": "object"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad input",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Error": {
+    "type": "object",
+    "required": [
+     "error"
+    ],
+    "properties": {
+     "error": {
+      "type": "object",
+      "required": [
+       "code",
+       "message"
+      ],
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "message": {
+        "type": "string"
+       },
+       "hint": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   },
+   "Meta": {
+    "type": "object",
+    "required": [
+     "as_of",
+     "schema_version",
+     "served"
+    ],
+    "properties": {
+     "as_of": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "schema_version": {
+      "type": "string"
+     },
+     "served": {
+      "const": "independently_confirmed_records_only"
+     },
+     "count": {
+      "type": "integer"
+     },
+     "next_cursor": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "Opaque; pass back unchanged as `cursor`."
+     }
+    }
+   },
+   "Asset": {
+    "type": "object",
+    "required": [
+     "chain_id",
+     "contract_address",
+     "symbol",
+     "identity_state"
+    ],
+    "properties": {
+     "chain_id": {
+      "const": 8453
+     },
+     "contract_address": {
+      "type": "string"
+     },
+     "symbol": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "isin": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "identity_state": {
+      "enum": [
+       "verified",
+       "mismatch",
+       "incomplete"
+      ]
+     },
+     "multiplier_wad": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "observed_block": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

@@ -20,3 +20,8 @@
 - Evidence: research/phase1/runs (3 controlled runs ok; 13/13 CONFIRMED each; idempotent). Tests 47/47.
 - Failures found and fixed: public RPC refuses eth_getLogs (redesigned discovery); jsonb key reordering broke idempotency (fixed + regression test); reconciliation called missing data "inconsistent" (fixed: unknown); 10 code-review findings (fixed).
 - Costs: $0 spent. Decisions needed: D2, D9, default branch, Phase 2 approval.
+
+2026-11-27 — Phase 2 session part 2 (Claude). Approved: "approve Phase 2"; SEC contact provided by founder; Alchemy chosen; PR #1 merged by founder; Phase 2 is PR #2.
+- Built: SEC CIK resolution (efts + submissions), declaration candidates, deterministic dividend declaration extraction from filing text, generalised reconciliation, leading calendar (/v1/calendar), company_context, OpenAPI, pinned Actions, RPC URL redaction.
+- Results: 13/13 reconciliations CONFIRMED; 9 dated declarations; 8/9 adjusted on payable date; MRVLc 8 days late; upcoming GOOGLc 2026-12-14 and NVDAc 2026-12-23. Tests 68/68.
+- Blocked: Alchemy key (network secret must be added by founder; secure form tool unavailable), Supabase project.

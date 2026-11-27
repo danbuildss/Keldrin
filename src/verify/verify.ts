@@ -4,7 +4,7 @@
 // Verdict per claim: CONFIRMED | REJECTED | UNSURE. Any REJECTED → record REJECTED; else any UNSURE → UNSURE.
 
 import { createHash } from "node:crypto";
-import { ALLOWED_HOSTS, B20_FACTORY, COINBASE_API, RPC_URL } from "../config.ts";
+import { ALLOWED_HOSTS, B20_FACTORY, COINBASE_API, RPC_URL, SEC_USER_AGENT } from "../config.ts";
 
 const T = {
   Announcement: "0xccebf8218a62875909564adef86a6f4df81503cb617221e793357d62f8e813f7",
@@ -19,9 +19,10 @@ export type Claim = { claim: string; verdict: Verdict; evidence: string };
 export type Review = { review_id: string; record_id: string; revision: number; payload_sha256: string; reviewer: string; checked_at: string; verdict: Verdict; claims: Claim[]; limitations: string[] };
 
 type Rec = Record<string, any>;
-type Transport = { rpc: (method: string, params: unknown[]) => Promise<any>; getJson: (url: string) => Promise<any> };
+type Transport = { rpc: (method: string, params: unknown[]) => Promise<any>; getJson: (url: string) => Promise<any>; getText?: (url: string) => Promise<{ body: string; sha256: string }> };
 
 // ---------- independent transport ----------
+const uaFor = (url: string) => (new URL(url).host.endsWith("sec.gov") ? SEC_USER_AGENT : "Keldrin-Verifier/0.1");
 function allowed(url: string) {
   const u = new URL(url);
   if (u.protocol !== "https:" || !ALLOWED_HOSTS.has(u.host)) throw new Error(`verifier: host not allowed ${u.host}`);
@@ -51,7 +52,12 @@ export const liveTransport: Transport = {
   },
   async getJson(url) {
     await pause(400);
-    return JSON.parse(await req(url, { headers: { accept: "application/json", "user-agent": "Keldrin-Verifier/0.1" } }));
+    return JSON.parse(await req(url, { headers: { accept: "application/json", "user-agent": uaFor(url) } }));
+  },
+  async getText(url) {
+    await pause(400);
+    const body = await req(url, { headers: { accept: "*/*", "user-agent": uaFor(url) } });
+    return { body, sha256: createHash("sha256").update(body, "utf8").digest("hex") };
   },
 };
 
@@ -296,13 +302,60 @@ export async function verifyReconciliation(recon: Rec, actionRecord: Rec, tx: Tr
   if (ev) {
     try {
       const j = await tx.getJson(ev.source_url);
-      const facts: Rec[] = j?.units?.["USD/shares"] ?? [];
-      const hit = facts.find((f) => f.accn === ev.accession && f.start === ev.period_start && f.end === ev.period_end);
-      add("SEC XBRL fact re-fetched", hit && String(hit.val) === ev.per_share_usd && hit.form === ev.form ? "CONFIRMED" : "REJECTED", hit ? `${hit.val} ${hit.form} ${hit.accn}` : "fact not found");
-      const eff = String(actionRecord.action.effective.time).slice(0, 10);
-      add("action date falls inside the fact's period", ev.period_start <= eff && eff <= ev.period_end ? "CONFIRMED" : "REJECTED", `${eff} in ${ev.period_start}..${ev.period_end}`);
+      const facts: Rec[] = j?.units?.[ev.unit === "pure" ? "pure" : "USD/shares"] ?? [];
+      const hit = facts.find((f) => f.accn === ev.accession && (f.start ?? f.end) === ev.period_start && f.end === ev.period_end);
+      add("SEC XBRL fact re-fetched", hit && String(hit.val) === ev.value && hit.form === ev.form ? "CONFIRMED" : "REJECTED", hit ? `${hit.val} ${hit.form} ${hit.accn}` : "fact not found");
+      if (ev.unit !== "pure") {
+        const eff = String(actionRecord.action.effective.time).slice(0, 10);
+        add("action date falls inside the fact's period", ev.period_start <= eff && eff <= ev.period_end ? "CONFIRMED" : "REJECTED", `${eff} in ${ev.period_start}..${ev.period_end}`);
+      } else {
+        const r = (BigInt(actionRecord.action.multiplier_after_wad) * 10n ** 18n) / BigInt(actionRecord.action.multiplier_before_wad);
+        add("split ratio equals multiplier ratio", r === BigInt(ev.value) * 10n ** 18n ? "CONFIRMED" : "REJECTED", `ratio ${r} vs ${ev.value}`);
+      }
     } catch (e) {
       add("SEC XBRL fact re-fetched", "UNSURE", (e as Error).message.slice(0, 120));
+    }
+  }
+  // Declaration candidates must exist in SEC's own filing index with the stated form, date and items.
+  if (recon.company?.cik && (recon.declaration_candidates ?? []).length) {
+    try {
+      const sub = await tx.getJson(`https://data.sec.gov/submissions/CIK${recon.company.cik}.json`);
+      const r = sub.filings.recent;
+      const bad = recon.declaration_candidates.filter((d: Rec) => {
+        const i = r.accessionNumber.indexOf(d.accession);
+        return i < 0 || r.form[i] !== d.form || r.filingDate[i] !== d.filed || (r.items[i] ?? "") !== d.items;
+      });
+      add("declaration candidate filings exist as stated", bad.length ? "REJECTED" : "CONFIRMED", `${recon.declaration_candidates.length} checked, ${bad.length} mismatched`);
+      add("company name and tickers match SEC", sub.name === recon.company.name && JSON.stringify(sub.tickers) === JSON.stringify(recon.company.sec_tickers) ? "CONFIRMED" : "REJECTED", `${sub.name} ${sub.tickers}`);
+    } catch (e) {
+      add("declaration candidate filings exist as stated", "UNSURE", (e as Error).message.slice(0, 120));
+    }
+  }
+  // Dated declaration: re-download the filing, check its hash, re-find the quote, re-parse amount and dates.
+  const dcl = recon.declaration;
+  if (dcl) {
+    try {
+      if (!tx.getText) throw new Error("transport cannot fetch documents");
+      const doc = await tx.getText(dcl.document_url);
+      add("declaration document unchanged (sha256)", doc.sha256 === dcl.document_sha256 ? "CONFIRMED" : "REJECTED", doc.sha256.slice(0, 16));
+      const ENT: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", rsquo: "\u2019", lsquo: "\u2018", rdquo: "\u201d", ldquo: "\u201c", ndash: "\u2013", mdash: "\u2014" };
+      const plain = doc.body
+        .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<\/?(?:a|abbr|b|bdi|bdo|big|cite|code|em|font|i|ins|kbd|mark|q|s|samp|small|span|strike|strong|sub|sup|tt|u|var)\b[^>]*>/gi, "").replace(/<[^>]+>/g, " ")
+        .replace(/&#x([0-9a-f]+);/gi, (_m: string, h: string) => String.fromCodePoint(parseInt(h, 16)))
+        .replace(/&#(\d+);/g, (_m: string, d: string) => String.fromCodePoint(Number(d)))
+        .replace(/&([a-z]+);/gi, (_m: string, e: string) => ENT[e.toLowerCase()] ?? " ")
+        .replace(/[\s\u00a0]+/g, " ");
+      const parts = String(dcl.quote).split(" … ");
+      add("declaration quote found in document", parts.every((q: string) => plain.includes(q)) ? "CONFIRMED" : "REJECTED", parts.length + " clause(s)");
+      const M = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+      const dates = [...String(dcl.quote).matchAll(/([A-Z][a-z]+) (\d{1,2}), ?(\d{4})/g)].map((m) => m[3] + "-" + String(M.indexOf(m[1].toLowerCase()) + 1).padStart(2, "0") + "-" + m[2].padStart(2, "0"));
+      const amountOk = String(dcl.quote).includes("$" + dcl.per_share + " per") || String(dcl.quote).includes("$ " + dcl.per_share + " per");
+      const datesOk = [dcl.payable_date, dcl.record_date].filter(Boolean).every((d: string) => dates.includes(d));
+      add("declared amount and dates re-parsed from quote", amountOk && datesOk ? "CONFIRMED" : "REJECTED", "$" + dcl.per_share + " dates " + dates.join(","));
+      const eff = String(actionRecord.action.effective.time).slice(0, 10);
+      if (dcl.record_date) add("token adjusted on/after record date", eff >= dcl.record_date ? "CONFIRMED" : "REJECTED", eff + " vs record " + dcl.record_date);
+    } catch (e) {
+      add("declaration document re-fetched", "UNSURE", (e as Error).message.slice(0, 120));
     }
   }
   const ref = recon.reference;
@@ -323,6 +376,35 @@ export async function verifyReconciliation(recon: Rec, actionRecord: Rec, tx: Tr
     } catch (e) {
       add("reference value at block", "UNSURE", (e as Error).message.slice(0, 120));
     }
+  }
+  const verdict: Verdict = claims.some((c) => c.verdict === "REJECTED") ? "REJECTED" : claims.some((c) => c.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
+  return { verdict, claims, checked_at: new Date().toISOString() };
+}
+
+// ---------- declaration evidence (calendar entries) ----------
+export async function verifyDeclaration(dcl: Rec, tx: Transport = liveTransport): Promise<{ verdict: Verdict; claims: Claim[]; checked_at: string }> {
+  const claims: Claim[] = [];
+  const add = (claim: string, verdict: Verdict, evidence: string) => claims.push({ claim, verdict, evidence });
+  try {
+    if (!tx.getText) throw new Error("transport cannot fetch documents");
+    const doc = await tx.getText(dcl.document_url);
+    add("declaration document unchanged (sha256)", doc.sha256 === dcl.document_sha256 ? "CONFIRMED" : "REJECTED", doc.sha256.slice(0, 16));
+    const ENT: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", rsquo: "\u2019", lsquo: "\u2018", rdquo: "\u201d", ldquo: "\u201c", ndash: "\u2013", mdash: "\u2014" };
+    const plain = doc.body
+      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<\/?(?:a|abbr|b|bdi|bdo|big|cite|code|em|font|i|ins|kbd|mark|q|s|samp|small|span|strike|strong|sub|sup|tt|u|var)\b[^>]*>/gi, "").replace(/<[^>]+>/g, " ")
+      .replace(/&#x([0-9a-f]+);/gi, (_m: string, h: string) => String.fromCodePoint(parseInt(h, 16)))
+      .replace(/&#(\d+);/g, (_m: string, d: string) => String.fromCodePoint(Number(d)))
+      .replace(/&([a-z]+);/gi, (_m: string, e: string) => ENT[e.toLowerCase()] ?? " ")
+      .replace(/[\s\u00a0]+/g, " ");
+    const parts = String(dcl.quote).split(" \u2026 ");
+    add("declaration quote found in document", parts.every((q: string) => plain.includes(q)) ? "CONFIRMED" : "REJECTED", parts.length + " clause(s)");
+    const M = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    const dates = [...String(dcl.quote).matchAll(/([A-Z][a-z]+) (\d{1,2}), ?(\d{4})/g)].map((m) => m[3] + "-" + String(M.indexOf(m[1].toLowerCase()) + 1).padStart(2, "0") + "-" + m[2].padStart(2, "0"));
+    const amountOk = String(dcl.quote).includes("$" + dcl.per_share + " per") || String(dcl.quote).includes("$ " + dcl.per_share + " per");
+    const datesOk = [dcl.payable_date, dcl.record_date].filter(Boolean).every((d: string) => dates.includes(d));
+    add("declared amount and dates re-parsed from quote", amountOk && datesOk ? "CONFIRMED" : "REJECTED", "$" + dcl.per_share + " dates " + dates.join(","));
+  } catch (e) {
+    add("declaration document re-fetched", "UNSURE", (e as Error).message.slice(0, 120));
   }
   const verdict: Verdict = claims.some((c) => c.verdict === "REJECTED") ? "REJECTED" : claims.some((c) => c.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
   return { verdict, claims, checked_at: new Date().toISOString() };

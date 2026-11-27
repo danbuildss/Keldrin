@@ -1,0 +1,173 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78:sec:a2962f7434bd",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78",
+   "payload_sha256": "a2962f7434bd9c3703cfeb09fe2deacf6d1de886d1cb607e54676d3adaab915a"
+  },
+  "company": {
+   "cik": "0000924613",
+   "name": "NOKIA CORP",
+   "sec_tickers": [
+    "NOK",
+    "NOKBF"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Nokia%20Corporation sha256=0028578430ed6d98",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NOK sha256=18e5237a026237dc",
+    "https://data.sec.gov/submissions/CIK0000924613.json sha256=4eff7d906dfd8478"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001104659-26-124366",
+    "form": "6-K",
+    "filed": "2026-11-09",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926124366/tm2629353d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-117972",
+    "form": "6-K",
+    "filed": "2026-10-22",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926117972/tm2628115d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-116141",
+    "form": "6-K",
+    "filed": "2026-10-15",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926116141/tm2627676d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-105772",
+    "form": "6-K",
+    "filed": "2026-09-08",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926105772/tm2624968d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-102322",
+    "form": "6-K",
+    "filed": "2026-08-27",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926102322/tm2624213d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-096765",
+    "form": "6-K",
+    "filed": "2026-08-14",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926096765/tm2623269d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-092536",
+    "form": "6-K",
+    "filed": "2026-08-07",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926092536/tm2622574d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-088006",
+    "form": "6-K",
+    "filed": "2026-07-29",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926088006/tm2621596d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-086848",
+    "form": "6-K",
+    "filed": "2026-07-27",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086848/tm2621372d1_6k.htm"
+   },
+   {
+    "accession": "0001104659-26-086081",
+    "form": "6-K",
+    "filed": "2026-07-23",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
+   }
+  ],
+  "declaration": null,
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"NOKIA CORP\" token=\"Nokia Corporation\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers NOK,NOKBF"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "654902204"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "10 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.001960475625609247"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "no us-gaap dividend-per-share facts (e.g. a foreign filer reporting under IFRS)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).",
+   "No us-gaap dividend-per-share facts for this company."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:47:20.063Z"
+ },
+ "payload_sha256": "73a7483bb3744daaf69f0058ab75eaa10582a7b4ab8ea40fc586dc91b87f48c9",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash a2962f7434bd9c37"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "10 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "NOKIA CORP NOK,NOKBF"
+   }
+  ],
+  "checked_at": "2026-11-27T08:47:20.533Z"
+ }
+}

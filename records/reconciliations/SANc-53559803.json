@@ -1,0 +1,397 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388:sec:c1d27b794d70",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+   "payload_sha256": "c1d27b794d7044faaa5fac6c514db288205a0f8971382b425e4ea2ced16afee0"
+  },
+  "company": {
+   "cik": "0000891478",
+   "name": "Banco Santander, S.A.",
+   "sec_tickers": [
+    "SAN",
+    "BCDRF"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Banco%20Santander%2C%20S.A. sha256=72385dbe444fda44",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SAN sha256=56a73ccaded4b4d4",
+    "https://data.sec.gov/submissions/CIK0000891478.json sha256=98a4b89d83446d1b"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0000891478-26-000098",
+    "form": "6-K",
+    "filed": "2026-10-30",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000098/financieroq326ingles.htm"
+   },
+   {
+    "accession": "0000950103-26-016289",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326016289/dp255721_6k.htm"
+   },
+   {
+    "accession": "0000891478-26-000095",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000095/q32026earningspresentati.htm"
+   },
+   {
+    "accession": "0000891478-26-000093",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000093/financieroq326ingles.htm"
+   },
+   {
+    "accession": "0000891478-26-000091",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000091/q32026pr.htm"
+   },
+   {
+    "accession": "0000950103-26-016265",
+    "form": "6-K",
+    "filed": "2026-10-28",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326016265/dp255629_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015990",
+    "form": "6-K",
+    "filed": "2026-10-22",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015990/dp255361_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015936",
+    "form": "6-K",
+    "filed": "2026-10-21",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015936/dp255253_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015615",
+    "form": "6-K",
+    "filed": "2026-10-15",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015615/dp255019_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015612",
+    "form": "6-K",
+    "filed": "2026-10-15",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015612/dp254990_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015610",
+    "form": "6-K",
+    "filed": "2026-10-15",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015610/dp254971_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015568",
+    "form": "6-K",
+    "filed": "2026-10-14",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015568/dp254973_6k-redemption.htm"
+   },
+   {
+    "accession": "0000950103-26-015545",
+    "form": "6-K",
+    "filed": "2026-10-14",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015545/dp254920_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-015335",
+    "form": "6-K",
+    "filed": "2026-10-08",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326015335/dp254722_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-014895",
+    "form": "6-K",
+    "filed": "2026-10-01",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326014895/dp254302_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-014666",
+    "form": "6-K",
+    "filed": "2026-09-29",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326014666/dp254007_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-014421",
+    "form": "6-K",
+    "filed": "2026-09-24",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326014421/dp253798_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-014067",
+    "form": "6-K",
+    "filed": "2026-09-17",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326014067/dp253469_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-013742",
+    "form": "6-K",
+    "filed": "2026-09-10",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326013742/dp253147_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-013701",
+    "form": "6-K",
+    "filed": "2026-09-09",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326013701/dp253084_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-013535",
+    "form": "6-K",
+    "filed": "2026-09-03",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326013535/dp252949_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-013322",
+    "form": "6-K",
+    "filed": "2026-09-01",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326013322/dp252780_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-013308",
+    "form": "6-K",
+    "filed": "2026-09-01",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326013308/dp252656_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-012959",
+    "form": "6-K",
+    "filed": "2026-08-27",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326012959/dp252367_6k.htm"
+   },
+   {
+    "accession": "0001193125-26-365115",
+    "form": "6-K",
+    "filed": "2026-08-25",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000119312526365115/d120143d6k.htm"
+   },
+   {
+    "accession": "0000950103-26-012763",
+    "form": "6-K",
+    "filed": "2026-08-21",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326012763/dp252120_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-012672",
+    "form": "6-K",
+    "filed": "2026-08-20",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326012672/dp251664_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-012282",
+    "form": "6-K",
+    "filed": "2026-08-13",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326012282/dp251696_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-012104",
+    "form": "6-K",
+    "filed": "2026-08-10",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326012104/dp251544_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-011978",
+    "form": "6-K",
+    "filed": "2026-08-06",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326011978/dp251392_6k-2.htm"
+   },
+   {
+    "accession": "0000950103-26-011921",
+    "form": "6-K",
+    "filed": "2026-08-05",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326011921/dp250447_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-011481",
+    "form": "6-K",
+    "filed": "2026-07-30",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326011481/dp250874_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-011352",
+    "form": "6-K",
+    "filed": "2026-07-30",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326011352/dp250798_6k.htm"
+   },
+   {
+    "accession": "0000891478-26-000078",
+    "form": "6-K",
+    "filed": "2026-07-24",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000078/san-20260630.htm"
+   },
+   {
+    "accession": "0000891478-26-000076",
+    "form": "6-K",
+    "filed": "2026-07-24",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000076/financieroq226ingles.htm"
+   },
+   {
+    "accession": "0000950103-26-011044",
+    "form": "6-K",
+    "filed": "2026-07-23",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326011044/dp250498_6k.htm"
+   },
+   {
+    "accession": "0000891478-26-000073",
+    "form": "6-K",
+    "filed": "2026-07-22",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000073/q22026earningspresentati.htm"
+   },
+   {
+    "accession": "0000891478-26-000071",
+    "form": "6-K",
+    "filed": "2026-07-22",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000071/financieroq226ingles.htm"
+   },
+   {
+    "accession": "0000891478-26-000069",
+    "form": "6-K",
+    "filed": "2026-07-22",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000089147826000069/q22026pr.htm"
+   },
+   {
+    "accession": "0000950103-26-010701",
+    "form": "6-K",
+    "filed": "2026-07-16",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326010701/dp250124_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-010632",
+    "form": "6-K",
+    "filed": "2026-07-15",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326010632/dp250038_6k.htm"
+   },
+   {
+    "accession": "0000950103-26-010426",
+    "form": "6-K",
+    "filed": "2026-07-09",
+    "items": "",
+    "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326010426/dp249898_6k.htm"
+   }
+  ],
+  "declaration": null,
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Banco Santander, S.A.\" token=\"Banco Santander, S.A.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers SAN,BCDRF"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "05964H105"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "42 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.010571078868727418"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "no us-gaap dividend-per-share facts (e.g. a foreign filer reporting under IFRS)"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).",
+   "No us-gaap dividend-per-share facts for this company."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:47:10.663Z"
+ },
+ "payload_sha256": "65941c1cff9a0049fcc0c0619ead4c795a69069223b66180621348e2f11b281a",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash c1d27b794d7044fa"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "42 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Banco Santander, S.A. SAN,BCDRF"
+   }
+  ],
+  "checked_at": "2026-11-27T08:47:11.132Z"
+ }
+}

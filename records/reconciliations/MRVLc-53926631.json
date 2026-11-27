@@ -1,0 +1,171 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41:sec:6b739a7952f5",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
+   "payload_sha256": "6b739a7952f5610514afc8c964ceeba91e2e96b8d4f743d08b908801dbcbb2a4"
+  },
+  "company": {
+   "cik": "0001835632",
+   "name": "Marvell Technology, Inc.",
+   "sec_tickers": [
+    "MRVL"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Marvell%20Technology%2C%20Inc. sha256=eedd21437cd94531",
+    "https://data.sec.gov/submissions/CIK0001835632.json sha256=7f1c91b201f0ad7c"
+   ]
+  },
+  "company_event": null,
+  "declaration_candidates": [
+   {
+    "accession": "0001193125-26-442714",
+    "form": "8-K",
+    "filed": "2026-11-02",
+    "items": "2.02,7.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000119312526442714/d81187d8k.htm"
+   },
+   {
+    "accession": "0001628280-26-063592",
+    "form": "8-K",
+    "filed": "2026-09-25",
+    "items": "8.01,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/mrvl-20260925.htm"
+   },
+   {
+    "accession": "0001835632-26-000022",
+    "form": "8-K",
+    "filed": "2026-08-27",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/mrvl-20260827.htm"
+   }
+  ],
+  "declaration": {
+   "per_share": "0.06",
+   "currency": "USD",
+   "payable_date": "2026-10-29",
+   "record_date": "2026-10-09",
+   "declared_on": null,
+   "declared_month": null,
+   "quote": "(NASDAQ: MRVL), today announced a quarterly dividend of $0.06 per share of common stock, including preferred stock on an as converted to common stock basis, payable on October 29, 2026 to stockholders of record as of October 9, 2026",
+   "offset": 187,
+   "accession": "0001628280-26-063592",
+   "form": "8-K",
+   "filed": "2026-09-25",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/a20260925dividendpressrele.htm",
+   "document_sha256": "09bd692dead509c74f42e35d286cf436dc76ada4509798ab3f0515de86aa4fe8"
+  },
+  "reference": null,
+  "interpretation": null,
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Marvell Technology, Inc.\" token=\"Marvell Technology, Inc.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers MRVL"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "573874104"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.06 payable 2026-10-29 record 2026-10-09 (8-K 0001628280-26-063592)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-11-06, record 2026-10-09"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "unknown",
+    "detail": "adjusted 2026-11-06, payable 2026-10-29 (+8 d)"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000001865048279598"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "unknown",
+    "detail": "not yet reported in XBRL (latest quarterly fact ends 2026-08-01)"
+   },
+   {
+    "name": "reference_feed_available",
+    "result": "unknown",
+    "detail": "no NAV feed listed for this token"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag).",
+   "No reference value feed, so the implied amount per share cannot be computed."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:47:14.287Z"
+ },
+ "payload_sha256": "c905901d9cb76118f2fd0aa8f23b6a3bdc79e29ebfca3e62f42108b4674bd05e",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash 6b739a7952f56105"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "3 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Marvell Technology, Inc. MRVL"
+   },
+   {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "09bd692dead509c7"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "1 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.06 dates 2026-10-29,2026-10-09"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-11-06 vs record 2026-10-09"
+   }
+  ],
+  "checked_at": "2026-11-27T08:47:15.235Z"
+ }
+}

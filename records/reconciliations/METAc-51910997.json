@@ -1,0 +1,156 @@
+{
+ "reconciliation": {
+  "schema_version": "0.2",
+  "record_type": "reconciliation",
+  "synthetic": false,
+  "reconciliation_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc:sec:dcdbe3436718",
+  "action_kind": "cash_dividend",
+  "issuer_action": {
+   "record_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+   "payload_sha256": "dcdbe3436718922f1f9cdeaa4541c2de1969fb48f149ca3d7ea1c884afbcd350"
+  },
+  "company": {
+   "cik": "0001326801",
+   "name": "Meta Platforms, Inc.",
+   "sec_tickers": [
+    "META",
+    "METAM"
+   ],
+   "resolution_evidence": [
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Meta%20Platforms%20Inc. sha256=1e02f5d1c0165f3e",
+    "https://data.sec.gov/submissions/CIK0001326801.json sha256=d8a3de061b73d74c"
+   ]
+  },
+  "company_event": {
+   "type": "cash_dividend_declared_per_share",
+   "value": "0.525",
+   "unit": "USD/share",
+   "period_start": "2026-07-01",
+   "period_end": "2026-09-30",
+   "accession": "0001628280-26-066773",
+   "form": "10-Q",
+   "filed": "2026-10-22",
+   "source_url": "https://data.sec.gov/api/xbrl/companyconcept/CIK0001326801/us-gaap/CommonStockDividendsPerShareDeclared.json",
+   "source_sha256": "64c2a7705bab8ff2eda76adbf2fb07dc94005bffd8edeaf38a6b6c9af8db7cf1"
+  },
+  "declaration_candidates": [
+   {
+    "accession": "0001628280-26-050596",
+    "form": "8-K",
+    "filed": "2026-07-29",
+    "items": "2.02,9.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/meta-20260729.htm"
+   }
+  ],
+  "declaration": null,
+  "reference": {
+   "feed": "0x6526aE6797A76123638b863AeE4dD27Ba4E4b27D",
+   "description": "Coinbase META",
+   "answer_raw": "71929600000",
+   "decimals": 8,
+   "value_usd": "719.296",
+   "updated_at": "2026-09-28T14:44:21.000Z",
+   "read_at_block": "51910996"
+  },
+  "interpretation": {
+   "implied_net_reinvested_per_share_usd": "0.22570953",
+   "ratio_to_declared": "0.429922",
+   "caveat": "Interpretation, not fact: assumes reinvestment at the feed's total-return reference just before the action. The issuer does not publish its per-action tax/fee breakdown, so the gap to the declared amount is unexplained, not an error."
+  },
+  "checks": [
+   {
+    "name": "sec_company_name_matches_token_name",
+    "result": "pass",
+    "detail": "SEC=\"Meta Platforms, Inc.\" token=\"Meta Platforms Inc.\""
+   },
+   {
+    "name": "sec_lists_expected_ticker",
+    "result": "pass",
+    "detail": "SEC tickers META,METAM"
+   },
+   {
+    "name": "isin_to_cusip_valid",
+    "result": "pass",
+    "detail": "30303M102"
+   },
+   {
+    "name": "share_class_evidenced",
+    "result": "unknown",
+    "detail": "share class not yet evidenced from a primary source"
+   },
+   {
+    "name": "declaration_candidate_filings_found",
+    "result": "pass",
+    "detail": "1 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
+    "name": "multiplier_increased_consistent_with_reinvestment",
+    "result": "pass",
+    "detail": "ratio 1.000313792289598084"
+   },
+   {
+    "name": "dividend_declared_in_quarter_of_action",
+    "result": "pass",
+    "detail": "0.525 USD/share for 2026-07-01..2026-09-30 (10-Q 0001628280-26-066773)"
+   },
+   {
+    "name": "implied_net_not_above_declared",
+    "result": "pass",
+    "detail": "implied 0.22570953 vs declared 0.525"
+   }
+  ],
+  "unknown": [
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations)."
+  ],
+  "status": "partially_reconciled",
+  "generated_at": "2026-11-27T08:46:45.987Z"
+ },
+ "payload_sha256": "c2127ef10cbe9ed99a8ef4615a8d404058cd49a7cb56c77fc3dfc52d6a311dbe",
+ "review": {
+  "verdict": "CONFIRMED",
+  "claims": [
+   {
+    "claim": "links the exact issuer-action payload",
+    "verdict": "CONFIRMED",
+    "evidence": "record hash dcdbe3436718922f"
+   },
+   {
+    "claim": "SEC XBRL fact re-fetched",
+    "verdict": "CONFIRMED",
+    "evidence": "0.525 10-Q 0001628280-26-066773"
+   },
+   {
+    "claim": "action date falls inside the fact's period",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-09-28 in 2026-07-01..2026-09-30"
+   },
+   {
+    "claim": "declaration candidate filings exist as stated",
+    "verdict": "CONFIRMED",
+    "evidence": "1 checked, 0 mismatched"
+   },
+   {
+    "claim": "company name and tickers match SEC",
+    "verdict": "CONFIRMED",
+    "evidence": "Meta Platforms, Inc. META,METAM"
+   },
+   {
+    "claim": "reference value at block",
+    "verdict": "CONFIRMED",
+    "evidence": "answer 71929600000 at 51910996"
+   },
+   {
+    "claim": "implied net per share arithmetic",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed 0.22570953"
+   }
+  ],
+  "checked_at": "2026-11-27T08:46:47.137Z"
+ }
+}
