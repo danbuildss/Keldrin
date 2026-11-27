@@ -93,3 +93,23 @@ test("reader role: the free-try counter works through the real read-only connect
     await admin.end();
   }
 });
+
+test("reader role: feedback is insert-only through feedback_submit; nobody but the owner can read it", { skip: !ADMIN && "set KELDRIN_TEST_PG_ADMIN to run" }, async () => {
+  const { admin, readerUrl, writerUrl } = await setup();
+  const r = openPg(readerUrl + "?sslmode=disable");
+  const { submitFeedback } = await import("../src/api/feedback.ts");
+  try {
+    const out = await submitFeedback(r as never, { email: "dev@example.com", x: "builder" }, "203.0.113.9");
+    assert.equal(out.status, 200, JSON.stringify(out.body));
+    assert.equal((await admin.query("SELECT count(*)::int AS n FROM keldrin.feedback")).rows[0].n, 1);
+    await assert.rejects(r.query("SELECT * FROM feedback"), "the reader cannot read feedback");
+    const w = new pg.Client({ connectionString: writerUrl + "?sslmode=disable" });
+    await w.connect();
+    await assert.rejects(w.query("SELECT * FROM keldrin.feedback"), "the writer cannot read feedback");
+    await assert.rejects(w.query("SELECT keldrin.feedback_submit('a@b.co', '', '', '00000000000000000000000000000000')"), "the writer cannot submit");
+    await w.end();
+  } finally {
+    await r.close();
+    await admin.end();
+  }
+});

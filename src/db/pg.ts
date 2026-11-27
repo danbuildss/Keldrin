@@ -9,8 +9,8 @@ export type ReadDb = {
   query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
   exec(sql: string): Promise<void>;
   close(): Promise<void>;
-  /** One statement in an explicit READ WRITE transaction. Used only for the free-try counter function, the one
-   *  write the reader role is granted (supabase/010_trial_grants.sql); table grants stay SELECT-only. */
+  /** One statement in an explicit READ WRITE transaction. Only the free-try counter and the feedback insert, the two
+   *  writes the reader role is granted (supabase/010, 011); table grants stay SELECT-only. */
   writeOne?<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
 };
 
@@ -20,6 +20,9 @@ function tls() {
 
 /** The only statement writeOne will run (the free-try counter). Shared with src/api/trial.ts so they cannot drift. */
 export const TRIAL_CONSUME_SQL = "SELECT trial_consume($1, $2::date) AS n";
+/** The website feedback insert (rate limited inside the function). */
+export const FEEDBACK_SQL = "SELECT feedback_submit($1, $2, $3, $4) AS result";
+const WRITE_ALLOWED = new Set([TRIAL_CONSUME_SQL, FEEDBACK_SQL]);
 
 export function openPg(connectionString: string): ReadDb {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
@@ -37,7 +40,7 @@ export function openPg(connectionString: string): ReadDb {
       throw new Error("read-only connection: exec is not allowed");
     },
     async writeOne<T>(sql: string, params: unknown[] = []) {
-      if (sql !== TRIAL_CONSUME_SQL) throw new Error("writeOne only runs the free-try counter");
+      if (!WRITE_ALLOWED.has(sql)) throw new Error("writeOne only runs the free-try counter and the feedback insert");
       const c = await pool.connect();
       try {
         await c.query("BEGIN READ WRITE");

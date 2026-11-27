@@ -9,6 +9,7 @@ import { assetCorporateActions } from "./assetActions.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
+import { submitFeedback } from "./feedback.ts";
 import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
@@ -105,14 +106,27 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
-    // The only non-GET route: the remote MCP endpoint (JSON-RPC over POST; every tool is read-only).
+    // Non-GET routes: the remote MCP endpoint (JSON-RPC over POST; every tool is read-only) and the website feedback form.
     const isMcp = p === "/mcp" && req.method === "POST";
-    if (req.method !== "GET" && !isMcp) return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
+    const isFeedback = p === "/v1/feedback" && req.method === "POST";
+    if (req.method !== "GET" && !isMcp && !isFeedback) return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
     const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
     const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
     if (retry !== null) {
       res.setHeader("retry-after", String(retry));
       return send(res, 429, err("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
+    }
+    if (isFeedback) {
+      const raw = await readBody(req, 4 * 1024);
+      if (raw === null) return send(res, 413, err("TOO_LARGE", "request body over 4 KB"), undefined, "no-store");
+      let body: unknown;
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return send(res, 400, err("BAD_REQUEST", "send a JSON object"), undefined, "no-store");
+      }
+      const out = await submitFeedback(db as never, body, fwd || req.socket?.remoteAddress || "unknown");
+      return send(res, out.status, out.body as Json, undefined, "no-store");
     }
     if (isMcp) {
       const raw = await readBody(req, 64 * 1024);
@@ -129,7 +143,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
