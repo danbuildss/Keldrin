@@ -66,6 +66,7 @@
     "url": "https://www.sec.gov/Archives/edgar/data/1067491/000106749126000034/index.htm"
    }
   ],
+  "declaration": null,
   "reference": null,
   "interpretation": null,
   "checks": [
@@ -95,6 +96,11 @@
     "detail": "6 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.021642990925283286"
@@ -107,13 +113,13 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).",
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:49.760Z"
+  "generated_at": "2026-11-27T08:47:31.540Z"
  },
- "payload_sha256": "a87d1c8b544deb238229de4cd6ffde8130781b108762c4d99f5fcd6a2b0c4ed6",
+ "payload_sha256": "20a575a17e205157af79c0c172a95839c5f38c4a99eea7c6e3b61738e4cc9088",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -133,6 +139,6 @@
     "evidence": "Infosys Ltd INFY"
    }
   ],
-  "checked_at": "2026-11-27T08:27:50.224Z"
+  "checked_at": "2026-11-27T08:47:32.007Z"
  }
 }

@@ -44,6 +44,21 @@
     "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/aapl-20260730.htm"
    }
   ],
+  "declaration": {
+   "per_share": "0.27",
+   "currency": "USD",
+   "payable_date": "2026-11-16",
+   "record_date": "2026-11-12",
+   "declared_on": null,
+   "declared_month": null,
+   "quote": "” Apple’s board of directors has declared a cash dividend of $0.27 per share of the Company’s common stock … The dividend is payable on November 16, 2026, to shareholders of record as of the close of business on November 12, 2026",
+   "offset": 1957,
+   "accession": "0000320193-26-000024",
+   "form": "8-K",
+   "filed": "2026-11-02",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/a8-kex991q4202609262026.htm",
+   "document_sha256": "b79e05d1202d1e836bb4ee73387ff3cfa1437c8e6a091e5ffff958296c922f35"
+  },
   "reference": {
    "feed": "0x787f13dEa48Db0897CbCDD985de77809D837F988",
    "description": "Coinbase AAPL",
@@ -81,6 +96,21 @@
     "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.27 payable 2026-11-16 record 2026-11-12 (8-K 0000320193-26-000024)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-11-16, record 2026-11-12"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-11-16, payable 2026-11-16 (+0 d)"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.000500389301980219"
@@ -93,13 +123,12 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:47.884Z"
+  "generated_at": "2026-11-27T08:47:24.233Z"
  },
- "payload_sha256": "93173df494d052893469b0d9060ac9be54c2b35a8b4392b0737b51937c4098c5",
+ "payload_sha256": "9d1cf60dbb680cf7ac35c5b5078d69f5a4f5b456dbcff2a6440dc7ba23d9b203",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -119,11 +148,31 @@
     "evidence": "Apple Inc. AAPL"
    },
    {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "b79e05d1202d1e83"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "2 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.27 dates 2026-11-16,2026-11-12"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-11-16 vs record 2026-11-12"
+   },
+   {
     "claim": "reference value at block",
     "verdict": "CONFIRMED",
     "evidence": "answer 35550825000 at 58271536"
    }
   ],
-  "checked_at": "2026-11-27T08:27:48.551Z"
+  "checked_at": "2026-11-27T08:47:25.380Z"
  }
 }

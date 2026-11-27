@@ -16,7 +16,7 @@
     "MU"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Micron%20Technology%20Inc. sha256=f3ac4c392c4d2837",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Micron%20Technology%20Inc. sha256=767de8071e977c34",
     "https://data.sec.gov/submissions/CIK0000723125.json sha256=1f6f9cb8d5690ab5"
    ]
   },
@@ -30,6 +30,21 @@
     "url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/mu-20260930.htm"
    }
   ],
+  "declaration": {
+   "per_share": "0.15",
+   "currency": "USD",
+   "payable_date": "2026-10-29",
+   "record_date": "2026-10-14",
+   "declared_on": "2026-09-30",
+   "declared_month": null,
+   "quote": "On September 30, 2026, Micron’s Board of Directors declared a quarterly dividend of $0.15 per share, payable in cash on October 29, 2026, to shareholders of record as of the close of business on October 14, 2026",
+   "offset": 3276,
+   "accession": "0000723125-26-000018",
+   "form": "8-K",
+   "filed": "2026-09-30",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/a2026q4ex991-pressrelease.htm",
+   "document_sha256": "d121e2e8294d26ad80d929db96f1da5b4b7eb93cb7217ab70ef8c863406f4b52"
+  },
   "reference": null,
   "interpretation": null,
   "checks": [
@@ -59,6 +74,21 @@
     "detail": "1 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.15 payable 2026-10-29 record 2026-10-14 (8-K 0000723125-26-000018)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-29, record 2026-10-14"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-29, payable 2026-10-29 (+0 d)"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.000100681176479289"
@@ -76,14 +106,13 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag).",
    "No reference value feed, so the implied amount per share cannot be computed."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:41.300Z"
+  "generated_at": "2026-11-27T08:47:04.736Z"
  },
- "payload_sha256": "fe0f4004861e2c83cde081760757493a157b8c40464be3ab96482e2a6e1b7fda",
+ "payload_sha256": "b49cbdf900b44f8a12a8e0c924129096da961f0e068aac702a430b0edbd8f478",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -101,8 +130,28 @@
     "claim": "company name and tickers match SEC",
     "verdict": "CONFIRMED",
     "evidence": "MICRON TECHNOLOGY INC MU"
+   },
+   {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "d121e2e8294d26ad"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "1 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.15 dates 2026-09-30,2026-10-29,2026-10-14"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-10-29 vs record 2026-10-14"
    }
   ],
-  "checked_at": "2026-11-27T08:27:41.766Z"
+  "checked_at": "2026-11-27T08:47:05.723Z"
  }
 }

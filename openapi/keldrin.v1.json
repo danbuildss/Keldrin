@@ -349,6 +349,71 @@
      }
     }
    }
+  },
+  "/v1/calendar": {
+   "get": {
+    "operationId": "getCalendar",
+    "summary": "Declared dividends and the date each token is expected to adjust (leading calendar)",
+    "description": "Entries come from SEC filing text (quote, document URL and sha256) and are independently re-verified. expected_adjustment_date is the payable date: an observed issuer pattern whose measured rate is stated in each entry's basis, not a guarantee.",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     },
+     {
+      "name": "state",
+      "in": "query",
+      "schema": {
+       "enum": [
+        "upcoming",
+        "applied",
+        "not_observed"
+       ]
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Calendar entries",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "meta"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "type": "object"
+           }
+          },
+          "meta": {
+           "$ref": "#/components/schemas/Meta"
+          }
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad input",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {

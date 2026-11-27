@@ -55,7 +55,7 @@ export function declarationCandidates(recent: { form: string[]; filingDate: stri
     if (t < start || t > end) continue;
     const form = recent.form[i];
     const items = recent.items[i] ?? "";
-    const relevant = form === "6-K" || (form === "8-K" && /(^|,)\s*(8\.01|2\.02|5\.03)/.test(items));
+    const relevant = form === "6-K" || (form === "8-K" && /(^|,)\s*(8\.01|2\.02|5\.03|7\.01)/.test(items));
     if (!relevant) continue;
     const acc = recent.accessionNumber[i];
     out.push({ accession: acc, form, filed: recent.filingDate[i], items, url: `https://www.sec.gov/Archives/edgar/data/${Number(cik)}/${acc.replace(/-/g, "")}/${recent.primaryDocument[i]}` });

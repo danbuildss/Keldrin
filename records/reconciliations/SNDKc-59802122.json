@@ -16,8 +16,8 @@
     "SNDK"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3a72f0a3ac4d31cb",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=5117e592008640aa",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3557c6f7d1e93eb6",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=213b3491221ee3cc",
     "https://data.sec.gov/submissions/CIK0002023554.json sha256=6f59d8f061f93fd6"
    ]
   },
@@ -45,6 +45,7 @@
     "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/sndk-20260805.htm"
    }
   ],
+  "declaration": null,
   "reference": null,
   "interpretation": null,
   "checks": [
@@ -81,13 +82,13 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "Declaration dates for this action kind are not extracted yet.",
    "Split ratio not yet evidenced in SEC structured data."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:51.167Z"
+  "generated_at": "2026-11-27T08:47:33.058Z"
  },
- "payload_sha256": "c990d7fa0c45de1d80a127275c4e2bc2a434f240aea7de3baf17b1de9610b1e1",
+ "payload_sha256": "6b74c494b7eeb1396a35ef7fffc967e34447a426928428ac550c7ee48466c731",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -107,6 +108,6 @@
     "evidence": "Sandisk Corp SNDK"
    }
   ],
-  "checked_at": "2026-11-27T08:27:51.613Z"
+  "checked_at": "2026-11-27T08:47:33.505Z"
  }
 }

@@ -72,6 +72,21 @@
     "url": "https://www.sec.gov/Archives/edgar/data/1652044/000119312526234488/d144566d8k.htm"
    }
   ],
+  "declaration": {
+   "per_share": "0.22",
+   "currency": "USD",
+   "payable_date": "2026-09-14",
+   "record_date": "2026-09-07",
+   "declared_on": null,
+   "declared_month": "2026-07",
+   "quote": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on September 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of September 7, 2026",
+   "offset": 5471,
+   "accession": "0001652044-26-000066",
+   "form": "8-K",
+   "filed": "2026-07-22",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/googexhibit991q22026.htm",
+   "document_sha256": "a4779c967a2cb8cc4fae1245bccf4b768675463dab437c25b964696e7b91ae42"
+  },
   "reference": {
    "feed": "0x5bF49E0ffA937CE2FfF033c739aD7C634c4D34F2",
    "description": "Coinbase GOOGL",
@@ -113,6 +128,21 @@
     "detail": "5 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.22 payable 2026-09-14 record 2026-09-07 (8-K 0001652044-26-000066)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-09-14, record 2026-09-07"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-09-14, payable 2026-09-14 (+0 d)"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.000377118676784179"
@@ -123,19 +153,23 @@
     "detail": "0.22 USD/share for 2026-07-01..2026-09-30 (10-Q 0001652044-26-000084)"
    },
    {
+    "name": "declared_amount_matches_sec_fact",
+    "result": "pass",
+    "detail": "text $0.22 vs XBRL 0.22"
+   },
+   {
     "name": "implied_net_not_above_declared",
     "result": "pass",
     "detail": "implied 0.13089789 vs declared 0.22"
    }
   ],
   "unknown": [
-   "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2)."
+   "Share class of the underlying (needs SEC filing text or the ADGM prospectus)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:31.300Z"
+  "generated_at": "2026-11-27T08:46:42.449Z"
  },
- "payload_sha256": "16bd91a606028ae63a8303da0dff725dacb22414b4efe3f94b95387ff2698b4a",
+ "payload_sha256": "3067e79e45c8eab14fb3a7d9b79b799d8ccf1255d73728bd1ccbced8871a2153",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -165,6 +199,26 @@
     "evidence": "Alphabet Inc. GOOGL,GOOG,GOOGM,GOOGN"
    },
    {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "a4779c967a2cb8cc"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "2 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.22 dates 2026-09-14,2026-09-07"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-09-14 vs record 2026-09-07"
+   },
+   {
     "claim": "reference value at block",
     "verdict": "CONFIRMED",
     "evidence": "answer 34710000000 at 51310618"
@@ -175,6 +229,6 @@
     "evidence": "recomputed 0.13089789"
    }
   ],
-  "checked_at": "2026-11-27T08:27:32.421Z"
+  "checked_at": "2026-11-27T08:46:44.178Z"
  }
 }

@@ -28,6 +28,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
 - GET /v1/actions/{record_id} — full record, evidence, review claims, revisions, and company_context (SEC reconciliation, when confirmed)
 - GET /openapi.json — OpenAPI 3.1 contract
+- GET /v1/calendar?state=upcoming — declared dividends and the date each token is expected to adjust (observed pattern, stated with its rate)
 - GET /health — coverage, last run, limitations
 Errors: {"error":{"code","message","hint"}}. 404 unknown, 400 bad input, 409 ambiguous symbol.
 `;
@@ -60,6 +61,20 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       }));
     }
 
+    if (p === "/v1/calendar") {
+      const contract = url.searchParams.get("contract");
+      if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      const state = url.searchParams.get("state");
+      if (state && !["upcoming", "applied", "not_observed"].includes(state)) return send(res, 400, err("BAD_STATE", "state must be upcoming, applied or not_observed"));
+      const snap = (await db.query<{ snapshot_id: string; as_of: string }>("SELECT snapshot_id, max(as_of) AS as_of FROM calendar_entries GROUP BY snapshot_id ORDER BY 2 DESC LIMIT 1")).rows[0];
+      if (!snap) return send(res, 200, ok([], { count: 0, snapshot_as_of: null }));
+      const rows = (await db.query<{ payload: Json; review: Json }>(
+        `SELECT payload, review FROM calendar_entries WHERE snapshot_id=$1 AND review_verdict='CONFIRMED'
+         AND ($2::text IS NULL OR lower(contract_address)=lower($2)) AND ($3::text IS NULL OR state=$3) ORDER BY payable_date, entry_id`,
+        [snap.snapshot_id, contract, state],
+      )).rows;
+      return send(res, 200, ok(rows.map((r) => ({ ...r.payload, review: r.review })), { count: rows.length, snapshot_as_of: snap.as_of }));
+    }
     if (p === "/v1/assets") {
       const rows = await db.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));

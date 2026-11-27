@@ -42,6 +42,7 @@
     "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/meta-20260729.htm"
    }
   ],
+  "declaration": null,
   "reference": {
    "feed": "0x6526aE6797A76123638b863AeE4dD27Ba4E4b27D",
    "description": "Coinbase META",
@@ -83,6 +84,11 @@
     "detail": "1 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.000313792289598084"
@@ -100,12 +106,12 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2)."
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:33.731Z"
+  "generated_at": "2026-11-27T08:46:45.987Z"
  },
- "payload_sha256": "b2dd67d926ff1378aef4db06d680eb619e5823df921353b37ba91ca70042224b",
+ "payload_sha256": "c2127ef10cbe9ed99a8ef4615a8d404058cd49a7cb56c77fc3dfc52d6a311dbe",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -145,6 +151,6 @@
     "evidence": "recomputed 0.22570953"
    }
   ],
-  "checked_at": "2026-11-27T08:27:34.972Z"
+  "checked_at": "2026-11-27T08:46:47.137Z"
  }
 }

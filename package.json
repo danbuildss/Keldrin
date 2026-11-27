@@ -12,6 +12,7 @@
     "verify": "node src/cli.ts verify",
     "proof:googl": "node src/cli.ts proof-googl",
     "reconcile": "node src/cli.ts reconcile",
+    "calendar": "node src/cli.ts calendar",
     "serve": "node src/cli.ts serve",
     "proof": "node src/cli.ts proof"
   },

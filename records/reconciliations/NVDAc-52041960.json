@@ -17,7 +17,7 @@
    ],
    "resolution_evidence": [
     "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=2526a7ba88160d88",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=6e339aec2b0bbd92",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=2fea1ec0e321527e",
     "https://data.sec.gov/submissions/CIK0001045810.json sha256=7c07b0a81346ce33"
    ]
   },
@@ -38,6 +38,13 @@
     "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm"
    },
    {
+    "accession": "0001045810-26-000069",
+    "form": "8-K",
+    "filed": "2026-08-17",
+    "items": "1.01,2.03,7.01",
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000069/nvda-20260817.htm"
+   },
+   {
     "accession": "0001193125-26-275783",
     "form": "8-K",
     "filed": "2026-06-18",
@@ -45,6 +52,21 @@
     "url": "https://www.sec.gov/Archives/edgar/data/1045810/000119312526275783/d48176d8k.htm"
    }
   ],
+  "declaration": {
+   "per_share": "0.25",
+   "currency": "USD",
+   "payable_date": "2026-10-01",
+   "record_date": "2026-09-10",
+   "declared_on": null,
+   "declared_month": null,
+   "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on October 1, 2026, to all shareholders of record on September 10, 2026",
+   "offset": 1478,
+   "accession": "0001045810-26-000073",
+   "form": "8-K",
+   "filed": "2026-08-26",
+   "document_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+   "document_sha256": "6f23ecda957a4c83223cb59993dfde4df6fd8ac2d2755940ae387fd1e29d426e"
+  },
   "reference": {
    "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
    "description": "Coinbase NVDA",
@@ -79,7 +101,22 @@
    {
     "name": "declaration_candidate_filings_found",
     "result": "pass",
-    "detail": "3 8-K/6-K filing(s) in the 120 days before the action"
+    "detail": "4 8-K/6-K filing(s) in the 120 days before the action"
+   },
+   {
+    "name": "dated_declaration_found",
+    "result": "pass",
+    "detail": "$0.25 payable 2026-10-01 record 2026-09-10 (8-K 0001045810-26-000073)"
+   },
+   {
+    "name": "token_adjusted_not_before_record_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-01, record 2026-09-10"
+   },
+   {
+    "name": "token_adjusted_on_payable_date",
+    "result": "pass",
+    "detail": "adjusted 2026-10-01, payable 2026-10-01 (+0 d)"
    },
    {
     "name": "multiplier_increased_consistent_with_reinvestment",
@@ -94,13 +131,12 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:36.556Z"
+  "generated_at": "2026-11-27T08:46:52.366Z"
  },
- "payload_sha256": "f20a1213627b6c2d4dd9efab11b56e22acc3f74dc10f6f80feb8906d5fe45040",
+ "payload_sha256": "64fe6f880d091de008440c10255cdada07a407f3e140a6ba7792453a2cbf2a27",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -112,7 +148,7 @@
    {
     "claim": "declaration candidate filings exist as stated",
     "verdict": "CONFIRMED",
-    "evidence": "3 checked, 0 mismatched"
+    "evidence": "4 checked, 0 mismatched"
    },
    {
     "claim": "company name and tickers match SEC",
@@ -120,11 +156,31 @@
     "evidence": "NVIDIA CORP NVDA"
    },
    {
+    "claim": "declaration document unchanged (sha256)",
+    "verdict": "CONFIRMED",
+    "evidence": "6f23ecda957a4c83"
+   },
+   {
+    "claim": "declaration quote found in document",
+    "verdict": "CONFIRMED",
+    "evidence": "1 clause(s)"
+   },
+   {
+    "claim": "declared amount and dates re-parsed from quote",
+    "verdict": "CONFIRMED",
+    "evidence": "$0.25 dates 2026-10-01,2026-09-10"
+   },
+   {
+    "claim": "token adjusted on/after record date",
+    "verdict": "CONFIRMED",
+    "evidence": "2026-10-01 vs record 2026-09-10"
+   },
+   {
     "claim": "reference value at block",
     "verdict": "CONFIRMED",
     "evidence": "answer 23025000000 at 52041959"
    }
   ],
-  "checked_at": "2026-11-27T08:27:37.222Z"
+  "checked_at": "2026-11-27T08:46:53.617Z"
  }
 }

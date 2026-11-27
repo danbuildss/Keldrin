@@ -95,6 +95,7 @@
     "url": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
    }
   ],
+  "declaration": null,
   "reference": null,
   "interpretation": null,
   "checks": [
@@ -124,6 +125,11 @@
     "detail": "10 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.001960475625609247"
@@ -136,13 +142,13 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).",
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:46.012Z"
+  "generated_at": "2026-11-27T08:47:20.063Z"
  },
- "payload_sha256": "76f6b523dcbdc58aab45ce3ef69c2b29ad200283cd9581659d69713c61e1b00c",
+ "payload_sha256": "73a7483bb3744daaf69f0058ab75eaa10582a7b4ab8ea40fc586dc91b87f48c9",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -162,6 +168,6 @@
     "evidence": "NOKIA CORP NOK,NOKBF"
    }
   ],
-  "checked_at": "2026-11-27T08:27:46.494Z"
+  "checked_at": "2026-11-27T08:47:20.533Z"
  }
 }

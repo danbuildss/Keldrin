@@ -183,3 +183,25 @@ test("company_context is served only when its review CONFIRMED and it links the 
     await db.close();
   }
 });
+
+test("calendar serves only CONFIRMED entries from the latest snapshot, filterable by state", async () => {
+  const { db, srv, get } = await setup();
+  try {
+    const put = (snap: string, asOf: string, id: string, state: string, verdict: string) =>
+      db.query("INSERT INTO calendar_entries (snapshot_id, entry_id, as_of, contract_address, state, payable_date, payload, review_verdict, review) VALUES ($1,$2,$3,$4,$5,'2026-12-14',$6,$7,'{}')", [snap, id, asOf, GOOGL, state, JSON.stringify({ entry_id: id, state }), verdict]);
+    await put("old", "2026-11-01T00:00:00Z", "stale", "upcoming", "CONFIRMED");
+    await put("new", "2026-11-27T00:00:00Z", "up", "upcoming", "CONFIRMED");
+    await put("new", "2026-11-27T00:00:00Z", "bad", "upcoming", "REJECTED");
+    await put("new", "2026-11-27T00:00:00Z", "done", "applied", "CONFIRMED");
+    const all = await get("/v1/calendar");
+    assert.deepEqual(all.body.data.map((e: any) => e.entry_id).sort(), ["done", "up"]);
+    const up = await get("/v1/calendar?state=upcoming");
+    assert.deepEqual(up.body.data.map((e: any) => e.entry_id), ["up"]);
+    assert.equal((await get("/v1/calendar?state=soon")).body.error.code, "BAD_STATE");
+    assert.equal((await get("/v1/calendar?contract=0x1")).body.error.code, "BAD_ADDRESS");
+    await assert.rejects(db.query("DELETE FROM calendar_entries"), /append-only/);
+  } finally {
+    srv.close();
+    await db.close();
+  }
+});

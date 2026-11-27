@@ -7,6 +7,7 @@ import { formatUnits } from "../lib/decimal.ts";
 import { cusipFromIsin } from "../lib/isin.ts";
 import { HttpError } from "../lib/http.ts";
 import { declarationCandidates, filingsIndex, resolveCik, underlyingTicker, type FilingRef } from "./company.ts";
+import { extractDividendDeclarations, filingDocuments, type Declaration } from "./declarations.ts";
 import type { Check, IssuerActionRecord } from "./records.ts";
 
 // Link a confirmed issuer action (token side) to the underlying company's official SEC disclosures.
@@ -25,6 +26,7 @@ export type Reconciliation = {
   company: { cik: string; name: string; sec_tickers: string[]; resolution_evidence: string[] } | null;
   company_event: { type: string; value: string; unit: string; period_start: string; period_end: string; accession: string; form: string; filed: string; source_url: string; source_sha256: string } | null;
   declaration_candidates: FilingRef[];
+  declaration: (Declaration & { accession: string; form: string; filed: string; document_url: string; document_sha256: string }) | null;
   reference: { feed: string; description: string | null; answer_raw: string; decimals: number; value_usd: string; updated_at: string; read_at_block: string } | null;
   interpretation: { implied_net_reinvested_per_share_usd: string; ratio_to_declared: string; caveat: string } | null;
   checks: Check[];
@@ -66,7 +68,7 @@ export async function reconcileAction(rec: IssuerActionRecord, recHash: string, 
   } else unknown.push("Underlying ticker not derivable from the token symbol.");
   if (!company) {
     c("sec_company_resolved", null, "no unique SEC entity");
-    return { ...base, company: null, company_event: null, declaration_candidates: [], reference: null, interpretation: null, checks, unknown, status: "unsure", generated_at: new Date().toISOString() };
+    return { ...base, company: null, company_event: null, declaration_candidates: [], declaration: null, reference: null, interpretation: null, checks, unknown, status: "unsure", generated_at: new Date().toISOString() };
   }
   // Identity is established by ticker in two SEC indexes; a differing display name is not contrary evidence.
   c("sec_company_name_matches_token_name", normName(company.name) === normName(rec.asset.name) ? true : null, `SEC="${company.name}" token="${rec.asset.name}"`);
@@ -80,7 +82,33 @@ export async function reconcileAction(rec: IssuerActionRecord, recHash: string, 
   const idx = await filingsIndex(company.cik);
   const candidates = declarationCandidates(idx.recent, company.cik, effTime);
   c("declaration_candidate_filings_found", candidates.length ? true : null, `${candidates.length} 8-K/6-K filing(s) in the 120 days before the action`);
-  unknown.push("Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).");
+  // 2b. Read the candidates' text (dividends only) and extract a dated declaration deterministically.
+  let declaration: Reconciliation["declaration"] = null;
+  if (kind === "cash_dividend") {
+    const found: NonNullable<Reconciliation["declaration"]>[] = [];
+    for (const cand of candidates.slice(0, 8)) {
+      for (const d of await filingDocuments(company.cik, cand.accession)) {
+        for (const x of extractDividendDeclarations(d.text)) found.push({ ...x, accession: cand.accession, form: cand.form, filed: cand.filed, document_url: d.url, document_sha256: d.sha256 });
+      }
+    }
+    // The declaration this action implements: record date on/before the action, payable date nearest the action.
+    const dist = (x: { payable_date: string | null; record_date: string | null }) => Math.abs(Date.parse(x.payable_date ?? x.record_date!) - Date.parse(effDate));
+    declaration = found.filter((x) => !x.record_date || x.record_date <= effDate).sort((a, b) => dist(a) - dist(b))[0] ?? null;
+    if (!declaration) {
+      c("dated_declaration_found", null, found.length + " dated declaration(s) extracted; none fits this action");
+      unknown.push("No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).");
+    } else {
+      c("dated_declaration_found", true, "$" + declaration.per_share + " payable " + declaration.payable_date + " record " + declaration.record_date + " (" + declaration.form + " " + declaration.accession + ")");
+      if (declaration.record_date) c("token_adjusted_not_before_record_date", effDate >= declaration.record_date, "adjusted " + effDate + ", record " + declaration.record_date);
+      if (declaration.payable_date) {
+        const days = Math.round((Date.parse(effDate) - Date.parse(declaration.payable_date)) / 86_400_000);
+        // Observed issuer pattern, not a rule: a difference is reported, never treated as contradiction.
+        c("token_adjusted_on_payable_date", days === 0 ? true : null, "adjusted " + effDate + ", payable " + declaration.payable_date + " (" + (days >= 0 ? "+" : "") + days + " d)");
+      }
+    }
+  } else {
+    unknown.push("Declaration dates for this action kind are not extracted yet.");
+  }
 
   // 3. Typed company facts by action kind.
   let companyEvent: Reconciliation["company_event"] = null;
@@ -101,6 +129,7 @@ export async function reconcileAction(rec: IssuerActionRecord, recHash: string, 
       if (f?.amended_from) c("sec_fact_amended", null, `latest ${f.val} (${f.accn}) supersedes ${f.amended_from.map((h) => `${h.val} (${h.accn})`).join(", ")}`);
       c("dividend_declared_in_quarter_of_action", cls.result === "unknown" ? null : cls.result === "pass", cls.detail);
       if (cls.unknownNote) unknown.push(cls.unknownNote);
+      if (f && declaration) c("declared_amount_matches_sec_fact", exactUnits(declaration.per_share, 8) === exactUnits(String(f.val), 8), "text $" + declaration.per_share + " vs XBRL " + f.val);
       if (f) companyEvent = { type: tag === "CommonStockDividendsPerShareDeclared" ? "cash_dividend_declared_per_share" : "cash_dividend_paid_per_share", value: String(f.val), unit: "USD/share", period_start: f.start!, period_end: f.end, accession: f.accn, form: f.form, filed: f.filed, source_url: con.meta.url, source_sha256: con.meta.sha256 };
       // Reference value just before the action (Chainlink NAV feed, total-return semantics) → interpretation only.
       const feeds = await navFeeds();
@@ -148,6 +177,7 @@ export async function reconcileAction(rec: IssuerActionRecord, recHash: string, 
     company,
     company_event: companyEvent,
     declaration_candidates: candidates,
+    declaration,
     reference,
     interpretation,
     checks,

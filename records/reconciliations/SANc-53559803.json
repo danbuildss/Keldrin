@@ -17,8 +17,8 @@
     "BCDRF"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Banco%20Santander%2C%20S.A. sha256=c1073c299bfa5a8c",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SAN sha256=cde16c17859a966f",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Banco%20Santander%2C%20S.A. sha256=72385dbe444fda44",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SAN sha256=56a73ccaded4b4d4",
     "https://data.sec.gov/submissions/CIK0000891478.json sha256=98a4b89d83446d1b"
    ]
   },
@@ -319,6 +319,7 @@
     "url": "https://www.sec.gov/Archives/edgar/data/891478/000095010326010426/dp249898_6k.htm"
    }
   ],
+  "declaration": null,
   "reference": null,
   "interpretation": null,
   "checks": [
@@ -348,6 +349,11 @@
     "detail": "42 8-K/6-K filing(s) in the 120 days before the action"
    },
    {
+    "name": "dated_declaration_found",
+    "result": "unknown",
+    "detail": "0 dated declaration(s) extracted; none fits this action"
+   },
+   {
     "name": "multiplier_increased_consistent_with_reinvestment",
     "result": "pass",
     "detail": "ratio 1.010571078868727418"
@@ -360,13 +366,13 @@
   ],
   "unknown": [
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus).",
-   "Declaration, record and payment dates (in the candidate filings' text on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).",
+   "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations).",
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:27:42.963Z"
+  "generated_at": "2026-11-27T08:47:10.663Z"
  },
- "payload_sha256": "0da9573778ffb5a8ca25d9b9ee19ca84417d41bcff23769d9b40a99439a6ee77",
+ "payload_sha256": "65941c1cff9a0049fcc0c0619ead4c795a69069223b66180621348e2f11b281a",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
@@ -386,6 +392,6 @@
     "evidence": "Banco Santander, S.A. SAN,BCDRF"
    }
   ],
-  "checked_at": "2026-11-27T08:27:43.435Z"
+  "checked_at": "2026-11-27T08:47:11.132Z"
  }
 }

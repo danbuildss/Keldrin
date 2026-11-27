@@ -1,4 +1,4 @@
-# Status | 2026-11-27 (end of Phase 1 session)
+# Status | 2026-11-27 (Phase 2 in progress, PR #2)
 
 **Phase 1: backend proof passed locally; PR open for founder review.** Nothing is deployed or published. There are no external users or revenue.
 
@@ -33,3 +33,10 @@
 Founder reviews the PR. On approval:
 - Phase 2: SEC-side company events and the leading calendar, earnings second, a gold set of 10+ events, Supabase.
 - Builder interviews (the GSTACK_REVIEW assignment) run in parallel.
+
+## Phase 2 progress (PR #2, draft)
+- PR #1 (Phase 0+1) merged by founder. Phase 2 approved.
+- Done: SEC company linkage for all 13 actions; dated dividend declarations from SEC text (9 found); leading calendar with 2 upcoming adjustments (GOOGLc Dec 14, NVDAc Dec 23); `/v1/calendar`, company_context, OpenAPI; pinned Actions; RPC URL redaction. 68/68 tests.
+- Findings: 8/9 tokens adjusted on the payable date; MRVLc 8 days late; PMc ×1.5588 vs a $1.60 declared dividend (lead).
+- Waiting on founder: Alchemy network secret (host base-mainnet.g.alchemy.com, header Authorization: Bearer …) and Supabase project.
+- Remaining: gold set (10+, annotated independently), Alchemy indexer, Supabase migrations + RLS, manual research workflow, Phase 2 gate runs.

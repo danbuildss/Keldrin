@@ -1,0 +1,514 @@
+{
+ "snapshot_id": "snap-2026-11-27T08-50-17-828Z",
+ "as_of": "2026-11-27T08:50:17.828Z",
+ "scope": [
+  "GOOGLc",
+  "NVDAc",
+  "AAPLc",
+  "METAc",
+  "TSLAc",
+  "ORCLc",
+  "MUc",
+  "MRVLc",
+  "CAKEc",
+  "PMc"
+ ],
+ "skipped": [],
+ "entries": [
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000078ee7ce2fe4908108c:2026-10-01:0.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C",
+     "symbol": "NVDAc"
+    },
+    "company": {
+     "cik": "0001045810",
+     "name": "NVIDIA CORP"
+    },
+    "declaration": {
+     "per_share": "0.25",
+     "currency": "USD",
+     "payable_date": "2026-10-01",
+     "record_date": "2026-09-10",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on October 1, 2026, to all shareholders of record on September 10, 2026",
+     "offset": 1475,
+     "accession": "0001045810-26-000073",
+     "form": "8-K",
+     "filed": "2026-08-26",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+     "document_sha256": "6f23ecda957a4c83223cb59993dfde4df6fd8ac2d2755940ae387fd1e29d426e"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "6f23ecda957a4c83"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.25 dates 2026-10-01,2026-09-10"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:45.967Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000347afba223d7b6b63c:2026-10-23:0.50",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000347AFbA223D7B6b63C",
+     "symbol": "ORCLc"
+    },
+    "company": {
+     "cik": "0001341439",
+     "name": "ORACLE CORP"
+    },
+    "declaration": {
+     "per_share": "0.50",
+     "currency": "USD",
+     "payable_date": "2026-10-23",
+     "record_date": "2026-10-09",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "Common Stock Quarterly Dividend The board of directors declared a quarterly cash dividend of $0.50 per share of outstanding common stock … This dividend will be paid to stockholders of record as of the close of business on October 9, 2026, with a payment date of October 23, 2026",
+     "offset": 5262,
+     "accession": "0001193125-26-387905",
+     "form": "8-K",
+     "filed": "2026-09-10",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm",
+     "document_sha256": "a111a6f96626c3b92d153b19983291341b97e60dfb7430a6efa1c451590bd7b0"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "a111a6f96626c3b9"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.50 dates 2026-10-09,2026-10-23"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:46.718Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000008fc2a8c23cf5937b66:2026-10-26:1.60",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000008FC2A8C23cf5937b66",
+     "symbol": "PMc"
+    },
+    "company": {
+     "cik": "0001413329",
+     "name": "Philip Morris International Inc."
+    },
+    "declaration": {
+     "per_share": "1.60",
+     "currency": "USD",
+     "payable_date": "2026-10-26",
+     "record_date": "2026-10-02",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "The new quarterly dividend of $1.60 per share, up from $1.47 per share, is payable on October 26, 2026, to shareholders of record as of October 2, 2026",
+     "offset": 581,
+     "accession": "0001628280-26-062621",
+     "form": "8-K",
+     "filed": "2026-09-18",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/september2026dividend.htm",
+     "document_sha256": "28b133ba2e0210475a014117fc3f09b954f1faf5f77c261006106e0d31ea0413"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "28b133ba2e021047"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$1.60 dates 2026-10-26,2026-10-02"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:47.194Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000fd2f87532b90095211:2026-10-29:0.15",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000Fd2f87532B90095211",
+     "symbol": "MUc"
+    },
+    "company": {
+     "cik": "0000723125",
+     "name": "MICRON TECHNOLOGY INC"
+    },
+    "declaration": {
+     "per_share": "0.15",
+     "currency": "USD",
+     "payable_date": "2026-10-29",
+     "record_date": "2026-10-14",
+     "declared_on": "2026-09-30",
+     "declared_month": null,
+     "quote": "On September 30, 2026, Micron’s Board of Directors declared a quarterly dividend of $0.15 per share, payable in cash on October 29, 2026, to shareholders of record as of the close of business on October 14, 2026",
+     "offset": 3262,
+     "accession": "0000723125-26-000018",
+     "form": "8-K",
+     "filed": "2026-09-30",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/a2026q4ex991-pressrelease.htm",
+     "document_sha256": "d121e2e8294d26ad80d929db96f1da5b4b7eb93cb7217ab70ef8c863406f4b52"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "d121e2e8294d26ad"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.15 dates 2026-09-30,2026-10-29,2026-10-14"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:47.708Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000ec3c4c7395cc609813:2026-10-29:0.06",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000eC3c4c7395Cc609813",
+     "symbol": "MRVLc"
+    },
+    "company": {
+     "cik": "0001835632",
+     "name": "Marvell Technology, Inc."
+    },
+    "declaration": {
+     "per_share": "0.06",
+     "currency": "USD",
+     "payable_date": "2026-10-29",
+     "record_date": "2026-10-09",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "(NASDAQ: MRVL), today announced a quarterly dividend of $0.06 per share of common stock, including preferred stock on an as converted to common stock basis, payable on October 29, 2026 to stockholders of record as of October 9, 2026",
+     "offset": 187,
+     "accession": "0001628280-26-063592",
+     "form": "8-K",
+     "filed": "2026-09-25",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/a20260925dividendpressrele.htm",
+     "document_sha256": "09bd692dead509c74f42e35d286cf436dc76ada4509798ab3f0515de86aa4fe8"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "09bd692dead509c7"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.06 dates 2026-10-29,2026-10-09"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:48.225Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000c2e324d24d7eecd1fb:2026-11-16:0.27",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+     "symbol": "AAPLc"
+    },
+    "company": {
+     "cik": "0000320193",
+     "name": "Apple Inc."
+    },
+    "declaration": {
+     "per_share": "0.27",
+     "currency": "USD",
+     "payable_date": "2026-11-16",
+     "record_date": "2026-11-12",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "” Apple’s board of directors has declared a cash dividend of $0.27 per share of the Company’s common stock … The dividend is payable on November 16, 2026, to shareholders of record as of the close of business on November 12, 2026",
+     "offset": 1956,
+     "accession": "0000320193-26-000024",
+     "form": "8-K",
+     "filed": "2026-11-02",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/a8-kex991q4202609262026.htm",
+     "document_sha256": "b79e05d1202d1e836bb4ee73387ff3cfa1437c8e6a091e5ffff958296c922f35"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "b79e05d1202d1e83"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.27 dates 2026-11-16,2026-11-12"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:48.712Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000f215e4c890cfb7176b:2026-11-24:0.30",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000f215E4C890CFb7176B",
+     "symbol": "CAKEc"
+    },
+    "company": {
+     "cik": "0000887596",
+     "name": "CHEESECAKE FACTORY INC"
+    },
+    "declaration": {
+     "per_share": "0.30",
+     "currency": "USD",
+     "payable_date": "2026-11-24",
+     "record_date": "2026-11-10",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "In addition, the Company’s Board of Directors has declared a quarterly dividend of $0.30 per share to be paid on November 24, 2026, to shareholders of record at the close of business on November 10, 2026",
+     "offset": 3764,
+     "accession": "0001104659-26-119176",
+     "form": "8-K",
+     "filed": "2026-10-27",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926119176/tm2628239d1_ex99-1.htm",
+     "document_sha256": "f6653193adb08700c1bf13abdbb826d4a668441348d2185402c61250d4b89a89"
+    },
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "f6653193adb08700"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.30 dates 2026-11-24,2026-11-10"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:49.224Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000002d0ba3164cc74f58b7:2026-12-14:0.22",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
+     "symbol": "GOOGLc"
+    },
+    "company": {
+     "cik": "0001652044",
+     "name": "Alphabet Inc."
+    },
+    "declaration": {
+     "per_share": "0.22",
+     "currency": "USD",
+     "payable_date": "2026-12-14",
+     "record_date": "2026-12-07",
+     "declared_on": null,
+     "declared_month": "2026-10",
+     "quote": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on December 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of December 7, 2026",
+     "offset": 4952,
+     "accession": "0001652044-26-000080",
+     "form": "8-K",
+     "filed": "2026-10-28",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+     "document_sha256": "46bb1889df7be0d4cd1ce09d61520743ce182941955313573460f86a03bf0989"
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-14",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "46bb1889df7be0d4"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.22 dates 2026-12-14,2026-12-07"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:49.825Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000078ee7ce2fe4908108c:2026-12-23:0.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C",
+     "symbol": "NVDAc"
+    },
+    "company": {
+     "cik": "0001045810",
+     "name": "NVIDIA CORP"
+    },
+    "declaration": {
+     "per_share": "0.25",
+     "currency": "USD",
+     "payable_date": "2026-12-23",
+     "record_date": "2026-12-02",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on December 23, 2026, to all shareholders of record on December 2, 2026",
+     "offset": 1442,
+     "accession": "0001045810-26-000088",
+     "form": "8-K",
+     "filed": "2026-11-17",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27pr.htm",
+     "document_sha256": "8a4b8148d7744378f956af3f8cd0f7354d86480a1b42d91f5ec625c3e5c6856b"
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-23",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T08:50:17.828Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "8a4b8148d7744378"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.25 dates 2026-12-23,2026-12-02"
+     }
+    ],
+    "checked_at": "2026-11-27T08:50:50.367Z"
+   }
+  }
+ ]
+}
