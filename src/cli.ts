@@ -14,7 +14,7 @@ import { scanLogs } from "./pipeline/indexer.ts";
 import { getCorporateAction } from "./adapters/coinbase.ts";
 import { canonicalJson } from "./lib/canonical.ts";
 import { indexAll } from "./pipeline/navIndex.ts";
-import { insertNavReview, loadReviewInput } from "./pipeline/navStore.ts";
+import { computeNavStats, insertNavReview, loadReviewInput } from "./pipeline/navStore.ts";
 import { verifyNavFeed } from "./verify/navVerify.ts";
 
 const args = process.argv.slice(2);
@@ -252,6 +252,7 @@ async function navIndexCmd() {
   for (const f of res.feeds) {
     const miss = f.phases.reduce((n, p) => n + p.missing.length, 0);
     console.log(`  ${f.symbol.padEnd(7)} ${f.feed} +${f.inserted} round(s); phases ${f.phases.map((p) => `${p.phase}:${p.last}`).join(" ")}; missing ${miss}`);
+    for (const p of f.phases) console.log(`      phase ${p.phase} ${p.aggregator} decimals ${p.aggregator_decimals} live blocks ${p.live_from_block ?? "start"}..${p.live_to_block ?? "now"}`);
     for (const p of f.phases) if (p.missing.length) console.log(`      phase ${p.phase} missing ids: ${p.missing.slice(0, 10).join(", ")}${p.missing.length > 10 ? " …" : ""}`);
   }
   for (const r of res.rejected) console.log(`  REJECTED feed ${r.feed} for ${r.token}: ${r.reason}`);
@@ -271,9 +272,10 @@ async function navVerifyCmd() {
   for (const f of feeds) {
     const input = await loadReviewInput(db, f.feed_address, Number(flag("sample") ?? 50));
     const review = await verifyNavFeed(input);
-    await insertNavReview(db, f.feed_address, review, input.rounds_indexed);
+    const stats = await computeNavStats(db, f.feed_address);
+    await insertNavReview(db, f.feed_address, review, input.rounds_indexed, stats);
     tally[review.verdict] = (tally[review.verdict] ?? 0) + 1;
-    console.log(`  ${review.verdict.padEnd(9)} ${f.symbol.padEnd(7)} rounds ${input.rounds_indexed} sampled ${review.sampled} mismatches ${review.mismatches}`);
+    console.log(`  ${review.verdict.padEnd(9)} ${f.symbol.padEnd(7)} rounds ${input.rounds_indexed} official ${stats.official_rounds} overlap-excluded ${stats.overlap_rounds_excluded} decimals-conflict phases [${stats.decimals_conflict_phases}] sampled ${review.sampled} mismatches ${review.mismatches} max-gap ${stats.max_in_session_gap_s}s`);
     for (const c of review.claims.filter((x) => x.verdict !== "CONFIRMED")) console.log(`      ${c.verdict} ${c.claim}: ${c.evidence}`);
   }
   console.log(`nav-verify: ${feeds.length} feed(s); ${JSON.stringify(tally)}`);

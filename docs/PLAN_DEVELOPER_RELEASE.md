@@ -17,7 +17,7 @@ Date: 2026-11-27. Driver: CD-003 (MAXXAGENT agreed to test endpoints; no integra
 
 ### Phase 5: `GET /v1/assets/{contract}/nav/history` (Fri–Sat)
 Build:
-- Migration `007_nav.sql`: `nav_feeds`, `nav_rounds` (append-only trigger), `nav_index_state`, `nav_reviews`. Writer: INSERT; reader: SELECT.
+- Migrations `004_nav.sql` + `005_nav_phases.sql`: `nav_feeds`, `nav_rounds`, `nav_reviews`, `nav_phases` (append-only). Writer: INSERT; reader: SELECT. (`nav_index_state` was replaced by retrying gaps found in `nav_rounds` itself.)
 - `src/pipeline/navIndex.ts`: discovery from Coinbase `/nav-feeds`, cross-checked onchain (`description()`, `decimals()`, proxy `phaseId()`/`phaseAggregators()`); phase-aware walk over all phases; batched reads; incremental from `nav_index_state`; never fills gaps.
 - Independent verification (in `src/verify/`, its own RPC client): re-reads a random sample of stored rounds per feed (and every phase's first and last round) and compares them byte for byte. Only feeds whose latest sample is CONFIRMED are served.
 - CLI `nav-index`; a step in `research.yml` after discover.
@@ -30,7 +30,7 @@ Acceptance:
 1. **NVDAc first:** every round from phase 1 round 1 to the latest indexed is stored. The count equals the onchain counts per phase, measured independently.
 2. A 50-round random sample re-read by the verifier matches exactly (answer, updatedAt, roundId).
 3. Re-running the indexer adds 0 rows; a new run adds only new rounds.
-4. Then all 14 feeds pass criteria 1–3. Any feed that fails is served as `verification: unconfirmed`, never silently.
+4. Then all feeds pass criteria 1–3. A feed that fails is **not served** (503 `NAV_NOT_VERIFIED`, fail closed); the stricter choice replaces the earlier "served as unconfirmed" wording (2026-11-27).
 5. Daily closes: the last round per New York trading day; weekend and holiday rounds excluded; tested on fixtures including a DST switch and an early close.
 6. Gaps are reported, never filled. A test asserts no synthetic rows.
 7. Bad input → 400; unknown token → 404; a token without a feed → 404 with code `NO_NAV_FEED`.

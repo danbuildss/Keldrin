@@ -7,8 +7,13 @@ import type { PGlite } from "@electric-sql/pglite";
 
 // Phase 5: Chainlink NAV history for Coinbase tokenized stocks on Base.
 // Proxy roundId = phaseId << 64 | aggregatorRoundId (Chainlink docs, "Historical data"). Every phase's
-// aggregator is walked from round 1; rounds are stored verbatim (raw answer, decimals, timestamps and the
-// block they were read at). Missing ids are reported, never filled.
+// aggregator is walked from round 1 to its true last round; rounds are stored verbatim (raw answer, decimals,
+// timestamps and the block they were read at). Missing ids are reported and retried on later runs, never filled.
+//
+// Phase 5b: aggregators overlap in time (a new aggregator publishes before the proxy switches to it, and the old
+// one keeps publishing after). Each phase's LIVE WINDOW (the blocks during which the proxy pointed at it) is found
+// by binary search on the proxy's historical phaseId() and stored in nav_phases with the aggregator's own decimals.
+// Only rounds inside their phase's live window, from an aggregator whose decimals match the proxy, are "official".
 
 export const PHASE_SHIFT = 64n;
 export const proxyRoundId = (phase: bigint, aggRound: bigint) => (phase << PHASE_SHIFT) | aggRound;
@@ -27,7 +32,7 @@ export type NavRoundRow = {
   updated_at: number;
   answered_in_round: bigint;
 };
-export type PhaseReport = { phase: number; aggregator: string; last: string; missing: string[] };
+export type PhaseReport = { phase: number; aggregator: string; last: string; missing: string[]; live_from_block: string | null; live_to_block: string | null; aggregator_decimals: number | null };
 
 /** Coinbase's feed for a token must be a Chainlink proxy whose description names the same ticker.
  *  Two exact forms are observed onchain: "Coinbase NVDA" and "Coinbase ANT / USD". Nothing looser is accepted. */
@@ -84,60 +89,116 @@ async function readRounds(feed: string, ids: bigint[], block: bigint): Promise<(
   return res.map((r) => (r && (r as RoundTuple)[3] > 0n ? (r as RoundTuple) : null));
 }
 
-/**
- * Pure planning step, exported for tests: given the ids read in one window and which came back, decide
- * which ids are missing and whether a closed (non-current) phase has ended inside the window.
- */
+/** Ids in 1..max that are not in `have` (sorted ascending input not required). Pure; exported for tests. */
+export function gaps(have: bigint[], max: bigint): bigint[] {
+  const s = new Set(have.map(String));
+  const out: bigint[] = [];
+  for (let a = 1n; a <= max; a++) if (!s.has(a.toString())) out.push(a);
+  return out;
+}
+
+/** Ids reported missing within a read window (kept for tests and for callers reading a contiguous range). */
 export function classifyWindow(found: boolean[], isCurrent: boolean): { missingIdx: number[]; ended: boolean } {
   let lastFound = -1;
   found.forEach((f, i) => {
     if (f) lastFound = i;
   });
-  // current phase: every id up to the latest round must exist; closed phase: the tail after the last found round is its end
   const end = isCurrent ? found.length - 1 : lastFound;
   const missingIdx: number[] = [];
   for (let i = 0; i <= end; i++) if (!found[i]) missingIdx.push(i);
   return { missingIdx, ended: isCurrent || lastFound < found.length - 1 };
 }
 
-/** Index every round of every phase not stored yet. Returns per-phase reports including ids found missing. */
+/** First block at which the proxy's phaseId() is >= `phase` (binary search over historical state). */
+export async function phaseStartBlock(phaseAt: (block: bigint) => Promise<number>, phase: number, head: bigint): Promise<bigint> {
+  let lo = 0n;
+  let hi = head; // invariant: phaseAt(hi) >= phase
+  while (lo < hi) {
+    const mid = (lo + hi) / 2n;
+    if ((await phaseAt(mid)) >= phase) hi = mid;
+    else lo = mid + 1n;
+  }
+  return lo;
+}
+
+type StoredPhase = { phase_id: number; live_from_block: string | null; live_to_block: string | null; aggregator_decimals: number | null; aggregator_address: string };
+
+/** Live window of every phase plus the aggregator's own decimals; stored append-only when anything new is learned. */
+async function syncPhases(db: PGlite, f: NavFeed, head: BlockRef, aggregators: string[]): Promise<StoredPhase[]> {
+  const stored = (await db.query<StoredPhase>(
+    "SELECT DISTINCT ON (phase_id) phase_id, live_from_block::text AS live_from_block, live_to_block::text AS live_to_block, aggregator_decimals, aggregator_address FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC",
+    [CHAIN_ID, f.feed],
+  )).rows;
+  const phaseAt = async (b: bigint) => Number(((await read(f.feed, "phaseId", [], b)) as number | null) ?? 0);
+  // boundary[p] = first block where phaseId >= p (p >= 2). Closed boundaries never change, so reuse stored ones.
+  const boundary = new Map<number, bigint>();
+  for (let p = 2; p <= f.phase; p++) {
+    const known = stored.find((s) => s.phase_id === p)?.live_from_block;
+    boundary.set(p, known ? BigInt(known) : await phaseStartBlock(phaseAt, p, head.number));
+  }
+  const out: StoredPhase[] = [];
+  for (let p = 1; p <= f.phase; p++) {
+    const from = p === 1 ? null : boundary.get(p)!;
+    const to = p === f.phase ? null : boundary.get(p + 1)!;
+    const aggregator = aggregators[p - 1];
+    const aggDec = (await read(aggregator, "decimals", [], head.number)) as number | null;
+    const row: StoredPhase = { phase_id: p, live_from_block: from?.toString() ?? null, live_to_block: to?.toString() ?? null, aggregator_decimals: aggDec === null ? null : Number(aggDec), aggregator_address: aggregator };
+    out.push(row);
+    const prev = stored.find((s) => s.phase_id === p);
+    if (prev && prev.live_from_block === row.live_from_block && prev.live_to_block === row.live_to_block && prev.aggregator_decimals === row.aggregator_decimals && prev.aggregator_address === aggregator) continue;
+    const fromTime = from === null ? null : new Date(Number((await getBlock(from)).timestamp) * 1000).toISOString();
+    const toTime = to === null ? null : new Date(Number((await getBlock(to)).timestamp) * 1000).toISOString();
+    await db.query(
+      "INSERT INTO nav_phases (chain_id, feed_address, phase_id, aggregator_address, aggregator_decimals, proxy_decimals, live_from_block, live_from_time, live_to_block, live_to_time, observed_block) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT DO NOTHING",
+      [CHAIN_ID, f.feed, p, aggregator, row.aggregator_decimals, f.decimals, row.live_from_block, fromTime, row.live_to_block, toTime, head.number.toString()],
+    );
+  }
+  return out;
+}
+
+/** Index every round of every phase not stored yet, retrying earlier gaps. Returns per-phase reports. */
 export async function indexFeed(db: PGlite, f: NavFeed, head: BlockRef): Promise<{ inserted: number; phases: PhaseReport[] }> {
   const latest = (await read(f.feed, "latestRoundData", [], head.number)) as RoundTuple | null;
   if (!latest) throw new Error(f.symbol + ": latestRoundData unreadable");
   const cur = splitRoundId(latest[0]);
   if (Number(cur.phase) !== f.phase) throw new Error(`${f.symbol}: phaseId ${f.phase} disagrees with latest round phase ${cur.phase}`);
   const retrievedAt = new Date().toISOString();
-  let inserted = 0;
-  const phases: PhaseReport[] = [];
+  const aggregators: string[] = [];
   for (let p = 1; p <= f.phase; p++) {
     const agg = (await read(f.feed, "phaseAggregators", [p], head.number)) as string | null;
     if (!agg) throw new Error(`${f.symbol}: phaseAggregators(${p}) unreadable`);
-    const aggregator = getAddress(agg);
-    const stored = (await db.query<{ last: string | null }>("SELECT max(aggregator_round_id)::text AS last FROM nav_rounds WHERE chain_id=$1 AND feed_address=$2 AND phase_id=$3", [CHAIN_ID, f.feed, p])).rows[0].last;
-    const next = BigInt(stored ?? "0") + 1n;
-    const isCurrent = p === f.phase;
+    aggregators.push(getAddress(agg));
+  }
+  const windows = await syncPhases(db, f, head, aggregators);
+  let inserted = 0;
+  const phases: PhaseReport[] = [];
+  for (let p = 1; p <= f.phase; p++) {
+    const aggregator = aggregators[p - 1];
     // the true last round: the current phase's latest id, or a closed phase's aggregator latestRound() (never inferred from gaps)
     let upto = cur.aggRound;
-    if (!isCurrent) {
+    if (p !== f.phase) {
       const lr = (await read(aggregator, "latestRound", [], head.number)) as bigint | null;
       if (lr === null) throw new Error(`${f.symbol}: latestRound() of phase ${p} aggregator unreadable`);
       upto = lr;
     }
-    const missing: string[] = [];
+    const have = (await db.query<{ a: string }>("SELECT aggregator_round_id::text AS a FROM nav_rounds WHERE chain_id=$1 AND feed_address=$2 AND phase_id=$3", [CHAIN_ID, f.feed, p])).rows.map((r) => BigInt(r.a));
+    const storedMax = have.reduce((m, a) => (a > m ? a : m), 0n);
+    // earlier gaps are retried every run (a transient RPC failure must not become a permanent hole), then new ids
+    const ids = [...gaps(have, storedMax < upto ? storedMax : upto)];
+    for (let a = storedMax + 1n; a <= upto; a++) ids.push(a);
     const rows: NavRoundRow[] = [];
-    if (next <= upto) {
-      const ids: bigint[] = [];
-      for (let a = next; a <= upto; a++) ids.push(a);
+    const missing: string[] = [];
+    if (ids.length) {
       const got = await readRounds(f.feed, ids.map((a) => proxyRoundId(BigInt(p), a)), head.number);
       got.forEach((r, i) => {
         if (r) rows.push({ feed: f.feed, round_id: proxyRoundId(BigInt(p), ids[i]), phase_id: p, aggregator_round_id: ids[i], aggregator, answer: r[1], decimals: f.decimals, started_at: Number(r[2]), updated_at: Number(r[3]), answered_in_round: r[4] });
+        else missing.push(proxyRoundId(BigInt(p), ids[i]).toString());
       });
-      // every id up to the known last round must exist; absent ones are reported, never filled
-      for (const i of classifyWindow(got.map((r) => r !== null), true).missingIdx) missing.push(proxyRoundId(BigInt(p), ids[i]).toString());
     }
     inserted += await insertRounds(db, rows, retrievedAt, head.number);
     const last = (await db.query<{ last: string | null }>("SELECT max(round_id)::text AS last FROM nav_rounds WHERE chain_id=$1 AND feed_address=$2 AND phase_id=$3", [CHAIN_ID, f.feed, p])).rows[0].last;
-    phases.push({ phase: p, aggregator, last: last ?? "none", missing });
+    const w = windows[p - 1];
+    phases.push({ phase: p, aggregator, last: last ?? "none", missing, live_from_block: w.live_from_block, live_to_block: w.live_to_block, aggregator_decimals: w.aggregator_decimals });
   }
   return { inserted, phases };
 }
