@@ -21,7 +21,7 @@ Approved by the founder on 2026-11-27 ("approve Phase 4"). Goal: the live API st
    ```
 3. **GitHub → danbuildss/Keldrin → Settings → Environments → `keldrin-research`** (create it if missing). Add these:
    - Secret `KELDRIN_WRITER_URL`: the string from step 2.
-   - Secret `BASE_RPC_URL`: your full Alchemy Base URL (`https://base-mainnet.g.alchemy.com/v2/…`). It contains the key, so it must be a secret.
+   - Secret `BASE_RPC_URL`: the Alchemy Base URL. Secret `BASE_RPC_BEARER`: the Alchemy key, sent as a header (already set up in an earlier session). If the key is inside the URL instead, `BASE_RPC_BEARER` can be left out.
    - Secret `DATABASE_CA_CERT`: the same Supabase root CA PEM you gave Vercel.
    - Variable `SEC_USER_AGENT`: `Keldrin hello.danbuilds@gmail.com`.
 4. **Settings → Secrets and variables → Actions → Variables → New repository variable:** `RESEARCH_ENABLED` = `true`.

@@ -36,6 +36,7 @@ jobs:
         env:
           SYMBOLS: ${{ inputs.symbols }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
@@ -43,6 +44,7 @@ jobs:
         run: node src/cli.ts reconcile --db=pg && node src/cli.ts calendar --db=pg
         env:
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
