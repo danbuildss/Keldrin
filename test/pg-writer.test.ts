@@ -67,3 +67,29 @@ test("writer role: pipeline writes work, are idempotent, and nothing beyond appe
     await admin.end();
   }
 });
+
+test("reader role: the free-try counter works through the real read-only connection (and nothing else is writable)", { skip: !ADMIN && "set KELDRIN_TEST_PG_ADMIN to run" }, async () => {
+  const { admin, readerUrl } = await setup();
+  // the role-level defaults Supabase relies on (supabase/005_reader_defaults.sql) are part of the migrations above
+  const r = openPg(readerUrl + "?sslmode=disable");
+  const { triesLeft, useTry } = await import("../src/api/trial.ts");
+  try {
+    const now = new Date("2026-11-27T12:00:00Z");
+    assert.equal(await triesLeft(r as never, "203.0.113.7", now), 3);
+    assert.equal(await useTry(r as never, "203.0.113.7", now), 2);
+    assert.equal(await useTry(r as never, "203.0.113.7", now), 1);
+    // the count is in the database, not in memory: a second connection sees it
+    const r2 = openPg(readerUrl + "?sslmode=disable");
+    assert.equal(await triesLeft(r2 as never, "203.0.113.7", now), 1);
+    await r2.close();
+    const rows = (await admin.query("SELECT n FROM keldrin.trial_usage")).rows;
+    assert.deepEqual(rows.map((x) => x.n), [2]);
+    // the reader still cannot write anything else, nor call writeOne with another statement
+    await assert.rejects(r.query("UPDATE assets SET name = name"));
+    await assert.rejects(r.query("SELECT trial_consume('00000000000000000000000000000000', '2026-11-27'::date)"), "outside writeOne the session is read-only");
+    await assert.rejects(r.writeOne!("DELETE FROM trial_usage"), /only runs the free-try counter/);
+  } finally {
+    await r.close();
+    await admin.end();
+  }
+});

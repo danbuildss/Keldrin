@@ -18,6 +18,9 @@ function tls() {
   return process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...(process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {}) };
 }
 
+/** The only statement writeOne will run (the free-try counter). Shared with src/api/trial.ts so they cannot drift. */
+export const TRIAL_CONSUME_SQL = "SELECT trial_consume($1, $2::date) AS n";
+
 export function openPg(connectionString: string): ReadDb {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
   const ssl = tls();
@@ -34,7 +37,7 @@ export function openPg(connectionString: string): ReadDb {
       throw new Error("read-only connection: exec is not allowed");
     },
     async writeOne<T>(sql: string, params: unknown[] = []) {
-      if (!/^SELECT trial_consume\(\$1, \$2\)/.test(sql)) throw new Error("writeOne only runs the free-try counter");
+      if (sql !== TRIAL_CONSUME_SQL) throw new Error("writeOne only runs the free-try counter");
       const c = await pool.connect();
       try {
         await c.query("BEGIN READ WRITE");
