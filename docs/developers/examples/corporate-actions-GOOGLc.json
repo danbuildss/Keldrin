@@ -1,0 +1,69 @@
+{
+ "data": [
+  {
+   "event_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
+   "chain_id": 8453,
+   "ticker": "GOOGLc",
+   "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
+   "event_type": "dividend",
+   "status": "confirmed_onchain",
+   "confidence": "medium",
+   "expected_adjustment_date": null,
+   "adjusted_at": "2026-09-14T18:29:45.000Z",
+   "multiplier_before_wad": "1000000000000000000",
+   "multiplier_after_wad": "1000377118676784179",
+   "multiplier_delta": "1.000377118676784179",
+   "per_share": null,
+   "record_date": null,
+   "payable_date": null,
+   "sec_filing_url": null,
+   "quoted_text": null,
+   "onchain_tx": "0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
+   "issuer_corporate_action_uuid": "e82812a6-0b24-41c4-8ed1-322d1b466d33",
+   "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
+   "basis": "Applied onchain and independently verified; no dated company declaration matched.",
+   "warnings": [],
+   "updated_at": "2026-11-27T11:47:59.000Z",
+   "operator_description": "Cash Dividend",
+   "announced_at": "2026-09-14T15:39:01Z",
+   "effective_block": "51310619",
+   "effective_at": "2026-09-14T18:29:45.000Z",
+   "ui_multiplier_before_wad": null,
+   "ui_multiplier_after_wad": null,
+   "ui_multiplier_effective_at": null,
+   "announcements": [
+    {
+     "id": "2097",
+     "block": "51305497",
+     "tx_hash": "0xb5aa54fb26131123a7bb931e31d63baf466e1a1075d74450d048da88ad6a1444",
+     "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33"
+    },
+    {
+     "id": "e82812a6-0b24-41c4-8ed1-322d1b466d33",
+     "block": "51310619",
+     "tx_hash": "0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
+     "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33"
+    }
+   ],
+   "evidence": {
+    "onchain_tx": "0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00",
+    "issuer_record_url": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e82812a6-0b24-41c4-8ed1-322d1b466d33",
+    "sec_filing_url": null,
+    "keldrin_record": "/v1/actions/kld%3A8453%3A0xb2000000000000000000002d0ba3164cc74f58b7%3Ae82812a6-0b24-41c4-8ed1-322d1b466d33"
+   },
+   "verification": {
+    "state": "confirmed",
+    "review_id": "rev-26f8dab8c9ed-1795780079057"
+   }
+  }
+ ],
+ "meta": {
+  "as_of": "2026-11-27T14:13:36.375Z",
+  "schema_version": "0.2",
+  "token": "0xb2000000000000000000002D0BA3164cc74f58B7",
+  "symbol": "GOOGLc",
+  "current_multiplier_wad": "1000377118676784179",
+  "count": 1,
+  "accounting_note": "The token's balance never changes for a dividend or split: the multiplier (WAD, 1e18) does. Shares per token = multiplier / 1e18. The Chainlink NAV is already total-return (it includes the multiplier): never apply the multiplier to the NAV again."
+ }
+}

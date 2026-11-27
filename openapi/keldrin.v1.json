@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Keldrin API",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
  },
  "servers": [
@@ -588,7 +588,7 @@
   "/v1/assets/{contract}/nav/history": {
    "get": {
     "summary": "Chainlink NAV history for one token (verified feeds only)",
-    "description": "Verbatim Chainlink rounds with feed, phase, aggregator and round id per point, so each value can be re-read onchain with getRoundData. Total-return NAV: it already includes dividends and splits. interval=daily returns the last round on each New York trading day at or before the session close; trading days without a round are listed in meta.quality.missing_trading_days and never filled. Served only when the feed's latest independent review is CONFIRMED.",
+    "description": "Verbatim Chainlink rounds with feed, phase, aggregator and round id per point, so each value can be re-read onchain with getRoundData. Total-return NAV: it already includes dividends and splits. Official rounds only by default: inside the window in which the proxy served that aggregator, from an aggregator whose decimals match the proxy. interval=daily returns the last official round inside each New York trading day's regular session; trading days without one are listed in meta.quality.missing_trading_days and never filled. Served only when the feed's latest independent review is CONFIRMED, and only rounds that review covered. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
     "parameters": [
      {
       "name": "contract",
@@ -641,12 +641,26 @@
       "description": "round interval only"
      },
      {
+      "name": "include",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "enum": [
+        "official",
+        "all"
+       ],
+       "default": "official"
+      },
+      "description": "all (interval=round only) also returns non-official rounds with official/proxy_live/decimals_ok flags"
+     },
+     {
       "name": "cursor",
       "in": "query",
       "schema": {
-       "type": "string"
+       "type": "string",
+       "pattern": "^\\d{1,12}-\\d{1,30}$"
       },
-      "description": "round interval only; pass meta.next_cursor back unchanged"
+      "description": "round interval only; pass meta.next_cursor back unchanged (order: updated_at, then round_id)"
      }
     ],
     "responses": {
@@ -747,7 +761,7 @@
       }
      },
      "404": {
-      "description": "Unknown token or no NAV feed (NO_NAV_FEED)",
+      "description": "Unknown token (UNKNOWN_ASSET) or no NAV feed (NO_NAV_FEED)",
       "content": {
        "application/json": {
         "schema": {
@@ -757,7 +771,173 @@
       }
      },
      "503": {
-      "description": "Feed not independently verified (NAV_NOT_VERIFIED)",
+      "description": "Not enabled (NAV_NOT_ENABLED) or feed not independently verified (NAV_NOT_VERIFIED)",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/market/session": {
+   "get": {
+    "summary": "US equity session right now (NYSE calendar 2026-2027)",
+    "responses": {
+     "200": {
+      "description": "Session",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "session": {
+             "type": "string",
+             "enum": [
+              "open",
+              "pre",
+              "after",
+              "closed",
+              "weekend",
+              "holiday",
+              "calendar_not_covered"
+             ]
+            },
+            "ny_date": {
+             "type": "string"
+            },
+            "ny_time": {
+             "type": "string"
+            },
+            "is_trading_day": {
+             "type": [
+              "boolean",
+              "null"
+             ]
+            },
+            "early_close": {
+             "type": "boolean"
+            },
+            "next_open": {
+             "type": [
+              "string",
+              "null"
+             ]
+            },
+            "next_close": {
+             "type": [
+              "string",
+              "null"
+             ]
+            },
+            "last_close": {
+             "type": [
+              "string",
+              "null"
+             ]
+            },
+            "calendar_version": {
+             "type": "string"
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/assets/{contract}/market-context": {
+   "get": {
+    "summary": "Session, latest Chainlink NAV (live, with round id and age) and staleness for one token",
+    "description": "The latest round is read live from Base's public RPC (cached up to 30 s). staleness: fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered, judged against the feed's own verified p99 in-session gap (threshold = max(2 \u00d7 p99, 30 min)). Provider failures degrade to nav: null with nav_unavailable_reason. No DEX price is served (dex.unavailable_reason). Returns 503 NAV_NOT_ENABLED until enabled.",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Market context"
+     },
+     "400": {
+      "description": "Bad address",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "UNKNOWN_ASSET",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "NAV_NOT_ENABLED",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/assets/{contract}/corporate-actions": {
+   "get": {
+    "summary": "One token's verified corporate actions with multiplier and uiMultiplier detail",
+    "description": "Same events as /v1/events for the token, plus operator description, announced_at, effective block/time, ui_multiplier_before/after_wad and its effective time (when the UIMultiplierUpdated event exists), announcement transactions and evidence links (onchain tx, Coinbase issuer record, SEC filing, Keldrin record).",
+    "parameters": [
+     {
+      "name": "contract",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "pattern": "^0x[0-9a-fA-F]{40}$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Corporate actions"
+     },
+     "400": {
+      "description": "Bad address",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "UNKNOWN_ASSET",
       "content": {
        "application/json": {
         "schema": {
@@ -1101,6 +1281,18 @@
      "provisional": {
       "type": "boolean",
       "description": "daily interval only: true while that session has not closed yet"
+     },
+     "official": {
+      "type": "boolean",
+      "description": "include=all only: inside its phase's live window and decimals match the proxy"
+     },
+     "proxy_live": {
+      "type": "boolean",
+      "description": "include=all only: the proxy served this round's aggregator when it was published"
+     },
+     "decimals_ok": {
+      "type": "boolean",
+      "description": "include=all only: the aggregator's decimals equal the proxy's"
      }
     }
    }

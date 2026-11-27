@@ -1,0 +1,14 @@
+  CONFIRMED AAPLc   rounds 718 official 629 overlap-excluded 16 decimals-conflict phases [1] sampled 53 mismatches 0 max-gap 22158s
+  CONFIRMED AMZNc   rounds 1106 official 1008 overlap-excluded 18 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 19720s
+  CONFIRMED ANTc    rounds 907 official 907 overlap-excluded 0 decimals-conflict phases [] sampled 51 mismatches 0 max-gap 1622s
+  CONFIRMED CRCLc   rounds 5356 official 4662 overlap-excluded 124 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 12218s
+  CONFIRMED GOOGLc  rounds 1111 official 1003 overlap-excluded 16 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 20260s
+  CONFIRMED INTCc   rounds 4636 official 4039 overlap-excluded 128 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 14018s
+  CONFIRMED METAc   rounds 1703 official 1549 overlap-excluded 30 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 19180s
+  CONFIRMED MSFTc   rounds 978 official 869 overlap-excluded 25 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 20142s
+  CONFIRMED MSTRc   rounds 5291 official 4883 overlap-excluded 94 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 12816s
+  CONFIRMED NVDAc   rounds 2065 official 1920 overlap-excluded 30 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 22364s
+  CONFIRMED SNDKc   rounds 6838 official 5611 overlap-excluded 254 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 13778s
+  CONFIRMED SPCXc   rounds 3826 official 2831 overlap-excluded 211 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 17890s
+  CONFIRMED TSLAc   rounds 1851 official 1674 overlap-excluded 30 decimals-conflict phases [1] sampled 54 mismatches 0 max-gap 18850s
+nav-verify: 13 feed(s); {"CONFIRMED":13}

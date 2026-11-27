@@ -1,0 +1,116 @@
+{
+ "data": [
+  {
+   "chain_id": 8453,
+   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "round_id": "36893488147419105076",
+   "phase_id": 2,
+   "aggregator_round_id": "1844",
+   "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+   "answer_raw": "15205675336",
+   "decimals": 8,
+   "nav": "152.05675336",
+   "started_at": "2026-11-25T00:14:54Z",
+   "updated_at": "2026-11-25T00:15:08Z",
+   "answered_in_round": "36893488147419105076",
+   "retrieved_at": "2026-11-27T13:24:36Z",
+   "retrieved_block": "62977500"
+  },
+  {
+   "chain_id": 8453,
+   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "round_id": "36893488147419105077",
+   "phase_id": 2,
+   "aggregator_round_id": "1845",
+   "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+   "answer_raw": "15282638329",
+   "decimals": 8,
+   "nav": "152.82638329",
+   "started_at": "2026-11-25T01:27:57Z",
+   "updated_at": "2026-11-25T01:28:10Z",
+   "answered_in_round": "36893488147419105077",
+   "retrieved_at": "2026-11-27T13:24:36Z",
+   "retrieved_block": "62977500"
+  },
+  {
+   "chain_id": 8453,
+   "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+   "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+   "round_id": "36893488147419105078",
+   "phase_id": 2,
+   "aggregator_round_id": "1846",
+   "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+   "answer_raw": "15206127317",
+   "decimals": 8,
+   "nav": "152.06127317",
+   "started_at": "2026-11-25T02:01:28Z",
+   "updated_at": "2026-11-25T02:01:41Z",
+   "answered_in_round": "36893488147419105078",
+   "retrieved_at": "2026-11-27T13:24:36Z",
+   "retrieved_block": "62977500"
+  }
+ ],
+ "meta": {
+  "as_of": "2026-11-27T14:21:43.934Z",
+  "schema_version": "0.2",
+  "token": "0xb20000000000000000000078ee7ce2fE4908108C",
+  "symbol": "NVDAc",
+  "feed": "0x04689a41629776563E6822F76f2e57D148d28513",
+  "feed_description": "Coinbase NVDA",
+  "decimals": 8,
+  "interval": "round",
+  "include": "official",
+  "from": "2026-11-25",
+  "to": "2026-11-27",
+  "semantics": "Chainlink total-return NAV per token: it already includes dividends and splits, so do not apply the multiplier again. A last published value outside market hours is a reference, not a live equity price.",
+  "source": "Derived from public onchain Chainlink data on Base (feed listed by Coinbase /v1/tokenized-stocks/nav-feeds, cross-checked onchain); every point carries its round id so it can be re-read with getRoundData.",
+  "next_cursor": "1795572101-36893488147419105078",
+  "order": "updated_at, then round_id",
+  "count": 3,
+  "quality": {
+   "official_rounds": 1920,
+   "first_official_round_at": "2026-08-07T19:55:27Z",
+   "last_official_round_at": "2026-11-27T13:23:06Z",
+   "missing_round_ids": [],
+   "missing_round_ids_count": 0,
+   "max_in_session_gap_s": 22364,
+   "p99_in_session_gap_s": 13448,
+   "overlap_rounds_excluded": 30,
+   "decimals_conflict_phases": [
+    1
+   ],
+   "phases": [
+    {
+     "phase_id": 1,
+     "aggregator": "0x1469c86475f6356dE848349d64c45C43189A8f6E",
+     "aggregator_decimals": 18,
+     "proxy_decimals": 8,
+     "live_from_block": null,
+     "live_from": null,
+     "live_to_block": "49669080",
+     "live_to": "2026-08-07T18:31:47Z"
+    },
+    {
+     "phase_id": 2,
+     "aggregator": "0xF72B1eB5932800F3d2a5EeC5f99e6cD586479675",
+     "aggregator_decimals": 8,
+     "proxy_decimals": 8,
+     "live_from_block": "49669080",
+     "live_from": "2026-08-07T18:31:47Z",
+     "live_to_block": null,
+     "live_to": null
+    }
+   ],
+   "coverage_note": "History starts at the feed's first official round. Rounds an aggregator published outside the window in which the proxy served it, or from an aggregator whose decimals differ from the proxy's, are not official: they are excluded from daily closes and shown only with interval=round&include=all.",
+   "verification": {
+    "verdict": "CONFIRMED",
+    "review_id": "navrev:0x04689a41629776563e6822f76f2e57d148d28513:2026-11-27T14:20:21.628Z",
+    "checked_at": "2026-11-27T14:20:21.628Z",
+    "sampled": 54,
+    "mismatches": 0
+   }
+  }
+ }
+}

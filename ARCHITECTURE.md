@@ -20,3 +20,7 @@ v0.3 (Phase 0, proposed): see PHASE0_PLAN.md §6.
 - Optional separate hourly NAV-only job if fresher data is required (cost decision).
 
 - CD-003 follow-up: market context reads the latest NAV live from the public Base RPC at request time (no new secret); history comes from the indexed `nav_rounds`. A shared deterministic NYSE calendar module fails closed beyond its coverage. (Proposed.)
+
+## Note (2026-11-27, competitive review; no direction change)
+- Don't build a DEX price engine. If market context needs a live DEX price or premium, prefer integrating an existing evidenced source (Proof of Stock, MIT, onchain reads) after checking its terms, or reuse its approach with attribution.
+- Keldrin's market context stays anchored on what only Keldrin has: the Chainlink round history, which lets it tell "expected closed" from "unexpectedly stale" per feed, with the round id.

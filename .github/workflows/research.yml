@@ -49,8 +49,9 @@ jobs:
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       - name: Index and independently verify Chainlink NAV history
-        run: node src/cli.ts nav-index --db=pg && node src/cli.ts nav-verify --db=pg
+        run: node src/cli.ts nav-index --db=pg ${SYMBOLS:+--symbols=$SYMBOLS} && node src/cli.ts nav-verify --db=pg ${SYMBOLS:+--symbols=$SYMBOLS}
         env:
+          SYMBOLS: ${{ inputs.symbols }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}

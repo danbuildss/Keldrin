@@ -28,3 +28,8 @@ This remains a hypothesis until builders confirm the need (T013). Not compared y
 | Chainlink feeds (onchain) | Total-return NAV rounds | Source for NAV | Raw rounds across phases; no daily closes, risk or session context |
 | MAXXAGENT (`/api/skill/stocks`, MIT repo) | Live NAV, DEX price, 24h, liquidity for 10 stocks; risk inside their app | Partly (live snapshot) | No history API; 10 stocks only; it's a product, not infrastructure |
 | DexScreener / GeckoTerminal | DEX prices, pools, liquidity | None today | Not pursued until terms are checked |
+
+## Proof of Stock (reviewed 2026-11-27; details: docs/research/PROOF_OF_STOCK.md)
+| Who | Offers | Overlap | Keldrin's difference |
+|---|---|---|---|
+| Proof of Stock (proofofstock.xyz, MIT repo) | Authenticity vs issuer registries (Base + Robinhood), impostor/deny lists, live NAV/DEX premium (onchain DEX reads, 15-min forward series since ~Nov 8), market session, freshness, daily anchoring, MCP (11 tools), x402 passes | Market session; NAV/DEX premium | Not found in their public code: Chainlink round history with ids, NAV backfill, dividend/split and multiplier history, volatility/drawdown, earnings, B20 policy monitoring, research. Complementary rather than head-on. |

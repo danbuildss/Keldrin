@@ -49,10 +49,11 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T030 | P1 (proposed) | Public self-verification of records | PROPOSED | Lesson 6 |
 | T031 | P1 | Decide the x402 host (Bankr x402 Cloud vs Vercel + facilitator) | OPEN (research) | Does Bankr support secrets? Phase 5 |
 | T032 | P0 (proposed) | NAV history indexer + `…/nav/history` (NVDAc first, then 14 feeds) — first MAXXAGENT test milestone | BUILT (Phase 5; verified locally; switched off pending the rights decision) | docs/research/FEASIBILITY_CD003.md; Chainlink rights decision |
-| T033 | P0 (proposed) | Per-asset `…/corporate-actions` route | PROPOSED | Existing verified data |
+| T033 | P0 | Per-asset `…/corporate-actions` route | BUILT (Phase 6; not deployed) | Existing verified data |
 | T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | PROPOSED | docs/research/RISK_METHODOLOGY.md |
-| T035 | P0 (proposed) | `…/market-context` + sessions calendar — first MAXXAGENT test milestone | PROPOSED (Phase 6) | docs/research/MARKET_SESSIONS.md |
+| T035 | P0 | `…/market-context` + sessions calendar — first MAXXAGENT test milestone | BUILT (Phase 6; not deployed) | docs/research/MARKET_SESSIONS.md |
 | T036 | P1 (proposed) | `…/transfer-policy` snapshot | PROPOSED | docs/research/B20_POLICIES.md |
 | T037 | P2 | DEX liquidity / NAV-DEX divergence | OPEN (terms check first) | — |
-| T038 | P0 (proposed) | Developer testing package (docs/developers/*, real examples from the deployed endpoints) | PROPOSED (Phase 6) | docs/PLAN_DEVELOPER_RELEASE.md |
+| T038 | P0 | Developer testing package (docs/developers/*, real examples) | BUILT (examples from the local verified store; re-capture from production after deploy) | docs/PLAN_DEVELOPER_RELEASE.md |
 | T039 | P1 (proposed) | Edge rate limit (Vercel Firewall) + documented limits | PROPOSED | Founder sets the rule |
+| T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |

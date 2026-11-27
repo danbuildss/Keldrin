@@ -4,6 +4,9 @@ import { CHAIN_ID, SCHEMA_VERSION } from "../config.ts";
 import OPENAPI_DOC from "../../openapi/keldrin.v1.json" with { type: "json" };
 import { listEvents } from "./events.ts";
 import { navHistory } from "./nav.ts";
+import { marketContext } from "./marketContext.ts";
+import { assetCorporateActions } from "./assetActions.ts";
+import { marketNow } from "../lib/marketSession.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -45,6 +48,9 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z — events added or changed since a timestamp (poll this)
 - GET /v1/assets — tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets/{contract}/corporate-actions — one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
+- GET /v1/assets/{contract}/market-context — US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
+- GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -83,7 +89,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/health"] }));
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/market/session", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -145,6 +151,15 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/v1/assets") {
       const rows = await db.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+    }
+    const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
+    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }));
+    const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
+    if (cm) {
+      if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
+      const out = cm[2] === "market-context" ? await marketContext(db, cm[1]) : await assetCorporateActions(db, cm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : out.body);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {
