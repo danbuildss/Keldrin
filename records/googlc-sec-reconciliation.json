@@ -6,7 +6,7 @@
   "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec-dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
-   "payload_sha256": "e282ce82d742daa46c577fb3247c76232efcd16cc7734b4204bb909ce26a5c07"
+   "payload_sha256": "d2e66841e30fc92ad0006a9518d926958fa80b2aab4fc518d2898096b7f20597"
   },
   "company": {
    "cik": "0001652044",
@@ -90,16 +90,16 @@
    "Declaration, record and payment dates (in the declaring 8-K/press release on www.sec.gov; needs an approved SEC contact User-Agent, decision D2)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T07:46:50.405Z"
+  "generated_at": "2026-11-27T08:03:20.471Z"
  },
- "payload_sha256": "27c7a087a5420107d4968b2c7bd6bf4e18c42f50bcf5f9561c415c66c5c3dff6",
+ "payload_sha256": "f4f0f18c75b7ffbdda106d0fe11ac7ba58c02b44d5e23c915ff10c0a42b5271b",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash e282ce82d742daa4"
+    "evidence": "record hash d2e66841e30fc92a"
    },
    {
     "claim": "SEC XBRL fact re-fetched",
@@ -122,6 +122,6 @@
     "evidence": "recomputed 0.13089789"
    }
   ],
-  "checked_at": "2026-11-27T07:46:51.077Z"
+  "checked_at": "2026-11-27T08:03:21.150Z"
  }
 }

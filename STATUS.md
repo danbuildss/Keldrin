@@ -1,19 +1,35 @@
-# Status | 2026-11-27 (end of Phase 0 research session)
+# Status | 2026-11-27 (end of Phase 1 session)
 
-**Phase 0: research complete, plan awaiting founder approval** (PHASE0_PLAN.md). No production code, database, live endpoint, released records, users or revenue exist. Initial application submitted by founder; acceptance unknown.
+**Phase 1: backend proof passed locally; PR open for founder review.** Nothing is deployed or published. There are no external users or revenue.
 
-## Done this session
-- Build kit v0.2 committed as baseline (starter check passed: synthetic fixture only).
-- Inspected aeonfun/aeon, danbuildss/orric-aeon and danbuildss/breakra-research at pinned commits (read-only). Reuse matrix: docs/REUSE_MATRIX.md.
-- Created a separate personal cloud environment, "Keldrin research", allowing only the read-only source hosts (founder approved via prompt).
-- Verified live sources: Coinbase registry (435 tokens; all 5 targets present), Base RPC (calls, receipts, historical state), SEC data.sec.gov (submissions, XBRL), BStocks API (competitor), Base B20 standard (base-std @ b97145b).
-- Reproduced one real applied corporate action from the chain: GOOGLc Cash Dividend e82812a6-… (multiplier change at block 51310619). Linked candidate SEC fact: Alphabet Q3 2026 dividend $0.22 (accn 0001652044-26-000084). Not a released record; not independently reviewed.
+## Done
+- **Keyless corporate-action feed** for all 435 Coinbase tokenized stocks on Base:
+  - onchain identity checks (435/435 verified)
+  - discovery by `multiplier()` bisection, because the public RPC refuses `eth_getLogs`
+  - receipt and bracket decoding, cross-checked against the issuer record
+- **13 real corporate actions**, all independently CONFIRMED in 3 of 3 controlled runs (idempotent: 13 records, revision 1):
+  - 12 cash dividends
+  - 1 scheduled 8-for-1 split (SNDKc, 2026-11-20)
+- **Independent verifier**: its own RPC client, ABI decoding, arithmetic and hash. It re-scans action blocks for completeness and REJECTS every tamper case tested.
+- **Storage**: append-only Postgres (PGlite locally); corrections become revisions.
+- **API**: read-only localhost API serving confirmed records only. A sample outside consumer validates schema, arithmetic and freshness.
+- **Deep proof**: GOOGLc linked to Alphabet's SEC XBRL dividend ($0.22) and the Chainlink reference. Implied net reinvestment is $0.1309 (interpretation). Status `partially_reconciled`.
+- **Code review**: a fresh-context review found 10 issues (7 important), all fixed with regression tests. 47/47 tests pass.
 
-## Blockers
-- www.sec.gov filing documents return 403 without a declared contact User-Agent (decision D2).
-- Public Base RPC rate-limits log scans (`-32011`); fine for Phase 1, provider needed for Phase 2.
-- Coinbase API terms and redistribution rights unknown.
-- Brand clearance pending.
+## Findings worth your attention
+- **PMc**: multiplier ×1.5588, labelled "Cash Dividend" by the issuer. This is a lead, not a claim.
+- **Issuer conventions** all integrators must handle:
+  - 12 of 13 actions used the deprecated instant setter.
+  - 2 emitted only the legacy event.
+  - Most have two announcement IDs.
+
+## Blockers / decisions
+- **D2**: SEC contact User-Agent, needed for record/payment dates and share-class evidence.
+- **D9**: a log-capable RPC provider, for full announcement coverage (notice-only announcements).
+- **Make `main` the default branch** (repo setting; the founder's action).
+- Coinbase API rights: unknown. Brand clearance: pending.
 
 ## Next
-Founder reviews PHASE0_PLAN.md §13 decisions D1–D9 and docs/GSTACK_REVIEW.md (proposed re-sequencing: corporate-action feed first). On approval of D1: implement Phase 1 (tasks P1-01..P1-09). Internal target Dec 5; official deadline Dec 12 23:59 UTC, rechecked 2026-11-27.
+Founder reviews the PR. On approval:
+- Phase 2: SEC-side company events and the leading calendar, earnings second, a gold set of 10+ events, Supabase.
+- Builder interviews (the GSTACK_REVIEW assignment) run in parallel.

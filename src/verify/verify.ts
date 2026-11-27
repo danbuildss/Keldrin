@@ -12,7 +12,7 @@ const T = {
   MultiplierUpdated: "0x4dbe4840d7465bd162f67814cea0b519567a2e0e578bcde61e7f4ced361e5a3d",
   UIMultiplierUpdated: "0x2205df4534432b2f60654a3fdb48737ffdaf3e9edb1a498bd985bc026b15b055",
 };
-const SEL = { multiplier: "0x1b3ed722", isB20: "0xfa19b927", extraMetadata: "0x4ddf9da0", symbol: "0x95d89b41" };
+const SEL = { multiplier: "0x1b3ed722", isB20: "0xfa19b927", extraMetadata: "0x4ddf9da0", symbol: "0x95d89b41", newUIMultiplier: "0xdc767007", effectiveAt: "0x97a4064f", OPERATOR_ROLE: "0xf5b541a6", hasRole: "0x91d14854" };
 
 export type Verdict = "CONFIRMED" | "REJECTED" | "UNSURE";
 export type Claim = { claim: string; verdict: Verdict; evidence: string };
@@ -111,13 +111,19 @@ export async function verifyIssuerAction(record: Rec, tx: Transport = liveTransp
     const r = await tx.rpc("eth_call", [{ to: B20_FACTORY, data: SEL.isB20 + pad32(contract) }, "latest"]);
     return [uint(r, 0) === 1n ? "CONFIRMED" : "REJECTED", `isB20=${uint(r, 0)}`];
   });
-  await guard("symbol matches chain", async () => {
-    const s = str(await call(SEL.symbol, "latest"), 0);
+  // Fail closed on the research pipeline's own failed checks or identity mismatch (CLAUDE.md).
+  for (const ck of record.checks ?? []) if (ck.result === "fail") add(`record check passes: ${ck.name}`, "REJECTED", ck.detail ?? "failed");
+  if (record.asset?.identity_state !== "verified") add("asset identity verified", record.asset?.identity_state === "mismatch" ? "REJECTED" : "UNSURE", String(record.asset?.identity_state));
+
+  // Identity is read at the block the action took effect (or was scheduled), not "latest": symbols are mutable.
+  const idBlock: bigint | "latest" = record.action?.effective?.block ? BigInt(record.action.effective.block) : record.action?.scheduling_block ? BigInt(record.action.scheduling_block) : "latest";
+  await guard("symbol matches chain at action block", async () => {
+    const s = str(await call(SEL.symbol, idBlock), 0);
     return [s === record.asset.symbol ? "CONFIRMED" : "REJECTED", `onchain=${s}`];
   });
   if (record.asset?.isin) {
-    await guard("ISIN matches onchain extraMetadata(\"isin\")", async () => {
-      const s = str(await call(SEL.extraMetadata + encodeString("isin"), "latest"), 0);
+    await guard("ISIN matches onchain extraMetadata(\"isin\") at action block", async () => {
+      const s = str(await call(SEL.extraMetadata + encodeString("isin"), idBlock), 0);
       return [s === record.asset.isin ? "CONFIRMED" : s === "" ? "UNSURE" : "REJECTED", `onchain=${s || "unset"}`];
     });
   }
@@ -176,12 +182,82 @@ export async function verifyIssuerAction(record: Rec, tx: Transport = liveTransp
     });
   }
 
-  // Flags are claims too: recompute the ones derivable from logs.
-  const evNames = (record.multiplier_events ?? []).map((m: Rec) => m.event);
-  const legacyOnly = evNames.length > 0 && !evNames.includes("UIMultiplierUpdated");
-  add("flag legacy_event_only", legacyOnly === (record.flags ?? []).includes("legacy_event_only") ? "CONFIRMED" : "REJECTED", `recomputed ${legacyOnly}`);
-  const multiIds = new Set((record.announcements ?? []).map((x: Rec) => x.id)).size > 1;
-  add("flag multiple_announcement_ids", multiIds === (record.flags ?? []).includes("multiple_announcement_ids") ? "CONFIRMED" : "REJECTED", `recomputed ${multiIds}`);
+  // Completeness: re-scan every block the action touched for ALL multiplier logs on this contract,
+  // so an omitted (e.g. undisclosed) change cannot pass. Brackets are paired by id within each tx.
+  const MULT = [T.MultiplierUpdated, T.UIMultiplierUpdated];
+  const blocks = [a.effective?.block, a.scheduling_block].filter((x): x is string => !!x);
+  const found: { tx: string; logIndex: number; topic: string; data: string; bracketed: boolean; block: string }[] = [];
+  let scanOk = true;
+  for (const b of [...new Set(blocks)]) {
+    try {
+      const rcs: any[] = await tx.rpc("eth_getBlockReceipts", ["0x" + BigInt(b).toString(16)]);
+      for (const rc of rcs) {
+        const open: string[] = [];
+        const logs = rc.logs.filter((l: any) => l.address.toLowerCase() === contract).sort((x: any, y: any) => Number(BigInt(x.logIndex) - BigInt(y.logIndex)));
+        for (const l of logs) {
+          if (l.topics[0] === T.Announcement) open.push(str(l.data, 0));
+          else if (l.topics[0] === T.EndAnnouncement) open.splice(open.lastIndexOf(str(l.data, 0)), 1);
+          else if (MULT.includes(l.topics[0])) found.push({ tx: rc.transactionHash.toLowerCase(), logIndex: Number(BigInt(l.logIndex)), topic: l.topics[0], data: l.data, bracketed: open.length > 0, block: b });
+        }
+      }
+    } catch (e) {
+      scanOk = false;
+      add(`re-scan block ${b} for multiplier logs`, "UNSURE", (e as Error).message.slice(0, 120));
+    }
+  }
+  const listed = new Set((record.multiplier_events ?? []).map((m: Rec) => `${m.tx_hash.toLowerCase()}:${m.log_index}`));
+  if (scanOk && blocks.length) {
+    const unlisted = found.filter((f) => !listed.has(`${f.tx}:${f.logIndex}`));
+    add("every multiplier log in the action's blocks is in the record", unlisted.length === 0 ? "CONFIRMED" : "REJECTED", `${found.length} found, ${unlisted.length} unlisted`);
+  }
+
+  // Flags are claims too: recompute every log-derived flag from the re-scan.
+  const flags = new Set<string>(record.flags ?? []);
+  const flagClaim = (name: string, expected: boolean) => add(`flag ${name}`, expected === flags.has(name) ? "CONFIRMED" : "REJECTED", `recomputed ${expected}`);
+  if (scanOk) {
+    flagClaim("undisclosed_multiplier_change", found.some((f) => !f.bracketed));
+    flagClaim("legacy_event_only", found.length > 0 && !found.some((f) => f.topic === T.UIMultiplierUpdated));
+    flagClaim("instant_path_deprecated_setter", a.status === "applied" && found.some((f) => f.topic === T.MultiplierUpdated && f.block === a.effective?.block && uint(f.data, 0).toString() === a.multiplier_after_wad));
+  }
+  flagClaim("multiple_announcement_ids", new Set((record.announcements ?? []).map((x: Rec) => x.id)).size > 1);
+
+  // Scheduled path: the update was recorded at scheduling_block and activated at exactly effectiveAt.
+  if (a.path === "scheduled" && a.scheduling_block) {
+    const eAt = a.effective_at_scheduled ? BigInt(a.effective_at_scheduled) : null;
+    const sched = found.find((f) => f.topic === T.UIMultiplierUpdated && f.block === a.scheduling_block);
+    add("scheduling tx recorded this multiplier and effectiveAt", sched && eAt !== null && uint(sched.data, 1).toString() === a.multiplier_after_wad && uint(sched.data, 2) === eAt ? "CONFIRMED" : "REJECTED", sched ? `new ${uint(sched.data, 1)} effectiveAt ${uint(sched.data, 2)}` : "no UIMultiplierUpdated in scheduling block");
+    if (a.status === "applied" && eAt !== null) {
+      await guard("activation block is the first block at or after effectiveAt", async () => {
+        const B = BigInt(a.effective.block);
+        const [cur, prev] = await Promise.all([tx.rpc("eth_getBlockByNumber", ["0x" + B.toString(16), false]), tx.rpc("eth_getBlockByNumber", ["0x" + (B - 1n).toString(16), false])]);
+        const ok = BigInt(cur.timestamp) >= eAt && BigInt(prev.timestamp) < eAt;
+        return [ok ? "CONFIRMED" : "REJECTED", `prev ${BigInt(prev.timestamp)} < effectiveAt ${eAt} <= block ${BigInt(cur.timestamp)}`];
+      });
+    }
+  }
+  if (a.status === "scheduled") {
+    await guard("pending update is live onchain", async () => {
+      const blk = await tx.rpc("eth_getBlockByNumber", ["latest", false]);
+      const nm = uint(await call(SEL.newUIMultiplier, "latest"), 0);
+      const ea = uint(await call(SEL.effectiveAt, "latest"), 0);
+      if (ea <= BigInt(blk.timestamp)) return ["UNSURE", `effectiveAt ${ea} already passed; record must be superseded by an applied revision`];
+      const ok = nm.toString() === a.multiplier_after_wad && ea.toString() === a.effective_at_scheduled;
+      return [ok ? "CONFIRMED" : "REJECTED", `newUIMultiplier ${nm} effectiveAt ${ea}`];
+    });
+  }
+
+  // Operator role, re-derived independently at each announcement's block.
+  if ((record.announcements ?? []).length) {
+    await guard("announcement callers hold OPERATOR_ROLE", async () => {
+      const role = word(await call(SEL.OPERATOR_ROLE, "latest"), 0);
+      const bad: string[] = [];
+      for (const ann of record.announcements) {
+        const r = await call(SEL.hasRole + role + pad32(ann.caller), BigInt(ann.block));
+        if (uint(r, 0) !== 1n) bad.push(`${ann.caller}@${ann.block}`);
+      }
+      return [bad.length ? "REJECTED" : "CONFIRMED", bad.length ? `no role: ${bad.join(", ")}` : `${record.announcements.length} caller(s) checked`];
+    });
+  }
 
   if (a.corporate_action_uuid) {
     await guard("issuer corporate-action record agrees", async () => {

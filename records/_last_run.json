@@ -1,6 +1,6 @@
 {
- "run_id": "run-2026-11-27T07-50-16-405Z",
- "head_block": "62877217",
+ "run_id": "run-2026-11-27T08-04-56-580Z",
+ "head_block": "62881608",
  "tokens": 435,
  "scope": 435,
  "identity": {
@@ -16,7 +16,7 @@
    "symbol": "SANc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -27,7 +27,7 @@
    "symbol": "GOOGLc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "legacy_event_only",
@@ -39,7 +39,7 @@
    "symbol": "ORCLc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -50,7 +50,7 @@
    "symbol": "SNDKc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "multiple_announcement_ids"
    ]
@@ -60,7 +60,7 @@
    "symbol": "NOKc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -71,7 +71,7 @@
    "symbol": "NVDAc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter"
    ]
@@ -81,7 +81,7 @@
    "symbol": "METAc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "legacy_event_only"
@@ -92,7 +92,7 @@
    "symbol": "PMc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -103,7 +103,7 @@
    "symbol": "AAPLc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -114,7 +114,7 @@
    "symbol": "MRVLc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter"
    ]
@@ -124,7 +124,7 @@
    "symbol": "CAKEc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -135,7 +135,7 @@
    "symbol": "INFYc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter"
    ]
@@ -145,7 +145,7 @@
    "symbol": "MUc",
    "verdict": "CONFIRMED",
    "revision": 1,
-   "created": true,
+   "created": false,
    "flags": [
     "instant_path_deprecated_setter",
     "multiple_announcement_ids"
@@ -155,5 +155,5 @@
  "verdicts": {
   "CONFIRMED": 13
  },
- "rpc_calls": 432
+ "rpc_calls": 434
 }

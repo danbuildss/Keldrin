@@ -19,6 +19,40 @@ const replay = {
 };
 const clone = () => structuredClone(fx.record);
 
+const sn = JSON.parse(readFileSync(new URL("../fixtures/recorded/sndkc-split.json", import.meta.url), "utf8"));
+const replayOf = (f: any) => ({
+  rpc: async (m: string, p: unknown[]) => {
+    const k = `${m} ${JSON.stringify(p)}`;
+    if (!(k in f.transcript)) throw new Error(`not recorded: ${k}`);
+    return structuredClone(f.transcript[k]);
+  },
+  getJson: async (u: string) => {
+    const k = `GET ${JSON.stringify(u)}`;
+    if (!(k in f.transcript)) throw new Error(`not recorded: ${k}`);
+    return structuredClone(f.transcript[k]);
+  },
+});
+
+test("real SNDKc 8-for-1 split (scheduled path) is CONFIRMED on replayed evidence", async () => {
+  const rv = await verifyIssuerAction(structuredClone(sn.record), replayOf(sn));
+  assert.equal(rv.verdict, "CONFIRMED", JSON.stringify(rv.claims.filter((c) => c.verdict !== "CONFIRMED")));
+  assert.equal(rv.payload_sha256, sn.payload_sha256);
+  assert.ok(rv.claims.some((c) => c.claim.startsWith("activation block is the first block") && c.verdict === "CONFIRMED"));
+  assert.ok(rv.claims.some((c) => c.claim.startsWith("scheduling tx recorded") && c.verdict === "CONFIRMED"));
+});
+
+for (const [name, mutate] of [
+  ["effectiveAt", (r: any) => (r.action.effective_at_scheduled = String(BigInt(r.action.effective_at_scheduled) - 1n))],
+  ["split ratio", (r: any) => ((r.action.multiplier_after_wad = "4000000000000000000"), (r.action.ratio = "4"))],
+  ["omitted scheduling event", (r: any) => (r.multiplier_events = [])],
+] as [string, (r: any) => void][]) {
+  test(`tampered SNDKc ${name} → REJECTED`, async () => {
+    const r = structuredClone(sn.record);
+    mutate(r);
+    assert.equal((await verifyIssuerAction(r, replayOf(sn))).verdict, "REJECTED");
+  });
+}
+
 test("real GOOGLc record is CONFIRMED on replayed evidence, bound to its payload hash", async () => {
   const rv = await verifyIssuerAction(clone(), replay);
   assert.equal(rv.verdict, "CONFIRMED", JSON.stringify(rv.claims.filter((c) => c.verdict !== "CONFIRMED")));
@@ -37,6 +71,10 @@ const tamper: [string, (r: any) => void][] = [
   ["synthetic", (r) => (r.synthetic = true)],
   ["issuer status", (r) => (r.issuer_record.status = "CORPORATE_ACTION_STATUS_ANNOUNCED")],
   ["symbol (ticker collision GOOG vs GOOGL)", (r) => (r.asset.symbol = "GOOGc")],
+  ["omitted multiplier event (undisclosed change hidden)", (r) => (r.multiplier_events = [])],
+  ["dropped instant-path flag", (r) => (r.flags = r.flags.filter((f: string) => f !== "instant_path_deprecated_setter"))],
+  ["a failing pipeline check", (r) => r.checks.push({ name: "callers_hold_operator_role", result: "fail" })],
+  ["identity mismatch", (r) => (r.asset.identity_state = "mismatch")],
 ];
 for (const [name, mutate] of tamper) {
   test(`tampered ${name} → REJECTED`, async () => {

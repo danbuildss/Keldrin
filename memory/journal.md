@@ -14,3 +14,9 @@
 - Next: founder approval, then Phase 1.
 
 2026-11-27 (later) — Founder asked to apply garrytan/gstack (306ff23, MIT). Read, not installed (setup edits ~/.claude and CLAUDE.md, adds hooks/telemetry). Applied office-hours, plan-eng-review and plan-devex-review by hand → docs/GSTACK_REVIEW.md. Main result: no real user outcome yet; recommend re-sequencing so Phase 1 ships a keyless corporate-action feed for all tokens, with GOOGLc↔SEC as the deep proof; founder to contact 3 named builders. Proposal only; not approved.
+
+2026-11-27 — Phase 1 session (Claude). Approved scope: re-sequenced Phase 1 (founder: "I approve the new order, start Phase 1"; later "keep going, finish Phase 1 and give me the PR too").
+- Built: registry/identity, multiplier bisection discovery, evidence + records (schema v0.2), independent verifier, PGlite store (append-only), read-only API, sample consumer, GOOGLc↔SEC reconciliation.
+- Evidence: research/phase1/runs (3 controlled runs ok; 13/13 CONFIRMED each; idempotent). Tests 47/47.
+- Failures found and fixed: public RPC refuses eth_getLogs (redesigned discovery); jsonb key reordering broke idempotency (fixed + regression test); reconciliation called missing data "inconsistent" (fixed: unknown); 10 code-review findings (fixed).
+- Costs: $0 spent. Decisions needed: D2, D9, default branch, Phase 2 approval.

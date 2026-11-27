@@ -61,7 +61,11 @@ export function buildIssuerActionRecord(ev: ActionEvidence, asset: AssetIdentity
     if (ev.change) {
       c("issuer_multiplier_after_matches_chain", typeof cb.multiplier_after === "number" ? doubleMatchesWad(cb.multiplier_after, BigInt(ev.change.after)) : null);
       c("issuer_multiplier_before_matches_chain", typeof cb.multiplier_before === "number" ? doubleMatchesWad(cb.multiplier_before, BigInt(ev.change.before)) : null);
-      c("issuer_applied_at_matches_block_time", cb.applied_at ? Date.parse(cb.applied_at) === Date.parse(ev.change.blockTime) : null, `${cb.applied_at} vs ${ev.change.blockTime}`);
+      // Instant path: applied_at is the announcement block time. Scheduled path: it is the scheduled effectiveAt
+      // (the activation block can be stamped slightly later), per the issuer API documentation.
+      const appliedSec = cb.applied_at ? Date.parse(cb.applied_at) / 1000 : null;
+      const expected = ev.path === "scheduled" && ev.scheduledEffectiveAt ? Number(ev.scheduledEffectiveAt) : Date.parse(ev.change.blockTime) / 1000;
+      c("issuer_applied_at_matches_chain", appliedSec === null ? null : appliedSec === expected, `${cb.applied_at} vs ${ev.path === "scheduled" ? `effectiveAt ${ev.scheduledEffectiveAt}` : ev.change.blockTime}`);
     }
     c("issuer_listed_txs_confirmed_onchain", ev.coinbaseTxChecks.length ? ev.coinbaseTxChecks.every((t) => t.found && t.idMatches && t.uriMatches) : null);
   } else {
@@ -99,7 +103,7 @@ export function buildIssuerActionRecord(ev: ActionEvidence, asset: AssetIdentity
       multiplier_after: wadToDecimal(BigInt(after)),
       ratio: before ? ratio(BigInt(after), BigInt(before)) : null,
       effective: ev.change ? { block: ev.change.block, block_hash: ev.change.blockHash, time: ev.change.blockTime } : null,
-      effective_at_scheduled: ev.pending?.effectiveAt ?? null,
+      effective_at_scheduled: ev.scheduledEffectiveAt,
       scheduling_block: ev.schedulingBlock,
     },
     announcements: ev.announcements.map((a) => ({ id: a.id, caller: a.caller, uri: a.uri, tx_hash: a.txHash, block: a.block, log_index: a.logIndex, bracketed: a.bracketed, inner_events: a.innerEvents })),

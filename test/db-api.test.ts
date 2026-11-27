@@ -68,8 +68,11 @@ test("reruns are idempotent; changed content becomes a new revision (correction)
   try {
     await upsertAsset(db, asset(GOOGL, "GOOGLc"));
     const a = await insertRecord(db, structuredClone(fx.record));
-    const rerun = structuredClone(fx.record);
+    // A fresh pipeline run: new timestamps AND a different key order (jsonb reorders keys on storage).
+    const reverseKeys = (v: any): any => (Array.isArray(v) ? v.map(reverseKeys) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).reverse().map((k) => [k, reverseKeys(v[k])])) : v);
+    const rerun = reverseKeys(structuredClone(fx.record));
     rerun.observed_at = new Date().toISOString();
+    rerun.sources = rerun.sources.map((s: any) => ({ ...s, retrieved_at: new Date().toISOString() }));
     const b = await insertRecord(db, rerun);
     assert.deepEqual([b.created, b.revision], [false, 1]);
     const corrected = structuredClone(fx.record);
@@ -113,6 +116,7 @@ test("API input errors are structured and specific", async () => {
     assert.deepEqual([amb.status, amb.body.error.code], [409, "AMBIGUOUS_SYMBOL"]);
     assert.equal((await get("/v1/actions?limit=0")).body.error.code, "BAD_LIMIT");
     assert.equal((await get("/v1/actions?cursor=abc")).body.error.code, "BAD_CURSOR");
+    assert.equal((await get("/v1/actions/%E0%A4%A")).body.error.code, "BAD_RECORD_ID");
     assert.equal((await get("/v1/actions/kld:8453:nope")).status, 404);
     assert.equal((await get(`/v1/assets/${GOOGL}`)).status, 200);
     assert.equal((await get("/v1/assets/0xb2000000000000000000000000000000000000ff")).status, 404);
@@ -120,6 +124,37 @@ test("API input errors are structured and specific", async () => {
     assert.equal((await get("/nope")).status, 404);
     const post = await fetch(`http://127.0.0.1:${(srv.address() as AddressInfo).port}/v1/assets`, { method: "POST" });
     assert.equal(post.status, 405);
+  } finally {
+    srv.close();
+    await db.close();
+  }
+});
+
+test("pagination never skips records sharing a block, and reaches pending (null-block) records", async () => {
+  const { db, srv, get } = await setup();
+  try {
+    const mk = (i: number, block: string | null) => {
+      const r = structuredClone(fx.record);
+      r.record_id = `kld:8453:${GOOGL.toLowerCase()}:t${i}`;
+      if (block === null) { r.action.status = "scheduled"; r.action.effective = null; } else r.action.effective = { ...r.action.effective, block };
+      return r;
+    };
+    const blocks = ["300", "200", "200", "200", "100", null, null];
+    for (let i = 0; i < blocks.length; i++) {
+      const r = mk(i, blocks[i]);
+      const ins = await insertRecord(db, r);
+      await insertReview(db, review({ ...r, revision: 1 }, ins.hash, "CONFIRMED", `r${i}`));
+    }
+    const seen: string[] = [];
+    let cursor: string | null = null;
+    for (let guard = 0; guard < 10; guard++) {
+      const page: any = await get(`/v1/actions?contract=${GOOGL}&limit=2${cursor ? `&cursor=${cursor}` : ""}`);
+      seen.push(...page.body.data.map((d: any) => d.record_id));
+      cursor = page.body.meta.next_cursor;
+      if (!cursor) break;
+    }
+    assert.equal(seen.length, blocks.length);
+    assert.equal(new Set(seen).size, blocks.length);
   } finally {
     srv.close();
     await db.close();

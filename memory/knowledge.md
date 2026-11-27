@@ -8,3 +8,9 @@ Only add claims with evidence URL, retrieval time, source rights, review state a
 - Public Base RPC serves historical state but rate-limits long eth_getLogs ranges.
 - SEC www.sec.gov requires a declared contact User-Agent; data.sec.gov accepted a generic one on this date.
 - Limitation: single-day observations; behaviour may change.
+
+## 2026-11-27 Phase 1 observations (independently verified by the Phase 1 verifier; evidence research/phase1/runs, records/)
+- All 435 Coinbase tokenized stocks pass onchain identity checks (B20 factory, symbol, decimals, ISIN, multiplier).
+- 13 corporate actions applied between 2026-08-12 and 2026-11-27 (12 "Cash Dividend", 1 "8-for-1 Stock Split" SNDKc on 2026-11-20 via the scheduled path). 12 used the deprecated instant setter.
+- mainnet.base.org refuses eth_getLogs at any range (-32011) but serves historical eth_call and eth_getBlockReceipts.
+- Limitation: notice-only announcements not exhaustively covered.

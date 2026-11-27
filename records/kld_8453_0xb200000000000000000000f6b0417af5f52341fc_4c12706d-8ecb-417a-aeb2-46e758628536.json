@@ -78,7 +78,7 @@
     "result": "pass"
    },
    {
-    "name": "issuer_applied_at_matches_block_time",
+    "name": "issuer_applied_at_matches_chain",
     "detail": "2026-11-16T16:31:03Z vs 2026-11-16T16:31:03.000Z",
     "result": "pass"
    },
@@ -94,7 +94,7 @@
     "kind": "base_rpc",
     "sha256": null,
     "locator": "eth_call multiplier() on 0xb200000000000000000000F6b0417af5F52341FC at blocks 58281438 and 58281439; block hash 0x37e03b7a9233e498dc95903ac4a217f6a30671c64390378e3435541999ee77eb",
-    "retrieved_at": "2026-11-27T07:51:36.460Z",
+    "retrieved_at": "2026-11-27T08:03:11.990Z",
     "rights_state": "public"
    },
    {
@@ -103,7 +103,7 @@
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0xc443c043144d945d32c02a1e2096380da27871cbed999e7700ff7ade9a790791 log 16 (Announcement id=4c12706d-8ecb-417a-aeb2-46e758628536)",
-    "retrieved_at": "2026-11-27T07:51:36.460Z",
+    "retrieved_at": "2026-11-27T08:03:11.990Z",
     "rights_state": "public"
    },
    {
@@ -112,7 +112,7 @@
     "kind": "coinbase_corporate_action",
     "sha256": "3917dbb574484d261a5b85960e05c3de8fb1a4e14e8f4e8c95fb4070e3acb464",
     "locator": "whole document",
-    "retrieved_at": "2026-11-27T07:51:36.290Z",
+    "retrieved_at": "2026-11-27T08:03:11.761Z",
     "rights_state": "unknown"
    }
   ],
@@ -120,7 +120,7 @@
   "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
   "synthetic": false,
   "supersedes": null,
-  "observed_at": "2026-11-27T07:51:36.460Z",
+  "observed_at": "2026-11-27T08:03:11.990Z",
   "record_type": "issuer_action",
   "verification": {
    "state": "draft",
@@ -179,14 +179,14 @@
    }
   ]
  },
- "payload_sha256": "03b5b0c7d20588547229551be3ee0f644f365455dad79348d0c6df39b8d1508d",
+ "payload_sha256": "da3a8ecbe571e5d58a3751808381b083d25d8f84e290231d9464bcf2204c470a",
  "review": {
-  "review_id": "rev-03b5b0c7d205-1795765898372",
+  "review_id": "rev-da3a8ecbe571-1795766784993",
   "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
   "revision": 1,
-  "payload_sha256": "03b5b0c7d20588547229551be3ee0f644f365455dad79348d0c6df39b8d1508d",
+  "payload_sha256": "da3a8ecbe571e5d58a3751808381b083d25d8f84e290231d9464bcf2204c470a",
   "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
-  "checked_at": "2026-11-27T07:51:38.372Z",
+  "checked_at": "2026-11-27T08:06:24.993Z",
   "verdict": "CONFIRMED",
   "claims": [
    {
@@ -195,12 +195,12 @@
     "evidence": "isB20=1"
    },
    {
-    "claim": "symbol matches chain",
+    "claim": "symbol matches chain at action block",
     "verdict": "CONFIRMED",
     "evidence": "onchain=INFYc"
    },
    {
-    "claim": "ISIN matches onchain extraMetadata(\"isin\")",
+    "claim": "ISIN matches onchain extraMetadata(\"isin\") at action block",
     "verdict": "CONFIRMED",
     "evidence": "onchain=US4567881085"
    },
@@ -235,14 +235,34 @@
     "evidence": "value 1021642990925283286"
    },
    {
+    "claim": "every multiplier log in the action's blocks is in the record",
+    "verdict": "CONFIRMED",
+    "evidence": "2 found, 0 unlisted"
+   },
+   {
+    "claim": "flag undisclosed_multiplier_change",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed false"
+   },
+   {
     "claim": "flag legacy_event_only",
     "verdict": "CONFIRMED",
     "evidence": "recomputed false"
    },
    {
+    "claim": "flag instant_path_deprecated_setter",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed true"
+   },
+   {
     "claim": "flag multiple_announcement_ids",
     "verdict": "CONFIRMED",
     "evidence": "recomputed false"
+   },
+   {
+    "claim": "announcement callers hold OPERATOR_ROLE",
+    "verdict": "CONFIRMED",
+    "evidence": "1 caller(s) checked"
    },
    {
     "claim": "issuer corporate-action record agrees",

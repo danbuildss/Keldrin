@@ -1,0 +1,22 @@
+# API + sample consumer, 2026-11-27T08:06:52Z, local http://127.0.0.1:8787
+GET /health -> 200 5172B 0.003572s
+GET /v1/actions?limit=20 -> 200 80669B 0.005044s
+GET /v1/actions?symbol=GOOGLc -> 200 6297B 0.003768s
+GET /v1/actions?contract=0x12 -> 400 105B 0.000725s
+GET /v1/actions/nope -> 404 156B 0.001544s
+health: ok; 13 confirmed records; data age 0.01 h → fresh
+GOOGLc applied at block 51310619 (2026-09-14T18:29:45.000Z): "Cash Dividend" multiplier ×1.000377118676784179; flags [instant_path_deprecated_setter, legacy_event_only, multiple_announcement_ids]; evidence: 0xb5aa54fb26131123a7bb931e31d63baf466e1a1075d74450d048da88ad6a1444, 0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00
+consumer: 1/1 records schema-valid, confirmed and arithmetic-checked
+consumer exit 0
+health: ok; 13 confirmed records; data age 0.01 h → fresh
+SNDKc applied at block 59802122 (2026-11-20T05:00:00.000Z): "Stock Split | 8-for-1 Stock Split" multiplier ×8; flags [multiple_announcement_ids]; evidence: 0xa7bf39d215adc43ca33f56922f8a81f90b43ec8161e207a283e3df26ba9c1446, 0x3f1dbf9658e3fc8f6d38d57793c7d864fe58647c9aae2fbf6c88eb25b67bdf65
+consumer: 1/1 records schema-valid, confirmed and arithmetic-checked
+consumer exit 0
+health: ok; 13 confirmed records; data age 0.01 h → fresh
+PMc applied at block 53116034 (2026-10-26T13:30:15.000Z): "Cash Dividend" multiplier ×1.558821201905386994; flags [instant_path_deprecated_setter, multiple_announcement_ids]; evidence: 0xd29ffee168e47554f1ceec75d4cd1ce565cf01c43edf0265d93a079e23e5d298, 0xf2a1b9ef2dcb909ce294a590c326decf6fdcbc1e08b069a11aae4b3ec0aafa3c
+consumer: 1/1 records schema-valid, confirmed and arithmetic-checked
+consumer exit 0
+health: ok; 13 confirmed records; data age 0.01 h → fresh
+NVDAc applied at block 52041960 (2026-10-01T16:47:47.000Z): "Cash Dividend" multiplier ×1.000537939576369481; flags [instant_path_deprecated_setter]; evidence: 0x7aef5d1292d0f78b1cdc05518301553fc7220e5a0022d98b822dc09ac925ddcd
+consumer: 1/1 records schema-valid, confirmed and arithmetic-checked
+consumer exit 0

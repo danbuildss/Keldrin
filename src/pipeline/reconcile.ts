@@ -1,7 +1,7 @@
 import { getAddress } from "viem";
 import { read } from "../adapters/chain.ts";
 import { navFeeds } from "../adapters/coinbase.ts";
-import { concept, quarterlyFacts, submissions } from "../adapters/sec.ts";
+import { concept, quarterlyFacts, submissions, type XbrlFact } from "../adapters/sec.ts";
 import { payloadHash } from "../lib/canonical.ts";
 import { formatUnits } from "../lib/decimal.ts";
 import { cusipFromIsin } from "../lib/isin.ts";
@@ -45,8 +45,11 @@ export async function reconcileDividend(rec: IssuerActionRecord, recHash: string
   // Company event (XBRL dividends declared per share)
   const con = await concept(opts.cik, "CommonStockDividendsPerShareDeclared");
   const q = quarterlyFacts(con.data.units["USD/shares"] ?? []);
-  const f = q.find((x) => x.start! <= effTime.slice(0, 10) && effTime.slice(0, 10) <= x.end) ?? null;
-  c("dividend_declared_in_quarter_of_action", f ? f.val > 0 : false, f ? `${f.val} USD/share for ${f.start}..${f.end} (${f.form} ${f.accn})` : "no quarterly fact covers the action date");
+  const cls = classifyDividendFact(q, effTime.slice(0, 10));
+  if (cls.fact?.amended_from) c("sec_fact_amended", null, `latest ${cls.fact.val} (${cls.fact.accn}) supersedes ${cls.fact.amended_from.map((h) => `${h.val} (${h.accn})`).join(", ")}`);
+  const f = cls.fact;
+  c("dividend_declared_in_quarter_of_action", cls.result === "unknown" ? null : cls.result === "pass", cls.detail);
+  if (cls.unknownNote) unknown.push(cls.unknownNote);
   if (f && f.filed > effTime.slice(0, 10)) c("sec_fact_filed_after_action", true, `fact first filed ${f.filed}; the declaration itself predates it (date not yet evidenced)`);
   unknown.push("Declaration, record and payment dates (in the declaring 8-K/press release on www.sec.gov; needs an approved SEC contact User-Agent, decision D2).");
   const ratioNum = BigInt(rec.action.multiplier_after_wad) * 10n ** 18n / BigInt(rec.action.multiplier_before_wad);
@@ -65,8 +68,8 @@ export async function reconcileDividend(rec: IssuerActionRecord, recHash: string
       reference = { feed: getAddress(feed.nav_feed_address), description: desc, answer_raw: rd[1].toString(), decimals: dec, value_usd: formatUnits(rd[1], dec), updated_at: new Date(Number(rd[3]) * 1000).toISOString(), read_at_block: (B - 1n).toString() };
       // implied net per share = (ratio - 1) × reference; exact integer math in feed decimals
       const implied = ((ratioNum - 10n ** 18n) * rd[1]) / 10n ** 18n;
-      if (f) {
-        const declared = BigInt(Math.round(f.val * 10 ** dec));
+      const declared = f ? exactUnits(String(f.val), dec) : null;
+      if (f && declared !== null && declared > 0n) {
         const toDeclared = (implied * 10n ** 6n) / declared;
         interpretation = {
           implied_net_reinvested_per_share_usd: formatUnits(implied, dec),
@@ -76,7 +79,10 @@ export async function reconcileDividend(rec: IssuerActionRecord, recHash: string
         c("implied_net_not_above_declared", implied > 0n && implied <= declared, `implied ${formatUnits(implied, dec)} vs declared ${f.val}`);
       }
     }
-  } else c("reference_feed_available", false, "no NAV feed listed for this token");
+  } else {
+    c("reference_feed_available", null, "no NAV feed listed for this token");
+    unknown.push("No reference value feed, so the implied amount per share cannot be computed.");
+  }
 
   const failed = checks.some((x) => x.result === "fail");
   const status = failed ? "inconsistent" : unknown.length ? "partially_reconciled" : "consistent";
@@ -93,6 +99,23 @@ export async function reconcileDividend(rec: IssuerActionRecord, recHash: string
     generated_at: new Date().toISOString(),
   });
   return body;
+}
+
+/** Exact decimal string → integer scaled by 10^dec; null for exponent forms or excess precision. */
+export function exactUnits(s: string, dec: number): bigint | null {
+  const m = s.match(/^(\d+)(?:\.(\d+))?$/);
+  if (!m || (m[2] ?? "").length > dec) return null;
+  return BigInt(m[1]) * 10n ** BigInt(dec) + BigInt((m[2] ?? "").padEnd(dec, "0") || "0");
+}
+
+/** Pure: does a quarterly XBRL dividend fact cover the action date? Missing-because-not-yet-reported is unknown, not fail. */
+export function classifyDividendFact(q: XbrlFact[], effDate: string): { fact: XbrlFact | null; result: "pass" | "fail" | "unknown"; detail: string; unknownNote: string | null } {
+  const f = q.find((x) => x.start! <= effDate && effDate <= x.end) ?? null;
+  if (f) return { fact: f, result: f.val > 0 ? "pass" : "fail", detail: `${f.val} USD/share for ${f.start}..${f.end} (${f.form} ${f.accn})`, unknownNote: null };
+  const latestEnd = q.at(-1)?.end ?? null;
+  if (!latestEnd || latestEnd < effDate)
+    return { fact: null, result: "unknown", detail: `not yet reported in XBRL (latest quarterly fact ends ${latestEnd ?? "none"})`, unknownNote: "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)." };
+  return { fact: null, result: "fail", detail: "a later quarter is reported but none covers the action date", unknownNote: null };
 }
 
 export const hashReconciliation = (r: Reconciliation) => payloadHash({ ...r, generated_at: undefined } as Record<string, unknown>);

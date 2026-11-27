@@ -79,7 +79,7 @@
     "result": "pass"
    },
    {
-    "name": "issuer_applied_at_matches_block_time",
+    "name": "issuer_applied_at_matches_chain",
     "detail": "2026-11-16T15:58:03Z vs 2026-11-16T15:58:03.000Z",
     "result": "pass"
    },
@@ -95,7 +95,7 @@
     "kind": "base_rpc",
     "sha256": null,
     "locator": "eth_call multiplier() on 0xb200000000000000000000C2e324d24d7eEcd1fb at blocks 58271536 and 58271537; block hash 0x5d5921b8799c53c67a888bd28b7f90a56790e4d97db9aa9d4bef903d40afaeb0",
-    "retrieved_at": "2026-11-27T07:51:28.723Z",
+    "retrieved_at": "2026-11-27T08:03:02.082Z",
     "rights_state": "public"
    },
    {
@@ -104,7 +104,7 @@
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0x550e8608beff144bf7ee7ce20c397936749ae1f2db701324a0931cf8ded59c98 log 10 (Announcement id=399166b9-8068-42a5-8924-8ce881d49376:pre)",
-    "retrieved_at": "2026-11-27T07:51:28.723Z",
+    "retrieved_at": "2026-11-27T08:03:02.082Z",
     "rights_state": "public"
    },
    {
@@ -113,7 +113,7 @@
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0x194cf3f65e657060df3425c76cf9b03c5cc19ca0c2afe647e4f882c18c50de40 log 36 (Announcement id=399166b9-8068-42a5-8924-8ce881d49376)",
-    "retrieved_at": "2026-11-27T07:51:28.723Z",
+    "retrieved_at": "2026-11-27T08:03:02.082Z",
     "rights_state": "public"
    },
    {
@@ -122,7 +122,7 @@
     "kind": "coinbase_corporate_action",
     "sha256": "4584c00386673658a1c5e954e03e323f7a946c8a4ad6025b7254f38c1f2fb765",
     "locator": "whole document",
-    "retrieved_at": "2026-11-27T07:51:28.307Z",
+    "retrieved_at": "2026-11-27T08:03:01.653Z",
     "rights_state": "unknown"
    }
   ],
@@ -130,7 +130,7 @@
   "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
   "synthetic": false,
   "supersedes": null,
-  "observed_at": "2026-11-27T07:51:28.723Z",
+  "observed_at": "2026-11-27T08:03:02.082Z",
   "record_type": "issuer_action",
   "verification": {
    "state": "draft",
@@ -199,14 +199,14 @@
    }
   ]
  },
- "payload_sha256": "6eb1a9122b08d50ba920f98e42e82617949fbf3b43cd33722877b9860f7ea450",
+ "payload_sha256": "67c1129934b13c8825177a1e5ad563d34d87071bbcbbe284eccb8fc5bfefdd20",
  "review": {
-  "review_id": "rev-6eb1a9122b08-1795765890831",
+  "review_id": "rev-67c1129934b1-1795766775735",
   "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
   "revision": 1,
-  "payload_sha256": "6eb1a9122b08d50ba920f98e42e82617949fbf3b43cd33722877b9860f7ea450",
+  "payload_sha256": "67c1129934b13c8825177a1e5ad563d34d87071bbcbbe284eccb8fc5bfefdd20",
   "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
-  "checked_at": "2026-11-27T07:51:30.831Z",
+  "checked_at": "2026-11-27T08:06:15.735Z",
   "verdict": "CONFIRMED",
   "claims": [
    {
@@ -215,12 +215,12 @@
     "evidence": "isB20=1"
    },
    {
-    "claim": "symbol matches chain",
+    "claim": "symbol matches chain at action block",
     "verdict": "CONFIRMED",
     "evidence": "onchain=AAPLc"
    },
    {
-    "claim": "ISIN matches onchain extraMetadata(\"isin\")",
+    "claim": "ISIN matches onchain extraMetadata(\"isin\") at action block",
     "verdict": "CONFIRMED",
     "evidence": "onchain=US0378331005"
    },
@@ -260,14 +260,34 @@
     "evidence": "value 1000500389301980219"
    },
    {
+    "claim": "every multiplier log in the action's blocks is in the record",
+    "verdict": "CONFIRMED",
+    "evidence": "2 found, 0 unlisted"
+   },
+   {
+    "claim": "flag undisclosed_multiplier_change",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed false"
+   },
+   {
     "claim": "flag legacy_event_only",
     "verdict": "CONFIRMED",
     "evidence": "recomputed false"
    },
    {
+    "claim": "flag instant_path_deprecated_setter",
+    "verdict": "CONFIRMED",
+    "evidence": "recomputed true"
+   },
+   {
     "claim": "flag multiple_announcement_ids",
     "verdict": "CONFIRMED",
     "evidence": "recomputed true"
+   },
+   {
+    "claim": "announcement callers hold OPERATOR_ROLE",
+    "verdict": "CONFIRMED",
+    "evidence": "2 caller(s) checked"
    },
    {
     "claim": "issuer corporate-action record agrees",

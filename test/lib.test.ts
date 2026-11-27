@@ -59,6 +59,10 @@ test("verifier/indexer constants equal keccak of their signatures", () => {
     ["extraMetadata(string)", toFunctionSelector("extraMetadata(string)")],
     ["symbol()", toFunctionSelector("symbol()")],
     ["latestRoundData()", toFunctionSelector("latestRoundData()")],
+    ["newUIMultiplier()", toFunctionSelector("newUIMultiplier()")],
+    ["effectiveAt()", toFunctionSelector("effectiveAt()")],
+    ["OPERATOR_ROLE()", toFunctionSelector("OPERATOR_ROLE()")],
+    ["hasRole(bytes32,address)", toFunctionSelector("hasRole(bytes32,address)")],
   ]) assert.ok(src.includes(val), `${sig} ${val} pinned in verifier`);
 });
 

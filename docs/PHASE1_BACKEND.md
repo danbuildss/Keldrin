@@ -65,4 +65,5 @@ Behind an HTTPS proxy (like this cloud session), prefix Node commands with `NODE
 - **Completeness.** Announcements that change nothing (pure notices) are only included when the issuer's record for an action lists them. Full coverage needs a log-capable RPC (decision D9).
 - **Missed reversals.** A multiplier that changes and changes back between two sample points would be missed (10 samples per token reduce this risk).
 - **Not exposed yet.** The SEC reconciliation exists only for GOOGLc and is not yet served by the API.
+- **Verifier completeness.** The verifier re-scans every block an action touched for all multiplier logs, so an omitted change in those blocks is caught. Changes in other blocks rely on bisection.
 - **Mutable issuer record.** The issuer record is re-fetched live by the verifier; if Coinbase edits it, the review becomes UNSURE or REJECTED until a new revision is reviewed.

@@ -79,21 +79,41 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       }
       const limit = Number(url.searchParams.get("limit") ?? 50);
       if (!Number.isInteger(limit) || limit < 1 || limit > 200) return send(res, 400, err("BAD_LIMIT", "limit must be an integer 1-200"));
-      const cursor = url.searchParams.get("cursor");
-      if (cursor && !/^\d+$/.test(cursor)) return send(res, 400, err("BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged"));
-      const rows = (await db.query<{ payload: Json; effective_block: string; review_id: string }>(
-        `SELECT payload, effective_block::text, review_id FROM confirmed_records
-         WHERE ($1::text IS NULL OR lower(contract_address)=lower($1)) AND ($2::bigint IS NULL OR effective_block < $2::bigint)
-         ORDER BY effective_block DESC NULLS LAST, record_id LIMIT $3`,
-        [contract, cursor, limit + 1],
+      // Opaque composite cursor (effective_block, record_id): no record is skipped when several share a
+      // block, and pending records (effective_block NULL, sorted last) stay reachable.
+      const rawCursor = url.searchParams.get("cursor");
+      let cur: [string | null, string] | null = null;
+      if (rawCursor) {
+        try {
+          const c = JSON.parse(Buffer.from(rawCursor, "base64url").toString("utf8"));
+          if (!Array.isArray(c) || c.length !== 2 || !(c[0] === null || /^\d+$/.test(c[0])) || typeof c[1] !== "string") throw new Error("shape");
+          cur = c as [string | null, string];
+        } catch {
+          return send(res, 400, err("BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged"));
+        }
+      }
+      const rows = (await db.query<{ payload: Json; effective_block: string | null; record_id: string; review_id: string }>(
+        `SELECT payload, effective_block::text, record_id, review_id FROM confirmed_records
+         WHERE ($1::text IS NULL OR lower(contract_address)=lower($1))
+           AND ($4::boolean IS NOT TRUE OR (
+             CASE WHEN $2::bigint IS NULL THEN effective_block IS NULL AND record_id > $3
+                  ELSE effective_block < $2::bigint OR (effective_block = $2::bigint AND record_id > $3) OR effective_block IS NULL END))
+         ORDER BY effective_block DESC NULLS LAST, record_id LIMIT $5`,
+        [contract, cur?.[0] ?? null, cur?.[1] ?? "", cur !== null, limit + 1],
       )).rows;
       const page = rows.slice(0, limit);
-      const next = rows.length > limit ? page.at(-1)?.effective_block ?? null : null;
+      const last = page.at(-1);
+      const next = rows.length > limit && last ? Buffer.from(JSON.stringify([last.effective_block, last.record_id])).toString("base64url") : null;
       return send(res, 200, ok(page.map((r) => ({ ...r.payload, verification: { ...(r.payload.verification as Json), state: "confirmed", review_id: r.review_id } })), { count: page.length, next_cursor: next }));
     }
     const xm = p.match(/^\/v1\/actions\/(.+)$/);
     if (xm) {
-      const id = decodeURIComponent(xm[1]);
+      let id: string;
+      try {
+        id = decodeURIComponent(xm[1]);
+      } catch {
+        return send(res, 400, err("BAD_RECORD_ID", "record id is not valid percent-encoding"));
+      }
       const rec = (await db.query<{ payload: Json; review_id: string; reviewed_at: string; revision: number }>("SELECT payload, review_id, reviewed_at, revision FROM confirmed_records WHERE record_id=$1", [id])).rows[0];
       if (!rec) return send(res, 404, err("UNKNOWN_RECORD", `no confirmed record ${id}`, "unreviewed, unsure and rejected records are never served"));
       const review = (await db.query("SELECT review_id, verdict, reviewer, claims, checked_at, payload_sha256 FROM reviews WHERE review_id=$1", [rec.review_id])).rows[0];

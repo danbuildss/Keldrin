@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { hashRecord, type IssuerActionRecord } from "../pipeline/records.ts";
+import { canonicalJson } from "../lib/canonical.ts";
 import type { AssetIdentity } from "../pipeline/registry.ts";
 import type { Review } from "../verify/verify.ts";
 
@@ -52,7 +53,8 @@ export async function insertRecord(db: PGlite, rec: IssuerActionRecord): Promise
 }
 
 const volatile = (r: IssuerActionRecord) => ({ ...r, revision: 0, supersedes: null, observed_at: "", verification: null, sources: r.sources.map((s) => ({ ...s, retrieved_at: "" })) });
-export const sameContent = (a: IssuerActionRecord, b: IssuerActionRecord) => JSON.stringify(volatile(a)) === JSON.stringify(volatile(b));
+// jsonb does not preserve key order, so compare canonically (sorted keys), never with JSON.stringify.
+export const sameContent = (a: IssuerActionRecord, b: IssuerActionRecord) => canonicalJson(volatile(a)) === canonicalJson(volatile(b));
 
 export async function insertReview(db: PGlite, rv: Review) {
   await db.query(

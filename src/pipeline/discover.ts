@@ -115,6 +115,7 @@ export type ActionEvidence = {
   pending: { newMultiplier: string; effectiveAt: string } | null;
   path: "instant" | "scheduled" | "unknown";
   schedulingBlock: string | null;
+  scheduledEffectiveAt: string | null; // unix seconds, for the scheduled path (applied or pending)
   multiplierEvents: { eventName: string; args: Record<string, string>; txHash: string; block: string; logIndex: number }[];
   announcements: Announcement[];
   unbracketedMultiplierEvents: number;
@@ -124,6 +125,8 @@ export type ActionEvidence = {
   operatorChecks: { caller: string; block: string; hasOperatorRole: boolean | null }[];
   observedAt: string;
 };
+
+const ev_pendingEa = (p: { effectiveAt: string } | null) => p?.effectiveAt ?? null;
 
 async function logsAtBlock(contract: string, block: bigint) {
   return decodeB20Logs((await getBlockReceipts(block)).flatMap((r) => r.logs), contract);
@@ -136,6 +139,7 @@ export async function gatherEvidence(contract: string, cp: ChangePoint | null, h
   let logs: DecodedLog[] = [];
   let path: ActionEvidence["path"] = "unknown";
   let schedulingBlock: bigint | null = null;
+  let scheduledEffectiveAt: string | null = null;
 
   if (cp) {
     const blk = await getBlock(cp.block);
@@ -160,6 +164,7 @@ export async function gatherEvidence(contract: string, cp: ChangePoint | null, h
       const set = found.filter((c) => c.after === ea).at(-1);
       if (set) {
         schedulingBlock = set.block;
+        scheduledEffectiveAt = ea.toString();
         logs = [...logs, ...(await logsAtBlock(contract, set.block))];
         path = "scheduled";
       }
@@ -206,6 +211,7 @@ export async function gatherEvidence(contract: string, cp: ChangePoint | null, h
     pending,
     path,
     schedulingBlock: schedulingBlock?.toString() ?? null,
+    scheduledEffectiveAt: scheduledEffectiveAt ?? ev_pendingEa(pending),
     multiplierEvents,
     announcements,
     unbracketedMultiplierEvents: unbracketed.length,

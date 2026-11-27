@@ -24,6 +24,30 @@ async function throttle(host: string, minIntervalMs: number) {
   lastCall.set(host, Date.now());
 }
 
+/** Read a body with the size cap enforced while streaming (and up front via content-length). */
+async function readCapped(res: Response, url: string): Promise<Buffer> {
+  const declared = Number(res.headers.get("content-length") ?? "0");
+  if (declared > LIMITS.maxResponseBytes) {
+    await res.body?.cancel();
+    throw new HttpError(`response too large (content-length ${declared})`, 0, url);
+  }
+  const chunks: Buffer[] = [];
+  let total = 0;
+  const reader = res.body?.getReader();
+  if (!reader) return Buffer.alloc(0);
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > LIMITS.maxResponseBytes) {
+      await reader.cancel();
+      throw new HttpError(`response too large (>${LIMITS.maxResponseBytes} bytes)`, 0, url);
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
+}
+
 export function assertAllowed(url: string) {
   const u = new URL(url);
   if (u.protocol !== "https:") throw new HttpError(`blocked non-https url ${url}`, 0, url);
@@ -52,8 +76,7 @@ export async function fetchText(
         signal: AbortSignal.timeout(LIMITS.httpTimeoutMs),
       });
       if (res.status >= 300 && res.status < 400) throw new HttpError(`redirect refused (${res.status})`, res.status, url);
-      const buf = Buffer.from(await res.arrayBuffer());
-      if (buf.length > LIMITS.maxResponseBytes) throw new HttpError(`response too large (${buf.length})`, res.status, url);
+      const buf = await readCapped(res, url);
       const body = buf.toString("utf8");
       const retry = res.status === 429 || res.status >= 500 || (opts.retryOn?.(res.status, body) ?? false);
       if (retry && attempt < LIMITS.maxAttempts) {
