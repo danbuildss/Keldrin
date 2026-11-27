@@ -14,10 +14,6 @@
     "b20"
   ],
   "homepage": "https://keldrin.vercel.app",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/danbuildss/Keldrin.git"
-  },
   "license": "UNLICENSED",
   "type": "module",
   "bin": {

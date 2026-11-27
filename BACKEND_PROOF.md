@@ -123,3 +123,10 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Earlier manual run against production: verify-nav matched every sampled round.
 - Tests (offline, test/cli.test.ts): help/version/unknown command; symbol resolution; market context with the gap shown and withheld (never "null%"); verify-nav exit 0 on match and 1 on a 1-unit answer mismatch; MCP bridge answers requests and stays silent on notifications. CI rebuilds npm/cli.js and fails on any diff.
 - `npm pack --dry-run`: 3 files, 4.7 kB. Not published: the founder publishes.
+
+## Phase 8–10 go-live (2026-11-27)
+- PR #16 merged by the founder; research run #6 (workflow_dispatch on 06e5655) succeeded in 18m 3s and filled dex_pools/dex_reviews in Supabase.
+- Outside-in on https://keldrin.vercel.app (block ≈63,086,2xx): `/dex` serves a main market for 11/13 tokens (AAPLc $358.07, AMZNc $252.62, ANTc $91.81, CRCLc $49.37 thin, GOOGLc $274.37, METAc $629.63 thin, MSFTc $494.21 thin, MSTRc $81.80, NVDAc $149.78 depth $9.4k, SNDKc $683.19 thin, SPCXc $132.35 thin); INTCc and TSLAc `no_pool_with_usable_depth`. Matches the local post-review run.
+- Independent re-check with the CLI (`verify-dex`) on a different provider (Alchemy) than the API's public RPC, at the served block: NVDAc, GOOGLc, MSTRc slot0 prices match the served price_quote.
+- `POST /mcp` tools/list on production returns the 6 tools.
+- Note: GitHub warns that the pinned checkout/setup-node/upload-artifact actions target Node 20 (forced to Node 24); harmless now, pin bump tracked as a follow-up.

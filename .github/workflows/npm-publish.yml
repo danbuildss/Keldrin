@@ -1,0 +1,44 @@
+name: Publish CLI to npm
+# Manual only: the founder clicks "Run workflow". Runs the tests, rebuilds npm/cli.js and checks it matches the
+# committed bundle, refuses to republish an existing version, then publishes. (npm provenance needs a public repository; add --provenance after the open-source split.)
+# The npm token lives only in the "npm-publish" environment.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_version:
+        description: "Type the version in npm/package.json to confirm (e.g. 0.6.0)"
+        required: true
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm-publish
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:npm && git diff --exit-code -- 'npm/'
+      - name: Check the version
+        env:
+          WANT: ${{ inputs.confirm_version }}
+        run: |
+          HAVE=$(node -p "require('./npm/package.json').version")
+          CLI=$(node npm/cli.js --version)
+          [ "$HAVE" = "$WANT" ] || { echo "npm/package.json is $HAVE, you typed $WANT"; exit 1; }
+          [ "$HAVE" = "$CLI" ] || { echo "cli.js reports $CLI but package.json is $HAVE"; exit 1; }
+          if npm view "keldrin@$HAVE" version >/dev/null 2>&1; then echo "keldrin@$HAVE is already published"; exit 1; fi
+      - name: Publish
+        working-directory: npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+      - name: Check it from the registry
+        run: |
+          sleep 20
+          npx -y "keldrin@$(node -p "require('./npm/package.json').version")" --version
