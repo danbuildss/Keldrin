@@ -28,3 +28,13 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Independent code review (fresh context): 10 findings (7 important), all fixed with regression tests before the final runs.
 - Limitations: notice-only announcements are included only when the issuer record lists them (no eth_getLogs on the public RPC); A→B→A multiplier changes between samples could be missed; not deployed; no external users.
 - Next action: founder reviews the PR and decides D2, D9 and Phase 2 scope.
+
+## 2026-11-27 Phase 2 gate — PASSED (Supabase primary store; local API only, not deployed)
+- Command: `bash scripts/phase2-gate.sh` (3 runs: supabase migrate → discover → reconcile → calendar → supabase check; then API on Supabase + outside consumer). Logs: research/phase2/runs/.
+- Per run: identity 435/435 verified; 13/13 issuer actions CONFIRMED; 13/13 SEC reconciliations (partially_reconciled) with reviews CONFIRMED; calendar 54 entries all CONFIRMED (13 upcoming, 34 announced-only, 7 applied; 9 pre-issuance declarations listed as not applicable). Step times ~600 s discover, ~80 s reconcile, ~400 s calendar.
+- Idempotency: Supabase records 26 after runs 1, 2 and 3 (13 originals + 13 correction revisions created once when the RPC source changed to Alchemy); confirmed 13 each run; reviews/calendar snapshots append only.
+- Security (each run): RLS on 8/8 tables; anon and authenticated denied; read-only role reads 13 confirmed and cannot write; records append-only; Data API exposes only public, graphql_public. Rollback test: migrations replay idempotently and the test schema drops.
+- API on Supabase + consumer: /health 200, /v1/actions 200, /v1/calendar?state=upcoming 200 (13 entries, GOOGLc 2026-12-14 … CSCOc 2027-01-20), bad input 400; consumer schema-valid, confirmed, arithmetic-checked, fresh.
+- Coverage: Alchemy log index (blocks 49851727–62907003): 60 actions; all 13 applied match bisection; 47 announced not yet applied; 0 undisclosed multiplier changes.
+- Bugs found by the gate and fixed with regression tests: local/Supabase revision divergence (0 servable, fail-closed); SQL literal corruption in parameter inlining.
+- Not done / limitations: gold set unannotated (0/16, needs a human); share class not evidenced; Supabase writes are one statement per request (~10 min per discover run; batch in Phase 4); API still localhost.

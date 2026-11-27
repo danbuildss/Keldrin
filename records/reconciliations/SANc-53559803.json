@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388:sec:c1d27b794d70",
+  "reconciliation_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388:sec:f1b4a0256827",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
-   "payload_sha256": "c1d27b794d7044faaa5fac6c514db288205a0f8971382b425e4ea2ced16afee0"
+   "payload_sha256": "f1b4a02568272f071c09ce961dd663d319466421ec2118d9cac3b7de140414e3"
   },
   "company": {
    "cik": "0000891478",
@@ -18,7 +18,7 @@
    ],
    "resolution_evidence": [
     "https://efts.sec.gov/LATEST/search-index?keysTyped=Banco%20Santander%2C%20S.A. sha256=72385dbe444fda44",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SAN sha256=56a73ccaded4b4d4",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SAN sha256=36b9120f4ca50786",
     "https://data.sec.gov/submissions/CIK0000891478.json sha256=98a4b89d83446d1b"
    ]
   },
@@ -370,16 +370,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:10.663Z"
+  "generated_at": "2026-11-27T10:42:15.389Z"
  },
- "payload_sha256": "65941c1cff9a0049fcc0c0619ead4c795a69069223b66180621348e2f11b281a",
+ "payload_sha256": "060cd52d503682ff9bb3ada8b57211c45a20ee9adcb275b8a3b40e05fe5034b1",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash c1d27b794d7044fa"
+    "evidence": "record hash f1b4a02568272f07"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -392,6 +392,6 @@
     "evidence": "Banco Santander, S.A. SAN,BCDRF"
    }
   ],
-  "checked_at": "2026-11-27T08:47:11.132Z"
+  "checked_at": "2026-11-27T10:42:15.860Z"
  }
 }

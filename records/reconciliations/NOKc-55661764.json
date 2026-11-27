@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78:sec:a2962f7434bd",
+  "reconciliation_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78:sec:9542c2ecb1e1",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78",
-   "payload_sha256": "a2962f7434bd9c3703cfeb09fe2deacf6d1de886d1cb607e54676d3adaab915a"
+   "payload_sha256": "9542c2ecb1e18c47f52919ddb1cfd3935bd4fad23af11b267f0255dbe3ece192"
   },
   "company": {
    "cik": "0000924613",
@@ -17,8 +17,8 @@
     "NOKBF"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Nokia%20Corporation sha256=0028578430ed6d98",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NOK sha256=18e5237a026237dc",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Nokia%20Corporation sha256=99d1171c945bf358",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NOK sha256=5f2a18de252e929a",
     "https://data.sec.gov/submissions/CIK0000924613.json sha256=4eff7d906dfd8478"
    ]
   },
@@ -146,16 +146,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:20.063Z"
+  "generated_at": "2026-11-27T10:42:27.843Z"
  },
- "payload_sha256": "73a7483bb3744daaf69f0058ab75eaa10582a7b4ab8ea40fc586dc91b87f48c9",
+ "payload_sha256": "288d2779f4c94e258979337048f4158c2a71c4f68b58732b0150716ceaf2d5d8",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash a2962f7434bd9c37"
+    "evidence": "record hash 9542c2ecb1e18c47"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -168,6 +168,6 @@
     "evidence": "NOKIA CORP NOK,NOKBF"
    }
   ],
-  "checked_at": "2026-11-27T08:47:20.533Z"
+  "checked_at": "2026-11-27T10:42:28.313Z"
  }
 }

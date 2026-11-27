@@ -25,3 +25,5 @@
 - Built: SEC CIK resolution (efts + submissions), declaration candidates, deterministic dividend declaration extraction from filing text, generalised reconciliation, leading calendar (/v1/calendar), company_context, OpenAPI, pinned Actions, RPC URL redaction.
 - Results: 13/13 reconciliations CONFIRMED; 9 dated declarations; 8/9 adjusted on payable date; MRVLc 8 days late; upcoming GOOGLc 2026-12-14 and NVDAc 2026-12-23. Tests 68/68.
 - Blocked: Alchemy key (network secret must be added by founder; secure form tool unavailable), Supabase project.
+
+2026-11-27 — Phase 2 completed (Claude). Founder: "keep going and finish Phase 2". Keys added by founder (Alchemy, Supabase). Built Alchemy indexer, Supabase schema/hardening/primary store, issuer-announced calendar, not-applicable rule. Gate: 3/3 runs passed against Supabase (research/phase2/runs). Bugs fixed: revision divergence on sync; SQL literal corruption. Costs: Alchemy and Supabase free-tier usage only; $0 billed to my knowledge (not verified on the providers' dashboards).

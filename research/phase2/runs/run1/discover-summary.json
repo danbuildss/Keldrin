@@ -1,0 +1,159 @@
+{
+ "run_id": "run-2026-11-27T09-55-00-621Z",
+ "head_block": "62914626",
+ "tokens": 435,
+ "scope": 435,
+ "identity": {
+  "verified": 435,
+  "incomplete": 0,
+  "mismatch": 0,
+  "mismatches": []
+ },
+ "change_points": 13,
+ "records": [
+  {
+   "record_id": "kld:8453:0xb20000000000000000000017bb66e9301e913a99:1df90f83-7c4f-4a7d-8739-3ad598ae0388",
+   "symbol": "SANc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
+   "symbol": "GOOGLc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "legacy_event_only",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac",
+   "symbol": "ORCLc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5",
+   "symbol": "SNDKc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb2000000000000000000005ac674f707e357409c:b80863d5-db65-43a7-8578-59adf6922e78",
+   "symbol": "NOKc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
+   "symbol": "NVDAc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
+   "symbol": "METAc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "legacy_event_only"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857",
+   "symbol": "PMc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
+   "symbol": "AAPLc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
+   "symbol": "MRVLc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
+   "symbol": "CAKEc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
+   "symbol": "INFYc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter"
+   ]
+  },
+  {
+   "record_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
+   "symbol": "MUc",
+   "verdict": "CONFIRMED",
+   "revision": 2,
+   "created": true,
+   "flags": [
+    "instant_path_deprecated_setter",
+    "multiple_announcement_ids"
+   ]
+  }
+ ],
+ "verdicts": {
+  "CONFIRMED": 13
+ },
+ "rpc_calls": 437
+}

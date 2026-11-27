@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536:sec:da3a8ecbe571",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536:sec:e957097bc46b",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000f6b0417af5f52341fc:4c12706d-8ecb-417a-aeb2-46e758628536",
-   "payload_sha256": "da3a8ecbe571e5d58a3751808381b083d25d8f84e290231d9464bcf2204c470a"
+   "payload_sha256": "e957097bc46bccb73aedb15f852b58057a1a87e3a40e45a962289216c2710aff"
   },
   "company": {
    "cik": "0001067491",
@@ -16,8 +16,8 @@
     "INFY"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Infosys%20Limited sha256=fe817998a145c319",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=INFY sha256=e31d9ac31047cfd9",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Infosys%20Limited sha256=d621a33a0c81a9d4",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=INFY sha256=08ea9b19053a3f31",
     "https://data.sec.gov/submissions/CIK0001067491.json sha256=1ff21b6c886bcead"
    ]
   },
@@ -117,16 +117,16 @@
    "No us-gaap dividend-per-share facts for this company."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:31.540Z"
+  "generated_at": "2026-11-27T10:42:41.798Z"
  },
- "payload_sha256": "20a575a17e205157af79c0c172a95839c5f38c4a99eea7c6e3b61738e4cc9088",
+ "payload_sha256": "4e19d92ea0fea2b6cf37a5a0b9661100c16339501e40c9023127c654d17962be",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash da3a8ecbe571e5d5"
+    "evidence": "record hash e957097bc46bccb7"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -139,6 +139,6 @@
     "evidence": "Infosys Ltd INFY"
    }
   ],
-  "checked_at": "2026-11-27T08:47:32.007Z"
+  "checked_at": "2026-11-27T10:42:42.266Z"
  }
 }

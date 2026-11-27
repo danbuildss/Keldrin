@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0:sec:d46a33bacdf2",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0:sec:49b4d9d397dd",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
-   "payload_sha256": "d46a33bacdf29c91b092740d5749a6f7529e56e240ccd06936b6ae152c585452"
+   "payload_sha256": "49b4d9d397dd7799396ad239310c55f79de6e6755513b65f8593a20bdf38167d"
   },
   "company": {
    "cik": "0000723125",
@@ -38,7 +38,7 @@
    "declared_on": "2026-09-30",
    "declared_month": null,
    "quote": "On September 30, 2026, Micron’s Board of Directors declared a quarterly dividend of $0.15 per share, payable in cash on October 29, 2026, to shareholders of record as of the close of business on October 14, 2026",
-   "offset": 3276,
+   "offset": 3262,
    "accession": "0000723125-26-000018",
    "form": "8-K",
    "filed": "2026-09-30",
@@ -110,16 +110,16 @@
    "No reference value feed, so the implied amount per share cannot be computed."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:04.736Z"
+  "generated_at": "2026-11-27T10:42:08.041Z"
  },
- "payload_sha256": "b49cbdf900b44f8a12a8e0c924129096da961f0e068aac702a430b0edbd8f478",
+ "payload_sha256": "9f7019c9538c732b6b64e9cf8cbcfddf49bf419b65d172f7375cc7c8d808881a",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash d46a33bacdf29c91"
+    "evidence": "record hash 49b4d9d397dd7799"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -152,6 +152,6 @@
     "evidence": "2026-10-29 vs record 2026-10-14"
    }
   ],
-  "checked_at": "2026-11-27T08:47:05.723Z"
+  "checked_at": "2026-11-27T10:42:09.210Z"
  }
 }

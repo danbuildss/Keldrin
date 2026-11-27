@@ -92,29 +92,29 @@
   "sources": [
    {
     "id": "chain-change",
-    "url": "https://mainnet.base.org",
+    "url": "https://base-mainnet.g.alchemy.com",
     "kind": "base_rpc",
     "sha256": null,
     "locator": "eth_call multiplier() on 0xb2000000000000000000002D0BA3164cc74f58B7 at blocks 51310618 and 51310619; block hash 0xf659120132c5a9ab81356f519b728b98c1776cbac7685013adae9683fd6ece78",
-    "retrieved_at": "2026-11-27T08:02:31.071Z",
+    "retrieved_at": "2026-11-27T10:02:59.088Z",
     "rights_state": "public"
    },
    {
     "id": "tx-0xb5aa54fb-226",
-    "url": "https://mainnet.base.org",
+    "url": "https://base-mainnet.g.alchemy.com",
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0xb5aa54fb26131123a7bb931e31d63baf466e1a1075d74450d048da88ad6a1444 log 226 (Announcement id=2097)",
-    "retrieved_at": "2026-11-27T08:02:31.071Z",
+    "retrieved_at": "2026-11-27T10:02:59.088Z",
     "rights_state": "public"
    },
    {
     "id": "tx-0xcd45e69e-345",
-    "url": "https://mainnet.base.org",
+    "url": "https://base-mainnet.g.alchemy.com",
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0xcd45e69e5b84d3f1808fe832d73c1ff7f332c7447bdf9c87925f196240ffeb00 log 345 (Announcement id=e82812a6-0b24-41c4-8ed1-322d1b466d33)",
-    "retrieved_at": "2026-11-27T08:02:31.071Z",
+    "retrieved_at": "2026-11-27T10:02:59.088Z",
     "rights_state": "public"
    },
    {
@@ -123,15 +123,15 @@
     "kind": "coinbase_corporate_action",
     "sha256": "0350427720760788e793301b0b148309faa62824a35bfe062a5c552e16108e74",
     "locator": "whole document",
-    "retrieved_at": "2026-11-27T08:02:30.658Z",
+    "retrieved_at": "2026-11-27T10:02:58.630Z",
     "rights_state": "unknown"
    }
   ],
-  "revision": 1,
+  "revision": 2,
   "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
   "synthetic": false,
-  "supersedes": null,
-  "observed_at": "2026-11-27T08:02:31.071Z",
+  "supersedes": 1,
+  "observed_at": "2026-11-27T10:02:59.088Z",
   "record_type": "issuer_action",
   "verification": {
    "state": "draft",
@@ -188,14 +188,14 @@
    }
   ]
  },
- "payload_sha256": "d2e66841e30fc92ad0006a9518d926958fa80b2aab4fc518d2898096b7f20597",
+ "payload_sha256": "9c0b6cf1e045043b19dacf51b3f7c3e7be7ae2cd59e9a97fd719eae8c6fce503",
  "review": {
-  "review_id": "rev-d2e66841e30f-1795766744858",
+  "review_id": "rev-9c0b6cf1e045-1795775977421",
   "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
-  "revision": 1,
-  "payload_sha256": "d2e66841e30fc92ad0006a9518d926958fa80b2aab4fc518d2898096b7f20597",
+  "revision": 2,
+  "payload_sha256": "9c0b6cf1e045043b19dacf51b3f7c3e7be7ae2cd59e9a97fd719eae8c6fce503",
   "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
-  "checked_at": "2026-11-27T08:05:44.858Z",
+  "checked_at": "2026-11-27T10:39:37.421Z",
   "verdict": "CONFIRMED",
   "claims": [
    {

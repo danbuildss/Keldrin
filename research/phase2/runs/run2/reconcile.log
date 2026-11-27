@@ -1,0 +1,24 @@
+(node:3093) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  GOOGLc  cash_dividend partially_reconciled review CONFIRMED cik 0001652044 cash_dividend_declared_per_share=0.22 (0001652044-26-000084); candidates 5; implied/declared 0.59499
+      declaration $0.22 record 2026-09-07 payable 2026-09-14 (8-K 2026-07-22); token adjusted 2026-09-14
+  METAc   cash_dividend partially_reconciled review CONFIRMED cik 0001326801 cash_dividend_declared_per_share=0.525 (0001628280-26-066773); candidates 1; implied/declared 0.429922
+  NVDAc   cash_dividend partially_reconciled review CONFIRMED cik 0001045810 no SEC fact; candidates 4
+      declaration $0.25 record 2026-09-10 payable 2026-10-01 (8-K 2026-08-26); token adjusted 2026-10-01
+  ORCLc   cash_dividend partially_reconciled review CONFIRMED cik 0001341439 no SEC fact; candidates 2
+      declaration $0.50 record 2026-10-09 payable 2026-10-23 (8-K 2026-09-10); token adjusted 2026-10-23
+  PMc     cash_dividend partially_reconciled review CONFIRMED cik 0001413329 no SEC fact; candidates 7
+      declaration $1.60 record 2026-10-02 payable 2026-10-26 (8-K 2026-09-18); token adjusted 2026-10-26
+  MUc     cash_dividend partially_reconciled review CONFIRMED cik 0000723125 no SEC fact; candidates 1
+      declaration $0.15 record 2026-10-14 payable 2026-10-29 (8-K 2026-09-30); token adjusted 2026-10-29
+  SANc    cash_dividend partially_reconciled review CONFIRMED cik 0000891478 no SEC fact; candidates 42
+  MRVLc   cash_dividend partially_reconciled review CONFIRMED cik 0001835632 no SEC fact; candidates 3
+      declaration $0.06 record 2026-10-09 payable 2026-10-29 (8-K 2026-09-25); token adjusted 2026-11-06
+  NOKc    cash_dividend partially_reconciled review CONFIRMED cik 0000924613 no SEC fact; candidates 10
+  AAPLc   cash_dividend partially_reconciled review CONFIRMED cik 0000320193 no SEC fact; candidates 3
+      declaration $0.27 record 2026-11-12 payable 2026-11-16 (8-K 2026-11-02); token adjusted 2026-11-16
+  INFYc   cash_dividend partially_reconciled review CONFIRMED cik 0001067491 no SEC fact; candidates 6
+  SNDKc   stock_split   partially_reconciled review CONFIRMED cik 0002023554 no SEC fact; candidates 3
+  CAKEc   cash_dividend partially_reconciled review CONFIRMED cik 0000887596 no SEC fact; candidates 2
+      declaration $0.30 record 2026-11-10 payable 2026-11-24 (8-K 2026-10-27); token adjusted 2026-11-24
+reconcile: 13 action(s); {"partially_reconciled/CONFIRMED":13}

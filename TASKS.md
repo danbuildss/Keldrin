@@ -34,3 +34,5 @@ Phase 1 (approved 2026-11-27, re-sequenced): DONE locally, see BACKEND_PROOF.md.
 | P2-06 | P1 | Earnings dates (second event class) | After P2-01 |
 
 Status vocabulary: OPEN, PROPOSED, APPROVED, IN_PROGRESS, BLOCKED, VERIFIED. VERIFIED requires reproducible evidence linked in BACKEND_PROOF.md or FINDINGS_INDEX.md. Do not silently promote tasks. Work on one approved phase at a time.
+
+Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calendar VERIFIED; P2-02 Alchemy indexer VERIFIED; P2-03 Supabase VERIFIED; P2-04 reconciliations + OpenAPI VERIFIED; P2-05 pinned Actions + manual workflow VERIFIED; P2-06 earnings dates OPEN (deferred). Gold set: template ready, annotation OPEN (founder).

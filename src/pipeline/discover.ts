@@ -77,7 +77,7 @@ export async function findChangePoints(tokens: RegistryToken[], head: bigint, lo
   return { points, deployed };
 }
 
-export type Announcement = { id: string; caller: string; description: string; uri: string; txHash: string; block: string; logIndex: number; bracketed: boolean; innerEvents: string[] };
+export type Announcement = { address: string; id: string; caller: string; description: string; uri: string; txHash: string; block: string; logIndex: number; bracketed: boolean; innerEvents: string[] };
 
 /** Pair Announcement/EndAnnouncement by id within one tx (not by adjacency) and list the events inside each bracket. */
 export function pairBrackets(logs: DecodedLog[]): { announcements: Announcement[]; unbracketed: DecodedLog[] } {
@@ -93,6 +93,7 @@ export function pairBrackets(logs: DecodedLog[]): { announcements: Announcement[
       const inner = endIdx === -1 ? [] : txLogs.slice(i + 1, endIdx);
       inner.forEach((l) => inside.add(l));
       announcements.push({
+        address: a.address,
         id: a.args.id,
         caller: getAddress(a.args.caller),
         description: a.args.description,

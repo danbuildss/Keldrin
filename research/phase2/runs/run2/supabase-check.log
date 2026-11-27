@@ -1,0 +1,10 @@
+(node:3305) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  row counts                                       [{"assets":435,"records":26,"reviews":78,"confirmed":13,"reconciliations":83,"calendar":179}]
+  RLS enabled on every keldrin table               [{"all_rls":true,"tables":8}]
+  anon can read records? (must be permission denied) ERROR supabase SQL HTTP 400: {"message":"Failed to run sql query: ERROR: 42501: permission denied for schema keldrin\nLINE 1: SET ROLE anon; SELECT count(*) FROM keld
+  authenticated can read records? (must be denied) ERROR supabase SQL HTTP 400: {"message":"Failed to run sql query: ERROR: 42501: permission denied for schema keldrin\nLINE 1: SET ROLE authenticated; SELECT count(*) 
+  reader can read confirmed records                [{"confirmed":13}]
+  reader cannot write (must be denied)             ERROR supabase SQL HTTP 400: {"message":"Failed to run sql query: ERROR: 42501: permission denied for table runs\n"}
+  records are append-only (must raise)             ERROR supabase SQL HTTP 400: {"message":"Failed to run sql query: ERROR: P0001: table records is append-only\nCONTEXT: PL/pgSQL function keldrin.keldrin_append_only()
+  keldrin not exposed via Data API schemas         [{"pgrst_db_schemas":null}]

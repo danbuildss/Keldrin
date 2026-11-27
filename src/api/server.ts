@@ -65,12 +65,12 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const state = url.searchParams.get("state");
-      if (state && !["upcoming", "applied", "not_observed"].includes(state)) return send(res, 400, err("BAD_STATE", "state must be upcoming, applied or not_observed"));
+      if (state && !["upcoming", "applied", "not_observed", "announced"].includes(state)) return send(res, 400, err("BAD_STATE", "state must be upcoming, applied, not_observed or announced"));
       const snap = (await db.query<{ snapshot_id: string; as_of: string }>("SELECT snapshot_id, max(as_of) AS as_of FROM calendar_entries GROUP BY snapshot_id ORDER BY 2 DESC LIMIT 1")).rows[0];
       if (!snap) return send(res, 200, ok([], { count: 0, snapshot_as_of: null }));
       const rows = (await db.query<{ payload: Json; review: Json }>(
         `SELECT payload, review FROM calendar_entries WHERE snapshot_id=$1 AND review_verdict='CONFIRMED'
-         AND ($2::text IS NULL OR lower(contract_address)=lower($2)) AND ($3::text IS NULL OR state=$3) ORDER BY payable_date, entry_id`,
+         AND ($2::text IS NULL OR lower(contract_address)=lower($2)) AND ($3::text IS NULL OR state=$3) ORDER BY payable_date NULLS LAST, entry_id`,
         [snap.snapshot_id, contract, state],
       )).rows;
       return send(res, 200, ok(rows.map((r) => ({ ...r.payload, review: r.review })), { count: rows.length, snapshot_as_of: snap.as_of }));

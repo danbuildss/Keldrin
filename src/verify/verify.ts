@@ -409,3 +409,30 @@ export async function verifyDeclaration(dcl: Rec, tx: Transport = liveTransport)
   const verdict: Verdict = claims.some((c) => c.verdict === "REJECTED") ? "REJECTED" : claims.some((c) => c.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
   return { verdict, claims, checked_at: new Date().toISOString() };
 }
+
+// ---------- issuer announcement (calendar) ----------
+export async function verifyIssuerAnnouncement(contract: string, ia: Rec, tx: Transport = liveTransport): Promise<{ verdict: Verdict; claims: Claim[]; checked_at: string }> {
+  const claims: Claim[] = [];
+  const add = (claim: string, verdict: Verdict, evidence: string) => claims.push({ claim, verdict, evidence });
+  const c = contract.toLowerCase();
+  for (const a of ia.announcements ?? []) {
+    try {
+      const rc = await tx.rpc("eth_getTransactionReceipt", [a.tx_hash]);
+      const lg = rc?.logs.find((l: any) => Number(BigInt(l.logIndex)) === a.log_index && l.address.toLowerCase() === c);
+      const ok = !!lg && rc.status === "0x1" && lg.topics[0] === T.Announcement && str(lg.data, 0) === a.id && str(lg.data, 2) === a.uri && addrFromTopic(lg.topics[1]) === String(a.caller).toLowerCase() && BigInt(rc.blockNumber).toString() === a.block;
+      add("announcement " + a.id.slice(0, 12) + " onchain", ok ? "CONFIRMED" : "REJECTED", "tx " + a.tx_hash.slice(0, 10) + " log " + a.log_index);
+    } catch (e) {
+      add("announcement onchain", "UNSURE", (e as Error).message.slice(0, 120));
+    }
+  }
+  try {
+    const cb = await tx.getJson(`${COINBASE_API}/corporate-actions/${ia.corporate_action_uuid}`);
+    const listed = new Set((cb.announcements ?? []).map((x: Rec) => String(x.tx_hash).toLowerCase()));
+    const ok = String(cb.contract_address).toLowerCase() === c && cb.status === ia.status && (ia.announcements ?? []).every((a: Rec) => listed.has(String(a.tx_hash).toLowerCase()));
+    add("issuer record agrees (contract, status, txs)", ok ? "CONFIRMED" : "REJECTED", "status " + cb.status);
+  } catch (e) {
+    add("issuer record agrees", "UNSURE", (e as Error).message.slice(0, 120));
+  }
+  const verdict: Verdict = claims.some((x) => x.verdict === "REJECTED") ? "REJECTED" : claims.some((x) => x.verdict === "UNSURE") ? "UNSURE" : "CONFIRMED";
+  return { verdict, claims, checked_at: new Date().toISOString() };
+}

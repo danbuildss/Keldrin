@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc:sec:dcdbe3436718",
+  "reconciliation_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc:sec:c7bb06881db3",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000008bc8786b856e61707c:b5b58e9c-bf6b-4d28-9021-49f762cdbabc",
-   "payload_sha256": "dcdbe3436718922f1f9cdeaa4541c2de1969fb48f149ca3d7ea1c884afbcd350"
+   "payload_sha256": "c7bb06881db33ae7573d9c250d2e473a8e342f25b2fff0e52c3ca06a89b3a6ec"
   },
   "company": {
    "cik": "0001326801",
@@ -17,7 +17,7 @@
     "METAM"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Meta%20Platforms%20Inc. sha256=1e02f5d1c0165f3e",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Meta%20Platforms%20Inc. sha256=86458c5538181342",
     "https://data.sec.gov/submissions/CIK0001326801.json sha256=d8a3de061b73d74c"
    ]
   },
@@ -109,16 +109,16 @@
    "No dated declaration found in the candidate filings (it may be outside SEC filings, e.g. only on investor relations)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:46:45.987Z"
+  "generated_at": "2026-11-27T10:41:44.204Z"
  },
- "payload_sha256": "c2127ef10cbe9ed99a8ef4615a8d404058cd49a7cb56c77fc3dfc52d6a311dbe",
+ "payload_sha256": "29c4736f1165a697fd905c87c5abd3ae5c75311822496ed4e88dfffab4cd47c3",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash dcdbe3436718922f"
+    "evidence": "record hash c7bb06881db33ae7"
    },
    {
     "claim": "SEC XBRL fact re-fetched",
@@ -151,6 +151,6 @@
     "evidence": "recomputed 0.22570953"
    }
   ],
-  "checked_at": "2026-11-27T08:46:47.137Z"
+  "checked_at": "2026-11-27T10:41:45.412Z"
  }
 }

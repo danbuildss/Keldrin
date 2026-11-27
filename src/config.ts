@@ -17,6 +17,7 @@ export const ALLOWED_HOSTS = new Set([
   "data.sec.gov",
   "efts.sec.gov",
   "www.sec.gov",
+  "api.supabase.com",
   ...(process.env.BASE_RPC_URL ? [new URL(process.env.BASE_RPC_URL).host] : []),
 ]);
 

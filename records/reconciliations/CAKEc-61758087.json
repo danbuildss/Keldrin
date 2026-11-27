@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b:sec:9b6bbb284933",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b:sec:e8b0027aea9e",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
-   "payload_sha256": "9b6bbb284933da89032bdfa5b2ed97119bbc2dcf96e749642b685d5a13a73b78"
+   "payload_sha256": "e8b0027aea9e9379ae09ab15bd1e65a504904cd3485e3f7683e7d03fd1000fda"
   },
   "company": {
    "cik": "0000887596",
@@ -117,16 +117,16 @@
    "No reference value feed, so the implied amount per share cannot be computed."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:35.886Z"
+  "generated_at": "2026-11-27T10:42:48.626Z"
  },
- "payload_sha256": "9b768ed9c56abf1320631009b4149fbf4d40c607906c27835ffae5188279cbae",
+ "payload_sha256": "0fa7b8c118b0c253295c54a2974158af969a36ec1e8f32d1d954f3424195c70e",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 9b6bbb284933da89"
+    "evidence": "record hash e8b0027aea9e9379"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -159,6 +159,6 @@
     "evidence": "2026-11-24 vs record 2026-11-10"
    }
   ],
-  "checked_at": "2026-11-27T08:47:36.846Z"
+  "checked_at": "2026-11-27T10:42:49.603Z"
  }
 }

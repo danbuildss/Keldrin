@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da:sec:790f55d0436f",
+  "reconciliation_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da:sec:a307c84af1a2",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
-   "payload_sha256": "790f55d0436f3c3e44ed6ef6b186483f767caafd4e9b4834a3a85e48d6c75763"
+   "payload_sha256": "a307c84af1a24f2eb0b3c355d3e1173fbf078b972458b19e53cb5fafa0f5091d"
   },
   "company": {
    "cik": "0001045810",
@@ -16,8 +16,8 @@
     "NVDA"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=2526a7ba88160d88",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=2fea1ec0e321527e",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVIDIA%20Corporation sha256=446cb802ddbc31b5",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=NVDA sha256=6e339aec2b0bbd92",
     "https://data.sec.gov/submissions/CIK0001045810.json sha256=7c07b0a81346ce33"
    ]
   },
@@ -60,7 +60,7 @@
    "declared_on": null,
    "declared_month": null,
    "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on October 1, 2026, to all shareholders of record on September 10, 2026",
-   "offset": 1478,
+   "offset": 1475,
    "accession": "0001045810-26-000073",
    "form": "8-K",
    "filed": "2026-08-26",
@@ -134,16 +134,16 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:46:52.366Z"
+  "generated_at": "2026-11-27T10:41:51.942Z"
  },
- "payload_sha256": "64fe6f880d091de008440c10255cdada07a407f3e140a6ba7792453a2cbf2a27",
+ "payload_sha256": "175592f08c17c044d7d88f9f4eb9121cf9c76817fe6e80dec6f135db4c248691",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 790f55d0436f3c3e"
+    "evidence": "record hash a307c84af1a24f2e"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -181,6 +181,6 @@
     "evidence": "answer 23025000000 at 52041959"
    }
   ],
-  "checked_at": "2026-11-27T08:46:53.617Z"
+  "checked_at": "2026-11-27T10:41:53.277Z"
  }
 }

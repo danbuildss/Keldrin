@@ -1,0 +1,3234 @@
+{
+ "snapshot_id": "snap-2026-11-27T10-24-45-749Z",
+ "as_of": "2026-11-27T10:24:45.749Z",
+ "scope": [
+  "AAPLc",
+  "CAKEc",
+  "GOOGLc",
+  "INFYc",
+  "METAc",
+  "MRVLc",
+  "MUc",
+  "NOKc",
+  "NVDAc",
+  "ORCLc",
+  "PMc",
+  "SANc",
+  "SNDKc",
+  "AEOc",
+  "STZc",
+  "CMCSAc",
+  "WDCc",
+  "GSc",
+  "LLYc",
+  "BALLc",
+  "BXc",
+  "ULc",
+  "GILDc",
+  "VSTc",
+  "PFEc",
+  "LRCXc",
+  "COPc",
+  "KLACc",
+  "WENc",
+  "TERc",
+  "CANc",
+  "SPBc",
+  "GAPc",
+  "KMBc",
+  "LUVc",
+  "VRTc",
+  "CSCOc",
+  "YUMc",
+  "TKRc",
+  "MRKc",
+  "DISc",
+  "VCc",
+  "BUDc",
+  "KSSc",
+  "PEPc",
+  "AMKRc",
+  "NKEc",
+  "HDc",
+  "TAPc",
+  "JNJc",
+  "INTUc",
+  "HPEc",
+  "ZMc",
+  "NEMc",
+  "BMNRc",
+  "HPQc",
+  "DKSc",
+  "ADIc"
+ ],
+ "skipped": [],
+ "not_applicable": [
+  {
+   "symbol": "STZc",
+   "record_date": "2026-10-30",
+   "payable_date": "2026-11-13",
+   "reason": "token has no supply (never minted)"
+  },
+  {
+   "symbol": "WDCc",
+   "record_date": "2026-09-08",
+   "payable_date": "2026-09-17",
+   "reason": "record date 2026-09-08 is before the token's first mint 2026-10-26"
+  },
+  {
+   "symbol": "GILDc",
+   "record_date": "2026-09-15",
+   "payable_date": "2026-09-29",
+   "reason": "record date 2026-09-15 is before the token's first mint 2026-11-24"
+  },
+  {
+   "symbol": "WENc",
+   "record_date": "2026-09-01",
+   "payable_date": "2026-09-15",
+   "reason": "record date 2026-09-01 is before the token's first mint 2026-09-29"
+  },
+  {
+   "symbol": "VRTc",
+   "record_date": "2026-09-14",
+   "payable_date": "2026-09-24",
+   "reason": "record date 2026-09-14 is before the token's first mint 2026-11-17"
+  },
+  {
+   "symbol": "CSCOc",
+   "record_date": "2026-10-02",
+   "payable_date": "2026-10-21",
+   "reason": "token has no supply (never minted)"
+  },
+  {
+   "symbol": "TAPc",
+   "record_date": "2026-08-28",
+   "payable_date": "2026-09-18",
+   "reason": "record date 2026-08-28 is before the token's first mint 2026-11-24"
+  },
+  {
+   "symbol": "INTUc",
+   "record_date": "2026-10-08",
+   "payable_date": "2026-10-16",
+   "reason": "record date 2026-10-08 is before the token's first mint 2026-11-24"
+  },
+  {
+   "symbol": "DKSc",
+   "record_date": "2026-09-11",
+   "payable_date": "2026-09-25",
+   "reason": "token has no supply (never minted)"
+  }
+ ],
+ "entries": [
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000002d0ba3164cc74f58b7:2026-12-14:0.22",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000002D0BA3164cc74f58B7",
+     "symbol": "GOOGLc"
+    },
+    "company": {
+     "cik": "0001652044",
+     "name": "Alphabet Inc."
+    },
+    "declaration": {
+     "per_share": "0.22",
+     "currency": "USD",
+     "payable_date": "2026-12-14",
+     "record_date": "2026-12-07",
+     "declared_on": null,
+     "declared_month": "2026-10",
+     "quote": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on December 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of December 7, 2026",
+     "offset": 4952,
+     "accession": "0001652044-26-000080",
+     "form": "8-K",
+     "filed": "2026-10-28",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+     "document_sha256": "46bb1889df7be0d4cd1ce09d61520743ce182941955313573460f86a03bf0989"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "70925ca4-7aae-45d5-bbc4-adc4415d9248",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-10T01:32:39Z",
+     "announcements": [
+      {
+       "tx_hash": "0xf9ded54b23b505122f56aa603a22f162c98d1ac8e9c1cc9f5f13f5b43f564e59",
+       "block": "55419918",
+       "log_index": 10,
+       "id": "70925ca4-7aae-45d5-bbc4-adc4415d9248:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/70925ca4-7aae-45d5-bbc4-adc4415d9248",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-14",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "46bb1889df7be0d4"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.22 dates 2026-12-14,2026-12-07"
+     },
+     {
+      "claim": "announcement 70925ca4-7aa onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xf9ded54b log 10"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:37.452Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000044e3cd7a0e1028e57a:2026-12-15:0.07",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000044E3CD7a0E1028E57a",
+     "symbol": "WENc"
+    },
+    "company": {
+     "cik": "0000030697",
+     "name": "Wendy's Co"
+    },
+    "declaration": {
+     "per_share": "0.07",
+     "currency": "USD",
+     "payable_date": "2026-12-15",
+     "record_date": "2026-12-01",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "Company Declares Quarterly Dividend The Company announced today the declaration of a quarterly cash dividend payment of $0.07 per share … The dividend is payable on December 15, 2026, to shareholders of record as of December 1, 2026",
+     "offset": 8621,
+     "accession": "0001193125-26-448548",
+     "form": "8-K",
+     "filed": "2026-11-05",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/30697/000119312526448548/d129346dex991.htm",
+     "document_sha256": "1f997c7daa22c8790e18551804712225b420748f3c18a6fd67eac25ef2eb7730"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "7439ba61-cf3c-4d27-8f7d-3b9b180c064f",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-09T23:53:18Z",
+     "announcements": [
+      {
+       "tx_hash": "0xf5bb483bc372d5a76cdd0bd284e88eb8c08187e61e0d28d22014d3678b0b3c1e",
+       "block": "55390112",
+       "log_index": 0,
+       "id": "7439ba61-cf3c-4d27-8f7d-3b9b180c064f:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/7439ba61-cf3c-4d27-8f7d-3b9b180c064f",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-15",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "1f997c7daa22c879"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.07 dates 2026-12-15,2026-12-01"
+     },
+     {
+      "claim": "announcement 7439ba61-cf3 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xf5bb483b log 0"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:39.957Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000b2e8dba585b1ffb158:2026-12-17:0.10",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000b2E8dBA585B1ffB158",
+     "symbol": "VRTc"
+    },
+    "company": {
+     "cik": "0001674101",
+     "name": "Vertiv Holdings Co"
+    },
+    "declaration": {
+     "per_share": "0.10",
+     "currency": "USD",
+     "payable_date": "2026-12-17",
+     "record_date": "2026-11-24",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "The increase will be effective starting with the fourth-quarter cash dividend of $0.10 per share of Class A common stock, which was declared by the Board of Directors on November 13, 2026, and is payable on December 17, 2026, to shareholders of record of Class A common stock at the close of business on November 24, 2026",
+     "offset": 443,
+     "accession": "0001628280-26-073564",
+     "form": "8-K",
+     "filed": "2026-11-13",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1674101/000162828026073564/exhibit991vrt-q42026divide.htm",
+     "document_sha256": "494bef549d72a77e67116a77a1012e61db818c56af910c1671a16814ae4b933d"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "9bc9714d-8b88-4539-ab34-9b3e8fa4ae24",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-14T01:33:43Z",
+     "announcements": [
+      {
+       "tx_hash": "0x79e7d701452eb169baa602097b7052de26428bc8ad9b6e90a2fe8e29897e541f",
+       "block": "57148238",
+       "log_index": 8,
+       "id": "9bc9714d-8b88-4539-ab34-9b3e8fa4ae24:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/9bc9714d-8b88-4539-ab34-9b3e8fa4ae24",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-17",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "494bef549d72a77e"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.10 dates 2026-11-13,2026-12-17,2026-11-24"
+     },
+     {
+      "claim": "announcement 9bc9714d-8b8 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x79e7d701 log 8"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:42.110Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000008fde21a1f5c69fec0b:2026-12-17:0.175",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000008fde21a1F5c69FeC0b",
+     "symbol": "WDCc"
+    },
+    "company": {
+     "cik": "0000106040",
+     "name": "WESTERN DIGITAL CORP"
+    },
+    "declaration": {
+     "per_share": "0.175",
+     "currency": "USD",
+     "payable_date": "2026-12-17",
+     "record_date": "2026-12-04",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "Dividend WD’s Board of Directors declared a cash dividend of $0.175 per share of the company’s common stock, which will be paid on December 17, 2026 to stockholders of record as of the close of business on December 4, 2026",
+     "offset": 3660,
+     "accession": "0001628280-26-066882",
+     "form": "8-K",
+     "filed": "2026-10-22",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026066882/a4ex991-pressreleaseq127.htm",
+     "document_sha256": "1de470c3899b410e7c6b09c5cef0e72e1cde3d85c38379b7a34c13aee5446834"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "be5b4d3b-b87f-4f59-9317-f1d05fb11550",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-24T00:34:43Z",
+     "announcements": [
+      {
+       "tx_hash": "0xf472ff3b363a7e76aeb445b08cd70ba45036f6436d6bae6c4e243b616a0367b7",
+       "block": "53006368",
+       "log_index": 295,
+       "id": "be5b4d3b-b87f-4f59-9317-f1d05fb11550:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/be5b4d3b-b87f-4f59-9317-f1d05fb11550",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-17",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "1de470c3899b410e"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.175 dates 2026-12-17,2026-12-04"
+     },
+     {
+      "claim": "announcement be5b4d3b-b87 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xf472ff3b log 295"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:44.256Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000000e63b7b0b6bc5b9213:2026-12-17:0.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000000E63b7B0b6BC5B9213",
+     "symbol": "ZMc"
+    },
+    "company": {
+     "cik": "0001585521",
+     "name": "Zoom Communications, Inc."
+    },
+    "declaration": {
+     "per_share": "0.25",
+     "currency": "USD",
+     "payable_date": "2026-12-17",
+     "record_date": "2026-12-03",
+     "declared_on": null,
+     "declared_month": "2026-11",
+     "quote": "Dividend Program In November 2026, Zoom’s Board of Directors approved the initiation of a quarterly cash dividend program and declared a cash dividend of $0.25 per share on Zoom’s outstanding common stock, payable on December 17, 2026, to stockholders of record as of the close of business on December 3, 2026",
+     "offset": 6399,
+     "accession": "0001585521-26-000170",
+     "form": "8-K",
+     "filed": "2026-11-23",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1585521/000158552126000170/zm-20261031ex991.htm",
+     "document_sha256": "01ee68b9d3ade5c7b865fd361465ce024d3fe2275d06398d0cd80b773e450880"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "46599c5b-1d6c-439f-b48a-b1d03322ba07",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-25T01:47:09Z",
+     "announcements": [
+      {
+       "tx_hash": "0x9d013bb725f916d343215a3a9cd9d7d9b4bc7f97fb5ec138671bfb4da593b36a",
+       "block": "61904267",
+       "log_index": 10,
+       "id": "46599c5b-1d6c-439f-b48a-b1d03322ba07:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/46599c5b-1d6c-439f-b48a-b1d03322ba07",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-17",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "01ee68b9d3ade5c7"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.25 dates 2026-12-17,2026-12-03"
+     },
+     {
+      "claim": "announcement 46599c5b-1d6 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x9d013bb7 log 10"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:46.396Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000003aa0410688baf4da88:2026-12-21:0.26",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000003AA0410688bAf4Da88",
+     "symbol": "NEMc"
+    },
+    "company": {
+     "cik": "0001164727",
+     "name": "NEWMONT Corp /DE/"
+    },
+    "declaration": {
+     "per_share": "0.26",
+     "currency": "USD",
+     "payable_date": "2026-12-21",
+     "record_date": "2026-11-25",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "In line with this commitment, a dividend of $0.26 per share for the third quarter of 2026 has been declared payable on December 21, 2026, to holders of record of such common stock at the close of business on November 25, 2026",
+     "offset": 6408,
+     "accession": "0001164727-26-000041",
+     "form": "8-K",
+     "filed": "2026-10-22",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1164727/000116472726000041/newmontq32026earningsrelea.htm",
+     "document_sha256": "60ab96b5509af9dbfa1961a15c7aa17257d62c7868e90a29bf6e76719ba4a1aa"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "17e5ebea-94ee-4d73-8c4e-c2d14d23fe63",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-25T05:31:33Z",
+     "announcements": [
+      {
+       "tx_hash": "0xa75b54bed62a62e84f6199075ab6e5c87a88d607bd07167bac005dc1cd84dae8",
+       "block": "61971587",
+       "log_index": 17,
+       "id": "17e5ebea-94ee-4d73-8c4e-c2d14d23fe63:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/17e5ebea-94ee-4d73-8c4e-c2d14d23fe63",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-21",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "60ab96b5509af9db"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.26 dates 2026-12-21,2026-11-25"
+     },
+     {
+      "claim": "announcement 17e5ebea-94e onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xa75b54be log 17"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:48.575Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000078ee7ce2fe4908108c:2026-12-23:0.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C",
+     "symbol": "NVDAc"
+    },
+    "company": {
+     "cik": "0001045810",
+     "name": "NVIDIA CORP"
+    },
+    "declaration": {
+     "per_share": "0.25",
+     "currency": "USD",
+     "payable_date": "2026-12-23",
+     "record_date": "2026-12-02",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on December 23, 2026, to all shareholders of record on December 2, 2026",
+     "offset": 1442,
+     "accession": "0001045810-26-000088",
+     "form": "8-K",
+     "filed": "2026-11-17",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/q3fy27pr.htm",
+     "document_sha256": "8a4b8148d7744378f956af3f8cd0f7354d86480a1b42d91f5ec625c3e5c6856b"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "4f332b80-3d7e-4f13-ad0d-0cb4cdc1a442",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-19T01:36:42Z",
+     "announcements": [
+      {
+       "tx_hash": "0x0a6c0fa33ad9e02c34b719ac7aa7c2f3fa60efc6ac370cebd59e51d03d2c9190",
+       "block": "59309136",
+       "log_index": 6,
+       "id": "4f332b80-3d7e-4f13-ad0d-0cb4cdc1a442:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/4f332b80-3d7e-4f13-ad0d-0cb4cdc1a442",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-23",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "8a4b8148d7744378"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.25 dates 2026-12-23,2026-12-02"
+     },
+     {
+      "claim": "announcement 4f332b80-3d7 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x0a6c0fa3 log 6"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:50.725Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000008463bf2557b483abf9:2026-12-24:1.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000008463bf2557B483AbF9",
+     "symbol": "DKSc"
+    },
+    "company": {
+     "cik": "0001089063",
+     "name": "DICK'S SPORTING GOODS, INC."
+    },
+    "declaration": {
+     "per_share": "1.25",
+     "currency": "USD",
+     "payable_date": "2026-12-24",
+     "record_date": "2026-12-11",
+     "declared_on": "2026-11-23",
+     "declared_month": null,
+     "quote": "6 Quarterly Dividend On November 23, 2026, the Company's Board of Directors authorized and declared a quarterly dividend in the amount of $1.25 per share on the Company's common stock and Class B common stock … The dividend is payable in cash on December 24, 2026 to stockholders of record at the close of business on December 11, 2026",
+     "offset": 17866,
+     "accession": "0001089063-26-000039",
+     "form": "8-K",
+     "filed": "2026-11-24",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1089063/000108906326000039/dks-20261031xex991earnings.htm",
+     "document_sha256": "f8722680873e409fcacfa555676213d45258a15e2d553fc92a5a3539af2fa53f"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "107eee0d-0e90-4f02-b672-d7c8307c477f",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-26T01:43:34Z",
+     "announcements": [
+      {
+       "tx_hash": "0x7c5739156d3c112cccb7078b00dc9e99b38db44141af331ebcff3ae7015d4958",
+       "block": "62335192",
+       "log_index": 38,
+       "id": "107eee0d-0e90-4f02-b672-d7c8307c477f:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/107eee0d-0e90-4f02-b672-d7c8307c477f",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-24",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "f8722680873e409f"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$1.25 dates 2026-11-23,2026-12-24,2026-12-11"
+     },
+     {
+      "claim": "announcement 107eee0d-0e9 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x7c573915 log 38"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:52.890Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000ea2df44a307cab279c:2026-12-29:0.01",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000eA2df44A307CaB279C",
+     "symbol": "BMNRc"
+    },
+    "company": {
+     "cik": "0001829311",
+     "name": "BITMINE IMMERSION TECHNOLOGIES, INC."
+    },
+    "declaration": {
+     "per_share": "0.01",
+     "currency": "USD",
+     "payable_date": "2026-12-29",
+     "record_date": "2026-12-08",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "1 Bitmine Immersion Technologies Announces Cash Dividend of $0.01 per Share of Common Stock NORWALK, CT, November 25, 2026 /PRNewswire/ — (NYSE: BMNR … The dividend will be paid on December 29, 2026 to holders of record of the Common Stock as of the close of business on December 8, 2026",
+     "offset": 40,
+     "accession": "0001493152-26-054131",
+     "form": "8-K",
+     "filed": "2026-11-25",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1829311/000149315226054131/ex99-1.htm",
+     "document_sha256": "5babad488d9ce14e7b565d7a75692a95cc7f8dead5ddf50c56868f2f8e845b0c"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "345f5ddb-1d75-4684-8e73-dd27610c8d00",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-26T01:31:07Z",
+     "announcements": [
+      {
+       "tx_hash": "0xb245150321ee72326d0e44b519506cbf5645c0cc3a564c0626b65e23b671a907",
+       "block": "62331461",
+       "log_index": 45,
+       "id": "345f5ddb-1d75-4684-8e73-dd27610c8d00:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/345f5ddb-1d75-4684-8e73-dd27610c8d00",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-29",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "5babad488d9ce14e"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.01 dates 2026-11-25,2026-12-29,2026-12-08"
+     },
+     {
+      "claim": "announcement 345f5ddb-1d7 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xb2451503 log 45"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:54.991Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000acccfe56da68b19a0d:2026-12-30:0.82",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000AcccFe56da68b19a0D",
+     "symbol": "GILDc"
+    },
+    "company": {
+     "cik": "0000882095",
+     "name": "GILEAD SCIENCES, INC."
+    },
+    "declaration": {
+     "per_share": "0.82",
+     "currency": "USD",
+     "payable_date": "2026-12-30",
+     "record_date": "2026-12-15",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "•The Board declared a quarterly dividend of $0.82 per share of common stock for the fourth quarter of 2026 … The dividend is payable on December 30, 2026, to stockholders of record at the close of business on December 15, 2026",
+     "offset": 12101,
+     "accession": "0000882095-26-000037",
+     "form": "8-K",
+     "filed": "2026-10-29",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/882095/000088209526000037/exhibit991earningspressrel.htm",
+     "document_sha256": "21fb5c88b19e636f6c7dd53d88f0d176bdb36ffc0360d4bca0f5dc7146ade101"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "15d89367-085c-470d-9a81-1496d45d794a",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-31T00:44:41Z",
+     "announcements": [
+      {
+       "tx_hash": "0x71517981865ee1cd9779abb81d4367df419ed686981f7dd388d18434efc15249",
+       "block": "53309067",
+       "log_index": 213,
+       "id": "15d89367-085c-470d-9a81-1496d45d794a:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/15d89367-085c-470d-9a81-1496d45d794a",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-30",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "21fb5c88b19e636f"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.82 dates 2026-12-30,2026-12-15"
+     },
+     {
+      "claim": "announcement 15d89367-085 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x71517981 log 213"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:57.177Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000a82a0c88dd258ed141:2026-12-30:5.00",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000a82a0C88DD258eD141",
+     "symbol": "GSc"
+    },
+    "company": {
+     "cik": "0000886982",
+     "name": "GOLDMAN SACHS GROUP INC"
+    },
+    "declaration": {
+     "per_share": "5.00",
+     "currency": "USD",
+     "payable_date": "2026-12-30",
+     "record_date": "2026-12-02",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "declared a dividend of $5.00 per common share to be paid on December 30, 2026 to common shareholders of record on December 2, 2026",
+     "offset": 7639,
+     "accession": "0000886982-26-000529",
+     "form": "8-K",
+     "filed": "2026-10-13",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/886982/000088698226000529/a3q26gsearningsresults.htm",
+     "document_sha256": "f52c45ea482908576db9dd435399d99f059054661183bb0ca439cbc69222110a"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "a558eba1-491f-41ec-a4df-a5f6cd1b8e7d",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-26T23:34:19Z",
+     "announcements": [
+      {
+       "tx_hash": "0xa5e186ae98fac9e83790a290dc36205dfbe034d7858331e5ec2c8f3f6629dfea",
+       "block": "53134156",
+       "log_index": 339,
+       "id": "a558eba1-491f-41ec-a4df-a5f6cd1b8e7d:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/a558eba1-491f-41ec-a4df-a5f6cd1b8e7d",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2026-12-30",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "f52c45ea48290857"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$5.00 dates 2026-12-30,2026-12-02"
+     },
+     {
+      "claim": "announcement a558eba1-491 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xa5e186ae log 339"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:29:59.315Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000009a3602cf5d020afa98:2027-01-06:0.31",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000009a3602cF5d020afA98",
+     "symbol": "HPQc"
+    },
+    "company": {
+     "cik": "0000047217",
+     "name": "HP INC"
+    },
+    "declaration": {
+     "per_share": "0.31",
+     "currency": "USD",
+     "payable_date": "2027-01-06",
+     "record_date": "2026-12-09",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "The HP board of directors has declared a quarterly cash dividend of $0.31 per share on the Company’s common stock, payable on January 6, 2027 to stockholders of record as of the close of business on December 9, 2026",
+     "offset": 7096,
+     "accession": "0000047217-26-000054",
+     "form": "8-K",
+     "filed": "2026-11-24",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/47217/000004721726000054/hp103126exhibit991q426.htm",
+     "document_sha256": "59fbf7b6ab8990d8b17a844afec08f9ab28ba61e7100c3eb114edcd43ff9efb0"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "4aef6093-fa9d-4b01-816c-5420c4d004a1",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-26T01:39:14Z",
+     "announcements": [
+      {
+       "tx_hash": "0xf07db033aa5e5024aca5e10eb803be986f8a000a45c035b5f235e630e17ffd66",
+       "block": "62333893",
+       "log_index": 19,
+       "id": "4aef6093-fa9d-4b01-816c-5420c4d004a1:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/4aef6093-fa9d-4b01-816c-5420c4d004a1",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2027-01-06",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "59fbf7b6ab8990d8"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.31 dates 2027-01-06,2026-12-09"
+     },
+     {
+      "claim": "announcement 4aef6093-fa9 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xf07db033 log 19"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:01.523Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000015776ea82655c4f034:2027-01-20:0.42",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000015776Ea82655C4F034",
+     "symbol": "CSCOc"
+    },
+    "company": {
+     "cik": "0000858877",
+     "name": "CISCO SYSTEMS, INC."
+    },
+    "declaration": {
+     "per_share": "0.42",
+     "currency": "USD",
+     "payable_date": "2027-01-20",
+     "record_date": "2027-01-04",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "” Cisco Declares Quarterly Dividend Cisco has declared a quarterly dividend of $0.42 per common share to be paid on January 20, 2027, to all stockholders of record as of the close of business on January 4, 2027",
+     "offset": 3388,
+     "accession": "0000858877-26-000170",
+     "form": "8-K",
+     "filed": "2026-11-12",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/858877/000085887726000170/exhibit991pressrelease-q1f.htm",
+     "document_sha256": "537d392c003c95c52d1f795487808c4f0fef59ae4d44d27ee61088d6b0cc4229"
+    },
+    "issuer_announcement": {
+     "corporate_action_uuid": "7ca17d84-1b6a-4c29-8540-46d5abcb2ace",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-14T01:37:23Z",
+     "announcements": [
+      {
+       "tx_hash": "0x112098613d51f19a53a5bfc8504e669457c89786c3608d4ec5125aa26b40ff07",
+       "block": "57149337",
+       "log_index": 0,
+       "id": "7ca17d84-1b6a-4c29-8540-46d5abcb2ace:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/7ca17d84-1b6a-4c29-8540-46d5abcb2ace",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "upcoming",
+    "expected_adjustment_date": "2027-01-20",
+    "applied_record_id": null,
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee. The issuer has also announced this action onchain (status CORPORATE_ACTION_STATUS_ANNOUNCED).",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "537d392c003c95c5"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.42 dates 2027-01-20,2027-01-04"
+     },
+     {
+      "claim": "announcement 7ca17d84-1b6 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x11209861 log 0"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:03.799Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000c2e324d24d7eecd1fb:2026-11-16:0.27",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+     "symbol": "AAPLc"
+    },
+    "company": {
+     "cik": "0000320193",
+     "name": "Apple Inc."
+    },
+    "declaration": {
+     "per_share": "0.27",
+     "currency": "USD",
+     "payable_date": "2026-11-16",
+     "record_date": "2026-11-12",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "” Apple’s board of directors has declared a cash dividend of $0.27 per share of the Company’s common stock … The dividend is payable on November 16, 2026, to shareholders of record as of the close of business on November 12, 2026",
+     "offset": 1956,
+     "accession": "0000320193-26-000024",
+     "form": "8-K",
+     "filed": "2026-11-02",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/a8-kex991q4202609262026.htm",
+     "document_sha256": "b79e05d1202d1e836bb4ee73387ff3cfa1437c8e6a091e5ffff958296c922f35"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "b79e05d1202d1e83"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.27 dates 2026-11-16,2026-11-12"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:06.035Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000c33e458d1f892a7917:ca:15177d7e-2fd9-4abb-83f2-2bae148da2d3",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000c33e458d1f892A7917",
+     "symbol": "ADIc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "15177d7e-2fd9-4abb-83f2-2bae148da2d3",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-26T01:44:44Z",
+     "announcements": [
+      {
+       "tx_hash": "0x7d27b17473c4839d8a36ce0cf9e713bc3fac1942038a89797604a7e1b6d371b2",
+       "block": "62335543",
+       "log_index": 12,
+       "id": "15177d7e-2fd9-4abb-83f2-2bae148da2d3:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/15177d7e-2fd9-4abb-83f2-2bae148da2d3",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 15177d7e-2fd onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x7d27b174 log 12"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:07.654Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000006064f8ec027f042294:ca:4bc64a71-ac15-4253-b9c2-f7296257f3aa",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000006064f8EC027f042294",
+     "symbol": "AEOc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "4bc64a71-ac15-4253-b9c2-f7296257f3aa",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-03T00:38:13Z",
+     "announcements": [
+      {
+       "tx_hash": "0xa188e2d4ea67bfdf90f2c85ee0b7b6950f532ecb7c4a3fe2c197c94bdd164034",
+       "block": "52099273",
+       "log_index": 48,
+       "id": "4bc64a71-ac15-4253-b9c2-f7296257f3aa:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/4bc64a71-ac15-4253-b9c2-f7296257f3aa",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 4bc64a71-ac1 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xa188e2d4 log 48"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:09.367Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000002c8b0e3d7ff26f81a0:ca:6e9973ba-ef23-47ed-891c-af94ee2367bb",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000002C8b0e3d7Ff26f81a0",
+     "symbol": "AMKRc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "6e9973ba-ef23-47ed-891c-af94ee2367bb",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-20T01:38:10Z",
+     "announcements": [
+      {
+       "tx_hash": "0x059362a1731905887ef94f8f1ae6e8b10f6c6cc1766a247abf74d0ac236812d2",
+       "block": "59741576",
+       "log_index": 11,
+       "id": "6e9973ba-ef23-47ed-891c-af94ee2367bb:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/6e9973ba-ef23-47ed-891c-af94ee2367bb",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 6e9973ba-ef2 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x059362a1 log 11"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:10.986Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000747bffa52fe2c2510b:ca:96640dd0-436e-47ff-ad38-7570ff3a7c52",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000747BFfA52Fe2C2510B",
+     "symbol": "BALLc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "96640dd0-436e-47ff-ad38-7570ff3a7c52",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-29T00:34:35Z",
+     "announcements": [
+      {
+       "tx_hash": "0xad32234ee007122a7103b6e4a72a0517fb2cb27795fbc378cac09c4829d68d26",
+       "block": "53222364",
+       "log_index": 30,
+       "id": "96640dd0-436e-47ff-ad38-7570ff3a7c52:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/96640dd0-436e-47ff-ad38-7570ff3a7c52",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 96640dd0-436 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xad32234e log 30"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:12.628Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000c36ce081dd09e86ca2:ca:c4cc637f-0907-4ea4-8c25-69fef9894ee5",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000c36ce081Dd09e86cA2",
+     "symbol": "BUDc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "c4cc637f-0907-4ea4-8c25-69fef9894ee5",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-18T01:38:39Z",
+     "announcements": [
+      {
+       "tx_hash": "0xc768275ac9d200c0d5b5ec2e12285072c4aa86c29c0cc7879c00dc02b7b769cc",
+       "block": "58877720",
+       "log_index": 16,
+       "id": "c4cc637f-0907-4ea4-8c25-69fef9894ee5:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/c4cc637f-0907-4ea4-8c25-69fef9894ee5",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement c4cc637f-090 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xc768275a log 16"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:14.284Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000645c1ec509e4261682:ca:23a7d911-defc-4b25-96c4-e9f03b611da7",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000645c1Ec509E4261682",
+     "symbol": "BXc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "23a7d911-defc-4b25-96c4-e9f03b611da7",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-29T00:34:49Z",
+     "announcements": [
+      {
+       "tx_hash": "0x050391e636bf9658af6ae124fc43b1b3edd1209a67001f5f259ce9f7a0c45272",
+       "block": "53222371",
+       "log_index": 753,
+       "id": "23a7d911-defc-4b25-96c4-e9f03b611da7:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/23a7d911-defc-4b25-96c4-e9f03b611da7",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 23a7d911-def onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x050391e6 log 753"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:15.935Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000f215e4c890cfb7176b:2026-11-24:0.30",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000f215E4C890CFb7176B",
+     "symbol": "CAKEc"
+    },
+    "company": {
+     "cik": "0000887596",
+     "name": "CHEESECAKE FACTORY INC"
+    },
+    "declaration": {
+     "per_share": "0.30",
+     "currency": "USD",
+     "payable_date": "2026-11-24",
+     "record_date": "2026-11-10",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "In addition, the Company’s Board of Directors has declared a quarterly dividend of $0.30 per share to be paid on November 24, 2026, to shareholders of record at the close of business on November 10, 2026",
+     "offset": 3764,
+     "accession": "0001104659-26-119176",
+     "form": "8-K",
+     "filed": "2026-10-27",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926119176/tm2628239d1_ex99-1.htm",
+     "document_sha256": "f6653193adb08700c1bf13abdbb826d4a668441348d2185402c61250d4b89a89"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000f215e4c890cfb7176b:e9ab20a2-6e1d-4825-8c14-04be154cfb9b",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "f6653193adb08700"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.30 dates 2026-11-24,2026-11-10"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:17.498Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000f32d61ba597eddfbfd:ca:8a524d98-2d3a-4e7a-9de4-b4b67a3ed880",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000f32d61BA597EDdFbfd",
+     "symbol": "CANc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "8a524d98-2d3a-4e7a-9de4-b4b67a3ed880",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Reverse Stock Split",
+     "announced_at": "2026-11-11T23:36:05Z",
+     "announcements": [
+      {
+       "tx_hash": "0x5f677d06c110512a129e08cc45950b2604e4503f35684e5340085e2946f6aa15",
+       "block": "56248948",
+       "log_index": 13,
+       "id": "8a524d98-2d3a-4e7a-9de4-b4b67a3ed880:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/8a524d98-2d3a-4e7a-9de4-b4b67a3ed880",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 8a524d98-2d3 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x5f677d06 log 13"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:19.435Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000003bd46dbde905508b16:ca:31fb4323-19fa-46f8-a938-6553edc83fa6",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000003bd46dbdE905508B16",
+     "symbol": "CMCSAc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "31fb4323-19fa-46f8-a938-6553edc83fa6",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-23T02:16:43Z",
+     "announcements": [
+      {
+       "tx_hash": "0x3b94459ca5d468aa17c4582c5aa130a5792d505c404b314dae730815179e50e8",
+       "block": "52966228",
+       "log_index": 105,
+       "id": "31fb4323-19fa-46f8-a938-6553edc83fa6:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/31fb4323-19fa-46f8-a938-6553edc83fa6",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 31fb4323-19f onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x3b94459c log 105"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:21.207Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000ec622942b76a2d3b21:ca:650787d7-6bb1-440a-b8a9-bff596793c4d",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000eC622942B76a2d3b21",
+     "symbol": "COPc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "650787d7-6bb1-440a-b8a9-bff596793c4d",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-09T23:52:58Z",
+     "announcements": [
+      {
+       "tx_hash": "0xab3aa690a90b9f8dbbb749907226e27225d5ca29bca655da3e4373a1b498e1bc",
+       "block": "55390012",
+       "log_index": 1,
+       "id": "650787d7-6bb1-440a-b8a9-bff596793c4d:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/650787d7-6bb1-440a-b8a9-bff596793c4d",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 650787d7-6bb onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xab3aa690 log 1"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:22.839Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000000bd75bf439a38bf7df:ca:54e9caa2-7662-42eb-a479-f22b20d8b4d4",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb2000000000000000000000bD75bF439A38bF7DF",
+     "symbol": "DISc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "54e9caa2-7662-42eb-a479-f22b20d8b4d4",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-18T01:32:30Z",
+     "announcements": [
+      {
+       "tx_hash": "0xb0e1eae4b1ab2c89b70bc0699bf9542f7fadeee2d70144e718428f48478be3ce",
+       "block": "58875873",
+       "log_index": 4,
+       "id": "54e9caa2-7662-42eb-a479-f22b20d8b4d4:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/54e9caa2-7662-42eb-a479-f22b20d8b4d4",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 54e9caa2-766 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xb0e1eae4 log 4"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:24.451Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000bba79a25edfd4b66c0:ca:ad0e70ba-acf7-44ed-81d3-777091f40678",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000bBA79A25EdfD4B66c0",
+     "symbol": "GAPc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "ad0e70ba-acf7-44ed-81d3-777091f40678",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-12T01:34:39Z",
+     "announcements": [
+      {
+       "tx_hash": "0x5257e4b4b0b9826c7e328c8bc38da69d33b91149d1394aabc369191a741cf3bc",
+       "block": "56284520",
+       "log_index": 120,
+       "id": "ad0e70ba-acf7-44ed-81d3-777091f40678:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/ad0e70ba-acf7-44ed-81d3-777091f40678",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement ad0e70ba-acf onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x5257e4b4 log 120"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:26.149Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000b11c7e7295fe11fba7:ca:a993a2b7-026c-40d8-b7f2-9d8993c8b7f9",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000b11c7e7295fE11fBa7",
+     "symbol": "HDc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "a993a2b7-026c-40d8-b7f2-9d8993c8b7f9",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-21T01:37:30Z",
+     "announcements": [
+      {
+       "tx_hash": "0x718f786e92e4dd642d52f5a969193a2b9840e0f4a3143c9de786aafa45c2ad3f",
+       "block": "60173376",
+       "log_index": 13,
+       "id": "a993a2b7-026c-40d8-b7f2-9d8993c8b7f9:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/a993a2b7-026c-40d8-b7f2-9d8993c8b7f9",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement a993a2b7-026 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x718f786e log 13"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:27.809Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000d8aeccf70906ab125d:ca:529df95e-d015-4c12-aee4-573f1a7e8e7e",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000d8aEccF70906AB125d",
+     "symbol": "HPEc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "529df95e-d015-4c12-aee4-573f1a7e8e7e",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-25T01:46:29Z",
+     "announcements": [
+      {
+       "tx_hash": "0x53a3f5d26139fffac64431f1d4dcda49595340801782deeb5bb46faad8e52bfc",
+       "block": "61904068",
+       "log_index": 99,
+       "id": "529df95e-d015-4c12-aee4-573f1a7e8e7e:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/529df95e-d015-4c12-aee4-573f1a7e8e7e",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 529df95e-d01 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x53a3f5d2 log 99"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:29.442Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000989432cd85947ee845:ca:5de17d1e-5aef-42d4-9b37-fc0e0222198a",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000989432cD85947EE845",
+     "symbol": "INTUc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "5de17d1e-5aef-42d4-9b37-fc0e0222198a",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-24T01:37:58Z",
+     "announcements": [
+      {
+       "tx_hash": "0xd9a6f8d9d11c61cffa0cb1c3003085021d4dbf0324bd444b803693aeab3a69ff",
+       "block": "61469513",
+       "log_index": 13,
+       "id": "5de17d1e-5aef-42d4-9b37-fc0e0222198a:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/5de17d1e-5aef-42d4-9b37-fc0e0222198a",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 5de17d1e-5ae onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xd9a6f8d9 log 13"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:31.063Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000090658e3f9b29e2f5c2:ca:657258c9-86da-46e9-9eaa-c188d430a32d",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000090658e3f9b29E2f5C2",
+     "symbol": "JNJc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "657258c9-86da-46e9-9eaa-c188d430a32d",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-24T01:31:38Z",
+     "announcements": [
+      {
+       "tx_hash": "0xa4cb5ceead3f96009bdf6f73f2578b56d798a5c84a83e562fc1d231cd8abb29e",
+       "block": "61467612",
+       "log_index": 13,
+       "id": "657258c9-86da-46e9-9eaa-c188d430a32d:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/657258c9-86da-46e9-9eaa-c188d430a32d",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 657258c9-86d onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xa4cb5cee log 13"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:32.713Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000dba9e310296c1066c0:ca:96aba2d2-e0c7-49c1-83b9-69cd6fd8e3c6",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000DBa9e310296C1066C0",
+     "symbol": "KLACc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "96aba2d2-e0c7-49c1-83b9-69cd6fd8e3c6",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-09T23:53:08Z",
+     "announcements": [
+      {
+       "tx_hash": "0x7228fb0cbb391ab7acbd76db253efc81f36f2f0d4ab09dd1ece9bd97e36a5b3d",
+       "block": "55390066",
+       "log_index": 5,
+       "id": "96aba2d2-e0c7-49c1-83b9-69cd6fd8e3c6:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/96aba2d2-e0c7-49c1-83b9-69cd6fd8e3c6",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 96aba2d2-e0c onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x7228fb0c log 5"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:34.360Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000a8f1c97d05a15e89e2:ca:fff02147-5dab-4ede-8ff9-091b4e2a0985",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000A8F1c97d05a15e89e2",
+     "symbol": "KMBc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "fff02147-5dab-4ede-8ff9-091b4e2a0985",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-13T14:30:19Z",
+     "announcements": [
+      {
+       "tx_hash": "0xc6f4ebe1616495d9100e9e48f148e2c40fd44ca49af3a062a3d157f4375a0409",
+       "block": "56949220",
+       "log_index": 97,
+       "id": "fff02147-5dab-4ede-8ff9-091b4e2a0985:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/fff02147-5dab-4ede-8ff9-091b4e2a0985",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement fff02147-5da onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xc6f4ebe1 log 97"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:36.006Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000105a1f43ff3605c5de:ca:b88d8827-aed1-4f0f-a9dc-ae921287f912",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000105A1f43ff3605C5De",
+     "symbol": "KSSc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "b88d8827-aed1-4f0f-a9dc-ae921287f912",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-20T01:33:36Z",
+     "announcements": [
+      {
+       "tx_hash": "0x0ffbd97427c16aa03d21f32f9db9a988342bb24f5b5718830d07bae1f2ac9f6f",
+       "block": "59740204",
+       "log_index": 1,
+       "id": "b88d8827-aed1-4f0f-a9dc-ae921287f912:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b88d8827-aed1-4f0f-a9dc-ae921287f912",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement b88d8827-aed onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x0ffbd974 log 1"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:37.729Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000f1a0f91e34892e4718:ca:3cce833c-1c3a-4d0d-aa9f-3f4c8648dadf",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000f1a0F91e34892E4718",
+     "symbol": "LLYc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "3cce833c-1c3a-4d0d-aa9f-3f4c8648dadf",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-26T23:34:33Z",
+     "announcements": [
+      {
+       "tx_hash": "0x90f1ab85e1bd0e9b356b025ecc29e38fd5cdfb1fa4d39a4f41d1d6257641e2ef",
+       "block": "53134163",
+       "log_index": 805,
+       "id": "3cce833c-1c3a-4d0d-aa9f-3f4c8648dadf:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/3cce833c-1c3a-4d0d-aa9f-3f4c8648dadf",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 3cce833c-1c3 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x90f1ab85 log 805"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:39.369Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000034975347ff1848aab9:ca:b2bfdf34-c1be-4ee7-acca-1df9e8b2586b",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000034975347FF1848AAb9",
+     "symbol": "LRCXc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "b2bfdf34-c1be-4ee7-acca-1df9e8b2586b",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-09T23:52:33Z",
+     "announcements": [
+      {
+       "tx_hash": "0xbb5df6a09152de3dc58f16bff349baf47fd858661717cf62fa18b8b6f0df9d8c",
+       "block": "55389891",
+       "log_index": 3,
+       "id": "b2bfdf34-c1be-4ee7-acca-1df9e8b2586b:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/b2bfdf34-c1be-4ee7-acca-1df9e8b2586b",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement b2bfdf34-c1b onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xbb5df6a0 log 3"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:41.002Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000d5c0393796e92fcab0:ca:3fc533bd-5574-4dc6-86ee-f678e65b103d",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000d5c0393796E92FCAB0",
+     "symbol": "LUVc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "3fc533bd-5574-4dc6-86ee-f678e65b103d",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-13T14:30:34Z",
+     "announcements": [
+      {
+       "tx_hash": "0xdc3644a5ac31c9fd1b2106991194af96ec1900c979112829d40ba3418b0813aa",
+       "block": "56949295",
+       "log_index": 79,
+       "id": "3fc533bd-5574-4dc6-86ee-f678e65b103d:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/3fc533bd-5574-4dc6-86ee-f678e65b103d",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 3fc533bd-557 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xdc3644a5 log 79"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:42.620Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000241fe94fe97fcbf034:ca:148187b4-b1e6-4f36-8f75-df400c8c6f74",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000241fe94fe97FcBf034",
+     "symbol": "MRKc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "148187b4-b1e6-4f36-8f75-df400c8c6f74",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-18T01:32:20Z",
+     "announcements": [
+      {
+       "tx_hash": "0xc63317eb57463dcd3d70b3a0d8c1d83315fc06f10fddbd269b307a491e9b58a8",
+       "block": "58875824",
+       "log_index": 16,
+       "id": "148187b4-b1e6-4f36-8f75-df400c8c6f74:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/148187b4-b1e6-4f36-8f75-df400c8c6f74",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 148187b4-b1e onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xc63317eb log 16"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:44.294Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000ec3c4c7395cc609813:2026-10-29:0.06",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000eC3c4c7395Cc609813",
+     "symbol": "MRVLc"
+    },
+    "company": {
+     "cik": "0001835632",
+     "name": "Marvell Technology, Inc."
+    },
+    "declaration": {
+     "per_share": "0.06",
+     "currency": "USD",
+     "payable_date": "2026-10-29",
+     "record_date": "2026-10-09",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "(NASDAQ: MRVL), today announced a quarterly dividend of $0.06 per share of common stock, including preferred stock on an as converted to common stock basis, payable on October 29, 2026 to stockholders of record as of October 9, 2026",
+     "offset": 187,
+     "accession": "0001628280-26-063592",
+     "form": "8-K",
+     "filed": "2026-09-25",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026063592/a20260925dividendpressrele.htm",
+     "document_sha256": "09bd692dead509c74f42e35d286cf436dc76ada4509798ab3f0515de86aa4fe8"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "09bd692dead509c7"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.06 dates 2026-10-29,2026-10-09"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:45.888Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000fd2f87532b90095211:2026-10-29:0.15",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000Fd2f87532B90095211",
+     "symbol": "MUc"
+    },
+    "company": {
+     "cik": "0000723125",
+     "name": "MICRON TECHNOLOGY INC"
+    },
+    "declaration": {
+     "per_share": "0.15",
+     "currency": "USD",
+     "payable_date": "2026-10-29",
+     "record_date": "2026-10-14",
+     "declared_on": "2026-09-30",
+     "declared_month": null,
+     "quote": "On September 30, 2026, Micron’s Board of Directors declared a quarterly dividend of $0.15 per share, payable in cash on October 29, 2026, to shareholders of record as of the close of business on October 14, 2026",
+     "offset": 3262,
+     "accession": "0000723125-26-000018",
+     "form": "8-K",
+     "filed": "2026-09-30",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/a2026q4ex991-pressrelease.htm",
+     "document_sha256": "d121e2e8294d26ad80d929db96f1da5b4b7eb93cb7217ab70ef8c863406f4b52"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000fd2f87532b90095211:293799e5-4c0c-4d0e-a2d9-3ea4367f17b0",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "d121e2e8294d26ad"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.15 dates 2026-09-30,2026-10-29,2026-10-14"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:47.561Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000071f6c75c5892b09beb:ca:6b41b3b3-bb62-47f1-92ec-fcebaf051296",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000071F6c75C5892b09Beb",
+     "symbol": "NKEc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "6b41b3b3-bb62-47f1-92ec-fcebaf051296",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-21T01:34:06Z",
+     "announcements": [
+      {
+       "tx_hash": "0xbf4b5bc0586c252030dd032b907b70d3f7cd7ddebe295e0a90b4942d7af8ad97",
+       "block": "60172352",
+       "log_index": 57,
+       "id": "6b41b3b3-bb62-47f1-92ec-fcebaf051296:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/6b41b3b3-bb62-47f1-92ec-fcebaf051296",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 6b41b3b3-bb6 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xbf4b5bc0 log 57"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:49.419Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000078ee7ce2fe4908108c:2026-10-01:0.25",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000078ee7ce2fE4908108C",
+     "symbol": "NVDAc"
+    },
+    "company": {
+     "cik": "0001045810",
+     "name": "NVIDIA CORP"
+    },
+    "declaration": {
+     "per_share": "0.25",
+     "currency": "USD",
+     "payable_date": "2026-10-01",
+     "record_date": "2026-09-10",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "NVIDIA will pay its next quarterly cash dividend of $0.25 per share on October 1, 2026, to all shareholders of record on September 10, 2026",
+     "offset": 1475,
+     "accession": "0001045810-26-000073",
+     "form": "8-K",
+     "filed": "2026-08-26",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+     "document_sha256": "6f23ecda957a4c83223cb59993dfde4df6fd8ac2d2755940ae387fd1e29d426e"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb20000000000000000000078ee7ce2fe4908108c:0d25ab63-6a9b-4f46-93fd-9d7f6fae92da",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "6f23ecda957a4c83"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.25 dates 2026-10-01,2026-09-10"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:51.039Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000347afba223d7b6b63c:2026-10-23:0.50",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000347AFbA223D7B6b63C",
+     "symbol": "ORCLc"
+    },
+    "company": {
+     "cik": "0001341439",
+     "name": "ORACLE CORP"
+    },
+    "declaration": {
+     "per_share": "0.50",
+     "currency": "USD",
+     "payable_date": "2026-10-23",
+     "record_date": "2026-10-09",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "Common Stock Quarterly Dividend The board of directors declared a quarterly cash dividend of $0.50 per share of outstanding common stock … This dividend will be paid to stockholders of record as of the close of business on October 9, 2026, with a payment date of October 23, 2026",
+     "offset": 5262,
+     "accession": "0001193125-26-387905",
+     "form": "8-K",
+     "filed": "2026-09-10",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm",
+     "document_sha256": "a111a6f96626c3b92d153b19983291341b97e60dfb7430a6efa1c451590bd7b0"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb200000000000000000000347afba223d7b6b63c:67deae04-adc5-4308-a1c8-d32ea2134fac",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "a111a6f96626c3b9"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "2 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$0.50 dates 2026-10-09,2026-10-23"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:52.470Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000006d1bc7faa266eb099d:ca:1b7e51ca-0784-465d-837a-52493d8429da",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000006d1bC7Faa266Eb099D",
+     "symbol": "PEPc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "1b7e51ca-0784-465d-837a-52493d8429da",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-20T01:35:00Z",
+     "announcements": [
+      {
+       "tx_hash": "0xe09cbd8f9e73f27beb5fb26d008f3af9b6839474c2a40863f5d1258e59562360",
+       "block": "59740624",
+       "log_index": 8,
+       "id": "1b7e51ca-0784-465d-837a-52493d8429da:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1b7e51ca-0784-465d-837a-52493d8429da",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 1b7e51ca-078 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xe09cbd8f log 8"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:54.251Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000018fe7ec7d6dfeeb528:ca:a32d45fa-dedb-46be-b6cf-30580689841c",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000018FE7eC7d6DfeeB528",
+     "symbol": "PFEc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "a32d45fa-dedb-46be-b6cf-30580689841c",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-07T00:09:25Z",
+     "announcements": [
+      {
+       "tx_hash": "0xba2beb2a98f1f0d9a1e630dce54cd26d53a771986b452b06106f79d70071ff75",
+       "block": "54098950",
+       "log_index": 4,
+       "id": "a32d45fa-dedb-46be-b6cf-30580689841c:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/a32d45fa-dedb-46be-b6cf-30580689841c",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement a32d45fa-ded onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xba2beb2a log 4"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:56.209Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000008fc2a8c23cf5937b66:2026-10-26:1.60",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000008FC2A8C23cf5937b66",
+     "symbol": "PMc"
+    },
+    "company": {
+     "cik": "0001413329",
+     "name": "Philip Morris International Inc."
+    },
+    "declaration": {
+     "per_share": "1.60",
+     "currency": "USD",
+     "payable_date": "2026-10-26",
+     "record_date": "2026-10-02",
+     "declared_on": null,
+     "declared_month": null,
+     "quote": "The new quarterly dividend of $1.60 per share, up from $1.47 per share, is payable on October 26, 2026, to shareholders of record as of October 2, 2026",
+     "offset": 581,
+     "accession": "0001628280-26-062621",
+     "form": "8-K",
+     "filed": "2026-09-18",
+     "document_url": "https://www.sec.gov/Archives/edgar/data/1413329/000162828026062621/september2026dividend.htm",
+     "document_sha256": "28b133ba2e0210475a014117fc3f09b954f1faf5f77c261006106e0d31ea0413"
+    },
+    "issuer_announcement": null,
+    "state": "applied",
+    "expected_adjustment_date": null,
+    "applied_record_id": "kld:8453:0xb2000000000000000000008fc2a8c23cf5937b66:e4071568-89ad-4f41-9a31-565225066857",
+    "basis": "Expected date = payable date, an observed issuer pattern (7 of 8 reconciled dividends adjusted on the payable date); not a guarantee.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "declaration document unchanged (sha256)",
+      "verdict": "CONFIRMED",
+      "evidence": "28b133ba2e021047"
+     },
+     {
+      "claim": "declaration quote found in document",
+      "verdict": "CONFIRMED",
+      "evidence": "1 clause(s)"
+     },
+     {
+      "claim": "declared amount and dates re-parsed from quote",
+      "verdict": "CONFIRMED",
+      "evidence": "$1.60 dates 2026-10-26,2026-10-02"
+     }
+    ],
+    "checked_at": "2026-11-27T10:30:57.845Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000ec3cd781acad151fdc:ca:1a8af9e9-d909-4cbb-beba-1d4c34a80d82",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000Ec3cD781ACaD151fDC",
+     "symbol": "SPBc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "1a8af9e9-d909-4cbb-beba-1d4c34a80d82",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-12T01:32:49Z",
+     "announcements": [
+      {
+       "tx_hash": "0x88a88d05a4c10c200a3e714a0b2dacdc74d3c90b36bd1244d59f7be51bc550f8",
+       "block": "56283970",
+       "log_index": 28,
+       "id": "1a8af9e9-d909-4cbb-beba-1d4c34a80d82:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/1a8af9e9-d909-4cbb-beba-1d4c34a80d82",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 1a8af9e9-d90 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x88a88d05 log 28"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:00.012Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000001ac12227a8ae0ef3ac:ca:0328345d-4a62-4d75-b99a-7182886fb800",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000001AC12227a8aE0Ef3Ac",
+     "symbol": "STZc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "0328345d-4a62-4d75-b99a-7182886fb800",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-23T02:16:13Z",
+     "announcements": [
+      {
+       "tx_hash": "0xb9b9db6f776f77c30c5df8d74b0adf4df1ba08c0e5bf8a9b045acb875ce5caa6",
+       "block": "52966213",
+       "log_index": 188,
+       "id": "0328345d-4a62-4d75-b99a-7182886fb800:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/0328345d-4a62-4d75-b99a-7182886fb800",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 0328345d-4a6 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0xb9b9db6f log 188"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:01.775Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000e0b9460c97f38f412f:ca:61f5ca76-b6aa-40c5-bd9f-4328c9aa9d62",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb200000000000000000000e0B9460c97F38f412F",
+     "symbol": "TAPc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "61f5ca76-b6aa-40c5-bd9f-4328c9aa9d62",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-21T01:43:35Z",
+     "announcements": [
+      {
+       "tx_hash": "0x858f3ee7c196794e9f1c5c23be3e0c36e59b43c307275444641f59b3b1dfaa63",
+       "block": "60175201",
+       "log_index": 45,
+       "id": "61f5ca76-b6aa-40c5-bd9f-4328c9aa9d62:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/61f5ca76-b6aa-40c5-bd9f-4328c9aa9d62",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 61f5ca76-b6a onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x858f3ee7 log 45"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:03.502Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000006bc65af32d24870a2d:ca:03f71f4a-3cd8-4b61-bd58-20cba2ea4f2b",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000006BC65AF32d24870A2d",
+     "symbol": "TERc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "03f71f4a-3cd8-4b61-bd58-20cba2ea4f2b",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-11T01:39:22Z",
+     "announcements": [
+      {
+       "tx_hash": "0x6a31c24f7fe17c7a84a1d2a56acd96937e631c21a68a9c4bb70754303e10954a",
+       "block": "55853934",
+       "log_index": 2,
+       "id": "03f71f4a-3cd8-4b61-bd58-20cba2ea4f2b:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/03f71f4a-3cd8-4b61-bd58-20cba2ea4f2b",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 03f71f4a-3cd onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x6a31c24f log 2"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:05.257Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000049b9fc3b3c8c9402ff:ca:8dd8658e-b715-4488-8a72-daf4e7142bb6",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000049B9fC3b3c8C9402ff",
+     "symbol": "TKRc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "8dd8658e-b715-4488-8a72-daf4e7142bb6",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-17T01:34:29Z",
+     "announcements": [
+      {
+       "tx_hash": "0x394bb50839015827f5c53317b225f53de6b543426bcbc22f2f49f9d83b375d54",
+       "block": "58444471",
+       "log_index": 2,
+       "id": "8dd8658e-b715-4488-8a72-daf4e7142bb6:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/8dd8658e-b715-4488-8a72-daf4e7142bb6",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 8dd8658e-b71 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x394bb508 log 2"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:06.980Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb200000000000000000000349ef3aa93a0897476:ca:f0a1e377-0867-4396-ae2d-9212154a25c9",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB200000000000000000000349ef3Aa93a0897476",
+     "symbol": "ULc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "f0a1e377-0867-4396-ae2d-9212154a25c9",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-10-30T00:37:25Z",
+     "announcements": [
+      {
+       "tx_hash": "0x00c0795e5f60b742fe80cb9a177c304aa6c7ce4c5bf781241f08736f4984ae37",
+       "block": "53265649",
+       "log_index": 775,
+       "id": "f0a1e377-0867-4396-ae2d-9212154a25c9:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/f0a1e377-0867-4396-ae2d-9212154a25c9",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement f0a1e377-086 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x00c0795e log 775"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:08.718Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000030945cb9c538d0b326:ca:379a919d-50be-4f2d-9756-dac82347960f",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xb20000000000000000000030945cB9c538D0B326",
+     "symbol": "VCc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "379a919d-50be-4f2d-9756-dac82347960f",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-18T01:38:30Z",
+     "announcements": [
+      {
+       "tx_hash": "0x5d923a3274b7f8938b69d142630940ddc3ee5e283ed1667d2b9a9c052d1c9006",
+       "block": "58877673",
+       "log_index": 13,
+       "id": "379a919d-50be-4f2d-9756-dac82347960f:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/379a919d-50be-4f2d-9756-dac82347960f",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 379a919d-50b onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x5d923a32 log 13"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:10.451Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb20000000000000000000079dc24fe2fbd09110f:ca:e7194983-f4b2-4b6d-93f4-e332a6da1b5d",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB20000000000000000000079DC24fe2FBD09110f",
+     "symbol": "VSTc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "e7194983-f4b2-4b6d-93f4-e332a6da1b5d",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-02T23:59:15Z",
+     "announcements": [
+      {
+       "tx_hash": "0x15411d4e3ffb2a662bf8611f6114e6d627024e5cd72fc72fbf8a3abea258b77b",
+       "block": "53437304",
+       "log_index": 312,
+       "id": "e7194983-f4b2-4b6d-93f4-e332a6da1b5d:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/e7194983-f4b2-4b6d-93f4-e332a6da1b5d",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement e7194983-f4b onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x15411d4e log 312"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:12.160Z"
+   }
+  },
+  {
+   "entry": {
+    "entry_id": "cal:8453:0xb2000000000000000000005c8324136de0f4134a:ca:7061d23e-4b4e-4a19-8396-70f6995b0d60",
+    "token": {
+     "chain_id": 8453,
+     "contract_address": "0xB2000000000000000000005C8324136dE0f4134a",
+     "symbol": "YUMc"
+    },
+    "company": null,
+    "declaration": null,
+    "issuer_announcement": {
+     "corporate_action_uuid": "7061d23e-4b4e-4a19-8396-70f6995b0d60",
+     "status": "CORPORATE_ACTION_STATUS_ANNOUNCED",
+     "description": "Cash Dividend",
+     "announced_at": "2026-11-14T01:38:03Z",
+     "announcements": [
+      {
+       "tx_hash": "0x9a6751df59802120687f4a8acceccb4c0263115425a00676cb80a1eb3edbe382",
+       "block": "57149538",
+       "log_index": 8,
+       "id": "7061d23e-4b4e-4a19-8396-70f6995b0d60:pre",
+       "uri": "https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/7061d23e-4b4e-4a19-8396-70f6995b0d60",
+       "caller": "0x5Da41bDDc73406F246d73CbE2e319f3cFc814D9A"
+      }
+     ]
+    },
+    "state": "announced",
+    "expected_adjustment_date": null,
+    "applied_record_id": null,
+    "basis": "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+    "as_of": "2026-11-27T10:24:45.749Z"
+   },
+   "review": {
+    "verdict": "CONFIRMED",
+    "claims": [
+     {
+      "claim": "announcement 7061d23e-4b4 onchain",
+      "verdict": "CONFIRMED",
+      "evidence": "tx 0x9a6751df log 8"
+     },
+     {
+      "claim": "issuer record agrees (contract, status, txs)",
+      "verdict": "CONFIRMED",
+      "evidence": "status CORPORATE_ACTION_STATUS_ANNOUNCED"
+     }
+    ],
+    "checked_at": "2026-11-27T10:31:13.912Z"
+   }
+  }
+ ]
+}

@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5:sec:b07047256f84",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5:sec:55010e3812e5",
   "action_kind": "stock_split",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000397293cb8cda9a10c5:4d449eba-9206-4c35-8c1e-921c20e864d5",
-   "payload_sha256": "b07047256f84b45aec10d9b49268da47ee475df4fded5458367295c5acfeef02"
+   "payload_sha256": "55010e3812e57d0f760d06c4041d32b98de29213378960c27ae3c1b62ac76d81"
   },
   "company": {
    "cik": "0002023554",
@@ -17,7 +17,7 @@
    ],
    "resolution_evidence": [
     "https://efts.sec.gov/LATEST/search-index?keysTyped=Sandisk%20Corporation sha256=3557c6f7d1e93eb6",
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=213b3491221ee3cc",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=SNDK sha256=e9f8f5d65c30d37b",
     "https://data.sec.gov/submissions/CIK0002023554.json sha256=6f59d8f061f93fd6"
    ]
   },
@@ -86,16 +86,16 @@
    "Split ratio not yet evidenced in SEC structured data."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:33.058Z"
+  "generated_at": "2026-11-27T10:42:44.499Z"
  },
- "payload_sha256": "6b74c494b7eeb1396a35ef7fffc967e34447a426928428ac550c7ee48466c731",
+ "payload_sha256": "3caf570ae457d7f65f62f632b6ea9ad068fabfd23c4f050e857255017c357b1a",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash b07047256f84b45a"
+    "evidence": "record hash 55010e3812e57d0f"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -108,6 +108,6 @@
     "evidence": "Sandisk Corp SNDK"
    }
   ],
-  "checked_at": "2026-11-27T08:47:33.505Z"
+  "checked_at": "2026-11-27T10:42:44.950Z"
  }
 }
