@@ -169,6 +169,49 @@ async function gold() {
   process.exit(mismatches.length ? 1 : 0);
 }
 
+async function supabaseCmd(sub: string) {
+  const { migrate, sbQuery, syncFromLocal } = await import("./db/supabase.ts");
+  if (sub === "migrate") {
+    const applied = await migrate("keldrin", true);
+    console.log("supabase migrate: applied " + (applied.length ? applied.join(", ") : "nothing (up to date)"));
+  } else if (sub === "rollback-test") {
+    // Replay all migrations into a throwaway schema twice (must be idempotent), check, then drop it.
+    const s = "keldrin_rollback_test";
+    await sbQuery("DROP SCHEMA IF EXISTS " + s + " CASCADE");
+    const first = await migrate(s, false);
+    const second = await migrate(s, false);
+    const tables = await sbQuery<{ n: number }>("SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = '" + s + "'");
+    await sbQuery("DROP SCHEMA " + s + " CASCADE");
+    const gone = await sbQuery<{ n: number }>("SELECT count(*)::int AS n FROM pg_namespace WHERE nspname = '" + s + "'");
+    console.log("rollback-test: first apply " + first.length + " migration(s), replay applied " + second.length + ", " + tables[0].n + " tables/views; dropped: " + (gone[0].n === 0));
+    if (second.length !== 0 || gone[0].n !== 0) process.exit(1);
+  } else if (sub === "sync") {
+    const db = await openDb(DB_DIR);
+    const counts = await syncFromLocal(db);
+    await db.close();
+    console.log("supabase sync (local rows copied): " + JSON.stringify(counts));
+  } else if (sub === "check") {
+    const q = async (label: string, sql: string) => {
+      try {
+        console.log("  " + label.padEnd(48) + " " + JSON.stringify(await sbQuery(sql)));
+      } catch (e) {
+        console.log("  " + label.padEnd(48) + " ERROR " + String((e as Error).message).replace(/\s+/g, " ").slice(0, 160));
+      }
+    };
+    await q("row counts", "SELECT (SELECT count(*) FROM keldrin.assets) assets, (SELECT count(*) FROM keldrin.records) records, (SELECT count(*) FROM keldrin.reviews) reviews, (SELECT count(*) FROM keldrin.confirmed_records) confirmed, (SELECT count(*) FROM keldrin.reconciliations) reconciliations, (SELECT count(*) FROM keldrin.calendar_entries) calendar");
+    await q("RLS enabled on every keldrin table", "SELECT bool_and(c.relrowsecurity) AS all_rls, count(*) AS tables FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='keldrin' AND c.relkind='r'");
+    await q("anon can read records? (must be permission denied)", "SET ROLE anon; SELECT count(*) FROM keldrin.records");
+    await q("authenticated can read records? (must be denied)", "SET ROLE authenticated; SELECT count(*) FROM keldrin.records");
+    await q("reader can read confirmed records", "SET ROLE keldrin_reader; SELECT count(*) AS confirmed FROM keldrin.confirmed_records");
+    await q("reader cannot write (must be denied)", "SET ROLE keldrin_reader; INSERT INTO keldrin.runs (run_id, kind, started_at) VALUES ('x','x',now())");
+    await q("records are append-only (must raise)", "UPDATE keldrin.records SET record_type = record_type WHERE false OR true");
+    await q("keldrin not exposed via Data API schemas", "SELECT current_setting('pgrst.db_schemas', true) AS pgrst_db_schemas");
+  } else {
+    console.error("usage: supabase <migrate|rollback-test|sync|check>");
+    process.exit(2);
+  }
+}
+
 async function verifyFile() {
   const f = args[1];
   const doc = JSON.parse(readFileSync(f, "utf8"));
@@ -183,6 +226,7 @@ const commands: Record<string, () => Promise<void>> = {
   reconcile: () => reconcileAll(flag("symbols")?.split(",")),
   calendar: () => calendar(flag("symbols")?.split(",")),
   gold,
+  supabase: () => supabaseCmd(args[1] ?? ""),
   "proof-googl": () => reconcileAll(["GOOGLc"]),
   "verify-file": verifyFile,
   serve: async () => {
