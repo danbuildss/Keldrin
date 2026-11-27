@@ -3130,8 +3130,8 @@ var require_stream = __commonJS({
         return new net.Socket();
       }
       function getSecureStream2(options) {
-        const tls = __require("tls");
-        return tls.connect(options);
+        const tls2 = __require("tls");
+        return tls2.connect(options);
       }
       return {
         getStream: getStream2,
@@ -6535,9 +6535,12 @@ var defaults = import_lib.default.defaults;
 var esm_default = import_lib.default;
 
 // src/db/pg.ts
+function tls() {
+  return process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {} };
+}
 function openPg(connectionString) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
-  const ssl = process.env.PGSSL_NO_VERIFY === "1" ? { rejectUnauthorized: false } : { rejectUnauthorized: true, ...process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {} };
+  const ssl = tls();
   const pool = new esm_default.Pool({ connectionString, ssl, max: 3, idleTimeoutMillis: 1e4, connectionTimeoutMillis: 8e3, statement_timeout: 8e3 });
   pool.on("connect", (c) => {
     void c.query("SET search_path TO keldrin, public; SET default_transaction_read_only = on");
