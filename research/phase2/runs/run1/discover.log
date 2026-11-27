@@ -2,3 +2,6 @@
 (Use `node --trace-warnings ...` to show where the warning was created)
 run run-2026-11-27T09-55-00-621Z: head block 62914626
 registry: 435 tokens (5 pages); scope 435
+identity: verified 435, incomplete 0, mismatch 0
+discover: sampled multiplier() for 435 tokens at 10 blocks
+discover: token 0/435, 0 change point(s) so far
