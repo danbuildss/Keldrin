@@ -57,7 +57,7 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T038 | P0 | Developer testing package (docs/developers/*, real examples) | BUILT (examples from the local verified store; re-capture from production after deploy) | docs/PLAN_DEVELOPER_RELEASE.md |
 | T039 | P1 (proposed) | Edge rate limit (Vercel Firewall) + documented limits | PROPOSED | Founder sets the rule |
 | T041 | P0 | Remote MCP server /mcp (Phase 9) | BUILT (not deployed) | BACKEND_PROOF Phase 9 |
-| T042 | P0 | CLI npx keldrin (Phase 10) | BUILT (founder publishes to npm) | npm/README.md |
-| T043 | P0 | x402 paid API (Phase 11) | WAITING (payout address, facilitator route, price) | docs/BREAKRA_STUDY.md |
+| T042 | P0 | CLI npx keldrin (Phase 10) | DONE: keldrin@0.6.0 published by the founder 2026-11-27 | npm/README.md |
+| T043 | P0 | x402 paid API (Phase 11) | LIVE on Bankr (snapshot, report, $0.05); 3 free tries on Keldrin's API built, awaiting merge | bankr/README.md |
 | T044 | P1 | Open-source the product: new public repo with code, tests, developer docs and a license; this repo stays private | DEFERRED by the founder (2026-11-27): build and prove the product first | Founder, 2026-11-27 |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |

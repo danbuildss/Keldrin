@@ -1,0 +1,45 @@
+{
+  "network": "base",
+  "currency": "USDC",
+  "services": {
+    "keldrin-snapshot": {
+      "price": "0.05",
+      "currency": "USDC",
+      "network": "base",
+      "paymentScheme": "exact",
+      "methods": ["GET"],
+      "description": "Keldrin snapshot: every Coinbase tokenized stock on Base with a verified Chainlink NAV feed, in one call. For each: latest NAV with round id and age, freshness (fresh / expected_closed / unexpectedly_stale), main DEX price with depth and gap vs NAV, and the next corporate action; plus the US market session. Verified data with provenance, not advice. Only a 2xx is charged. Free per-stock API: https://keldrin.vercel.app/llms.txt",
+      "schema": {
+        "output": {
+          "type": "object",
+          "properties": {
+            "data": { "type": "object", "description": "market (session now), count, stocks[] with symbol, token, nav, staleness, dex, next_corporate_action" },
+            "meta": { "type": "object" }
+          }
+        }
+      }
+    },
+    "keldrin-report": {
+      "price": "0.05",
+      "currency": "USDC",
+      "network": "base",
+      "paymentScheme": "exact",
+      "methods": ["GET", "POST"],
+      "description": "Keldrin report: everything Keldrin verifies about one Coinbase tokenized stock on Base, in one call: identity and multiplier, corporate actions (dividends, splits, with SEC and onchain evidence), market context (session, live Chainlink NAV, freshness), 30 daily NAV closes with round ids, and every verified DEX pool with price and depth. Input: token (exact symbol like NVDAc, or contract address). Verified data with provenance, not advice. Only a 2xx is charged.",
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": { "token": { "type": "string", "description": "Exact symbol (e.g. NVDAc) or 0x contract address" } },
+          "required": ["token"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "data": { "type": "object", "description": "token, symbol, name, multiplier_wad, corporate_actions[], market_context, nav_daily_30d, dex" },
+            "meta": { "type": "object" }
+          }
+        }
+      }
+    }
+  }
+}

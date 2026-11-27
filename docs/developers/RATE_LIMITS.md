@@ -6,4 +6,7 @@ Legend: ✅ live now · 🛠 planned (docs/PLAN_DEVELOPER_RELEASE.md), not built
 - ✅ CDN caching on successful responses (`s-maxage=60`); repeated identical calls are usually served from cache.
 - ✅ Application limit: 120 requests/min per client IP **per server instance** (best effort on serverless).
 - 🛠 Planned for the test period: a documented **60 uncached requests/min per IP**, enforced at the edge (Vercel Firewall rule, set by the founder); `429` with a retry hint.
-- 🛠 Later: optional free API keys for higher limits; x402 pay-per-call as an additional route for agents. **Basic access will never require a token or a payment.**
+- ✅ One-stock routes (`/v1/assets/...`, `/v1/events`, `/v1/calendar`, MCP, CLI) stay free. **Basic access will never require a token or a payment.**
+- ✅ `/v1/snapshot` (all stocks with a verified NAV feed in one answer) and `/v1/report?token=` (everything about one token): **3 free complete answers per client per day** (shared), then `402` with the paid links. The counter is per server instance, so it is a trial allowance, not an access control. Incomplete answers are `503` and don't use a try. Header `x-keldrin-free-tries-left` and `meta.free_tries_left_today` show what's left.
+- ✅ Paid, x402 ($0.05 USDC on Base, hosted on Bankr x402 Cloud; charged only on a complete answer): `https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot` and `.../keldrin-report` (input `token`).
+- 🛠 Later: optional free API keys for higher limits.

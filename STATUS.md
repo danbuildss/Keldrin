@@ -69,4 +69,8 @@
 - Phase 9, remote MCP at POST /mcp (6 read-only tools) + server.json for the MCP Registry: built, not deployed (same PR).
 - Phase 10, CLI `npx keldrin` (npm/): built, 4 offline tests, CI checks the bundle matches the source. The name `keldrin` was free on npm on 2026-11-27. The founder publishes (`npm publish` from npm/).
 - Tests: 119 pass, 1 skipped.
-- LIVE (2026-11-27): PR #16 merged, run #6 green; /dex live for 11/13 tokens and independently re-checked; /mcp live. Next: founder publishes the CLI. Then Phase 11 (x402: needs payout wallet address, facilitator route, price), 12 (website from the founder's design + feedback form), 13 (launch).
+- LIVE (2026-11-27): PR #16 merged, run #6 green; /dex live for 11/13 tokens and independently re-checked; /mcp live; CLI published as keldrin@0.6.0 on npm (founder). Next: Phase 11 x402 on approval of the host + payout address. Then Phase 11 (x402: needs payout wallet address, facilitator route, price), 12 (website from the founder's design + feedback form), 13 (launch).
+
+## Phase 11 (approved 2026-11-27): paid x402 on Bankr + 3 free tries
+- Live on Bankr (deployed by the founder from Bankr chat; Bankr's test calls cost $0.10): keldrin-snapshot and keldrin-report, $0.05 USDC on Base, payout to the founder's Bankr wallet 0xb98f…fa91. Self-contained (read the free API), never charged on incomplete answers. Bankr's reported answers match production data. Not verified from this session: the 402 terms (x402.bankr.bot is blocked by this session's network).
+- Built, not deployed: /v1/snapshot and /v1/report on Keldrin's own API with 3 free complete answers per client per day, then 402 with the Bankr links. Needs a merge.

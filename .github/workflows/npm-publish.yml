@@ -39,6 +39,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
       - name: Check it from the registry
+        # npm can take a few minutes to make a new package available ("being processed"); wait up to 10 minutes,
+        # and run npx from an empty folder so the repository's own package.json can't interfere.
         run: |
-          sleep 20
-          npx -y "keldrin@$(node -p "require('./npm/package.json').version")" --version
+          V=$(node -p "require('./npm/package.json').version")
+          cd "$(mktemp -d)"
+          for i in $(seq 1 40); do
+            if [ "$(npm view "keldrin@$V" version 2>/dev/null)" = "$V" ]; then npx -y "keldrin@$V" --version; exit 0; fi
+            sleep 15
+          done
+          echo "published, but keldrin@$V was not yet available after 10 minutes; check https://www.npmjs.com/package/keldrin"
+          exit 1
