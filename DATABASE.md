@@ -20,3 +20,12 @@ Transactional release: validate schema + rights + active mapping + independently
 - `chain_logs(chain_id, block_number, block_hash, tx_hash, log_index, address, topic0, decoded jsonb, observed_at)`. PK (chain_id, tx_hash, log_index). Store block_hash for reorg checks. Flag multiplier changes outside an Announcement bracket.
 - `reconciliations(id, event_id, revision, issuer_action_id, checks jsonb, verdict match|mismatch|unsure, computed_at)`.
 - `events` hold company-level events (e.g. a declared dividend with declaration/record/pay dates). `event_assets` links them to `issuer_actions`. WAD and token amounts are `numeric(78,0)`; registry doubles are never stored as values of record.
+
+## Proposed tables (CD-003, 2026-11-27): NOT approved
+- `nav_feeds` (chain_id, token_address, feed_address, description, decimals, source, verified_at)
+- `nav_rounds` append-only (feed_address, proxy_round_id PK part, phase_id, aggregator_round_id, aggregator_address, answer numeric(78,0), started_at, updated_at, answered_in_round, block_observed)
+- `nav_index_state` (feed_address, phase_id, last_aggregator_round_id, closed)
+- `policy_observations` append-only (token_address, block, scope, policy_id, paused_features, probes jsonb)
+All under the private `keldrin` schema; the writer role gets INSERT; the reader gets SELECT.
+
+- CD-003 follow-up: `nav_rounds` must keep `aggregator_address`, `retrieved_at` and `decimals` per row for provenance; add `nav_reviews` (verification samples). (Proposed.)

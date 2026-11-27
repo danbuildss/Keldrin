@@ -22,3 +22,6 @@ Gold set: aim for 10+ independently annotated real cases with source URLs and ex
 - security: host allowlist
 
 Live: 3/3 controlled runs ok (research/phase1/runs). Not yet covered: payment, MCP, outage/reorg simulation, gold set of 10 annotated SEC events.
+
+## Planned tests for the developer release (proposed)
+Round-count equality per phase vs independent onchain counts; a 50-round verifier sample; idempotent re-index; no synthetic rows; daily-close fixtures (DST, early close, holiday); session classification fixtures; staleness classes; corporate-actions consistency with /v1/events; docs curl examples executed against the preview.

@@ -11,7 +11,7 @@
 | T007 | P0 | Implement adapters and job state | IN_PROGRESS (adapters done; job leases/dead letter in Phase 2) | Phase 1 P1-03; job state in Phase 2 |
 | T008 | P0 | Expand coverage to five approved assets | VERIFIED beyond scope (all 435 tokens; gold set pending) | Phase 2; needs log indexer + RPC decision (D9) |
 | T009 | P0 | REST feed + sample consumer | VERIFIED locally (OpenAPI spec pending Phase 3) | Localhost subset in Phase 1 P1-08; full Phase 3 |
-| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | IN_PROGRESS (Phase 4: code proven; founder secrets pending) | Manual runs proven; separate credentials; founder enable |
+| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | VERIFIED (Phase 4: GitHub Actions run #3 succeeded; BACKEND_PROOF.md) | Manual runs proven; separate credentials; founder enable |
 | T011 | P1 | x402 one paid route | OPEN | Entitlement and cost approvals, testnet proof, replay/outage handling |
 | T012 | P1 | Public evidence UI and docs | OPEN | Only after backend gate |
 | T013 | P1 | Founder-led builder integrations / interviews | IN_PROGRESS (CD-001, CD-002; CUSTOMER_DISCOVERY.md) | Validates differentiation hypothesis |
@@ -48,3 +48,11 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T029 | P1 (proposed) | Remote read-only MCP endpoint /mcp + MCP Registry listing | PROPOSED | Replaces the T015 shape; founder submits listings |
 | T030 | P1 (proposed) | Public self-verification of records | PROPOSED | Lesson 6 |
 | T031 | P1 | Decide the x402 host (Bankr x402 Cloud vs Vercel + facilitator) | OPEN (research) | Does Bankr support secrets? Phase 5 |
+| T032 | P0 (proposed) | NAV history indexer + `…/nav/history` (NVDAc first, then 14 feeds) — first MAXXAGENT test milestone | PROPOSED (Phase 5) | docs/research/FEASIBILITY_CD003.md; Chainlink rights decision |
+| T033 | P0 (proposed) | Per-asset `…/corporate-actions` route | PROPOSED | Existing verified data |
+| T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | PROPOSED | docs/research/RISK_METHODOLOGY.md |
+| T035 | P0 (proposed) | `…/market-context` + sessions calendar — first MAXXAGENT test milestone | PROPOSED (Phase 6) | docs/research/MARKET_SESSIONS.md |
+| T036 | P1 (proposed) | `…/transfer-policy` snapshot | PROPOSED | docs/research/B20_POLICIES.md |
+| T037 | P2 | DEX liquidity / NAV-DEX divergence | OPEN (terms check first) | — |
+| T038 | P0 (proposed) | Developer testing package (docs/developers/*, real examples from the deployed endpoints) | PROPOSED (Phase 6) | docs/PLAN_DEVELOPER_RELEASE.md |
+| T039 | P1 (proposed) | Edge rate limit (Vercel Firewall) + documented limits | PROPOSED | Founder sets the rule |

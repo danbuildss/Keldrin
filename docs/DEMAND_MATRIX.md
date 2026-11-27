@@ -21,3 +21,22 @@ The evidence column counts distinct builders (CUSTOMER_DISCOVERY.md). The availa
 | MCP tool | CD-002 | ❌ | Wrapper over REST (Phase 5) | — | — |
 | Webhooks or alerts | CD-002 (secondary) | ❌ | After scheduling | — | — |
 | Pay per call (x402) | CD-002 | ❌ | Phase 5 (founder approved later) | — | Bankr offered to host |
+
+## Added 2026-11-27 from CD-003 (MAXXAGENT); availability verified in docs/research/FEASIBILITY_CD003.md
+| Need | Requested by | Keldrin today | Feasible next | Data source and availability | Notes |
+|---|---|---|---|---|---|
+| Historical NAV (rounds, daily closes) | CD-003 ("biggest wish") | ❌ | Phase-aware indexer, `…/nav/history` | Chainlink onchain; **14 of 138 tokens have feeds**; ~36k rounds since 2026-08-03 | Redistribution terms to check |
+| Corporate actions per asset | CD-001, CD-002, CD-003 | ✅ via /v1/events | `…/corporate-actions` route | Already verified | Coinbase offers by-UUID only |
+| Per-share vs total-return series | CD-003 (implied) | ❌ | NAV ÷ multiplier in force | Chainlink + Keldrin multipliers | Prevents double adjustment |
+| Volatility, drawdown | CD-003 | ❌ | `…/risk` (NAV-based) | Derived from NAV history | `insufficient_data` when short |
+| Market session / stale vs closed | CD-003 | ❌ | `…/market-context` | Deterministic calendar + feed age | Holiday list must be maintained |
+| B20 transfer policy | CD-003 | ❌ | `…/transfer-policy` snapshot | Onchain (PolicyRegistry) | MIT reference code exists |
+| DEX liquidity / NAV-DEX gap | CD-001, CD-003 | ❌ | Partner or own pool indexing | DexScreener/GeckoTerminal terms unknown | Deferred |
+
+### CD-003 follow-up requirements (2026-11-27)
+| Need | Requested by | Keldrin today | Next |
+|---|---|---|---|
+| Round-level provenance for NAV | CD-003 | ❌ | nav/history fields (Phase 5) |
+| uiMultiplier with dates | CD-003 | Indexed and verified, not surfaced | corporate-actions route (Phase 6) |
+| Freshness across closures | CD-003 | Partial | market-context (Phase 6) |
+| Free server tier + limits | CD-003, CD-002 | ✅ keyless | Edge rate limit + docs |

@@ -38,3 +38,11 @@ Full ledger with HTTP status, hashes and times: research/phase0/evidence/ledger.
 - **Chainlink NAV:** feed address from `/nav-feeds`, read onchain (`description` "Coinbase GOOGL", 8 decimals, `latestRoundData`), historical reads OK. Total-return reference, not a price. Feed terms not reviewed.
 - **BStocks:** `https://basestocks.finance/api/v1` reachable, keyless, x402 v2 on two endpoints at $0.10. No corporate-event fields.
 - **Not yet reached:** ADGM prospectus PDFs (adgm.com not allowlisted), company IR sites, Blockscout (403 from the site).
+
+## Proposed sources (CD-003 research, 2026-11-27; not yet approved)
+| Source | Use | Access | Rights |
+|---|---|---|---|
+| Coinbase `/v1/tokenized-stocks/nav-feeds` | Feed discovery (cross-checked onchain) | Public, keyless | Covered by founder's data-rights decision? **Confirm** |
+| Chainlink NAV proxies on Base (`getRoundData`, `phaseAggregators`) | NAV history | Onchain via Alchemy | **Redistribution terms not checked**: legal review |
+| B20 PolicyRegistry `0x8453…0002`, token `policyId`/`pausedFeatures` | Transfer-policy snapshot | Onchain | Public chain state |
+| NYSE holiday calendar | Market sessions | To decide (maintained file) | Facts, not copyrightable; cite the source |
