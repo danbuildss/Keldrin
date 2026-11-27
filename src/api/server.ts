@@ -9,7 +9,6 @@ import { assetCorporateActions } from "./assetActions.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
-import { paidAuth, paidReport, paidSnapshot } from "./paid.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -106,15 +105,6 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     // The only non-GET route: the remote MCP endpoint (JSON-RPC over POST; every tool is read-only).
     const isMcp = p === "/mcp" && req.method === "POST";
     if (req.method !== "GET" && !isMcp) return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
-    // Paid routes: only for Keldrin's x402 endpoints on Bankr (bearer key). Checked before the free rate limit.
-    if (p.startsWith("/v1/paid/")) {
-      const auth = paidAuth(req.headers.authorization);
-      if (auth === "not_configured") return send(res, 503, err("PAID_NOT_CONFIGURED", "paid routes are not enabled on this server"), undefined, "no-store");
-      if (auth === "denied") return send(res, 401, err("PAID_ONLY", "this route is served through Keldrin's paid x402 endpoints", "pay per call via x402 (see /llms.txt); the free routes under /v1 serve the same verified data one stock at a time"), undefined, "no-store");
-      const out = p === "/v1/paid/snapshot" ? await paidSnapshot(db) : p === "/v1/paid/report" ? await paidReport(db, url.searchParams.get("token") ?? "") : { status: 404, body: err("NOT_FOUND", "unknown paid route") };
-      const b = out.body as Json;
-      return send(res, out.status, out.status === 200 ? { ...b, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((b.meta as Json) ?? {}) } } : b, undefined, "private, no-store");
-    }
     const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
     const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
     if (retry !== null) {
