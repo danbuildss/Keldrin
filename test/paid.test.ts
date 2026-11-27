@@ -157,3 +157,27 @@ test("free tries over HTTP: 3 complete answers per client per day, then 402 with
     await db.close();
   }
 });
+
+test("free tries are counted in the database (shared by every server instance), keyed on a salted hash, never the raw IP", async () => {
+  const db = await seededDb(false);
+  const servers = [createServer((req, res) => void handle(db, req, res)), createServer((req, res) => void handle(db, req, res))];
+  for (const s of servers) await new Promise<void>((r) => s.listen(0, "127.0.0.1", () => r()));
+  const url = (i: number) => `http://127.0.0.1:${(servers[i].address() as AddressInfo).port}/v1/report?token=NVDAc`;
+  const old = process.env.NAV_HISTORY_PUBLIC;
+  process.env.NAV_HISTORY_PUBLIC = "true";
+  const h = { headers: { "x-forwarded-for": "9.9.9.9" } };
+  try {
+    for (const i of [0, 1, 0]) assert.equal((await fetch(url(i), h)).status, 200);
+    resetTrials(); // no in-memory state left: the count must come from the database
+    assert.equal((await fetch(url(1), h)).status, 402, "a different instance sees the same count");
+    const rows = (await db.query<{ client_hash: string; n: number }>("SELECT client_hash, n FROM trial_usage")).rows;
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].n, 3);
+    assert.match(rows[0].client_hash, /^[0-9a-f]{32}$/);
+    assert.ok(!JSON.stringify(rows).includes("9.9.9.9"), "the IP is not stored");
+  } finally {
+    process.env.NAV_HISTORY_PUBLIC = old;
+    for (const s of servers) s.close();
+    await db.close();
+  }
+});

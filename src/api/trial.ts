@@ -1,4 +1,5 @@
 import type { PGlite } from "@electric-sql/pglite";
+import { createHash } from "node:crypto";
 import { assetCorporateActions } from "./assetActions.ts";
 import { navHistory } from "./nav.ts";
 import { marketContext, liveLatestRound, type DexReader, type RoundReader } from "./marketContext.ts";
@@ -10,7 +11,7 @@ import { CHAIN_ID } from "../config.ts";
 // GET /v1/snapshot and GET /v1/report?token=… answer exactly like the paid Bankr x402 endpoints (keldrin-snapshot,
 // keldrin-report, $0.05 USDC on Base). Each client gets 3 complete answers per UTC day across both; after that the
 // answer is 402 with the paid links. Only complete answers count; anything incomplete is a 503 and doesn't use a try.
-// The counter is in memory per server instance, so it is a trial allowance, not an access control.
+// The counter is shared (Postgres) and keyed on a salted hash of the client IP; it is a trial allowance, not access control.
 
 export const FREE_TRIES_PER_DAY = 3;
 export const PAID = {
@@ -27,24 +28,39 @@ const err = (status: number, code: string, message: string, hint?: string): Out 
 const incomplete = (why: string) => err(503, "INCOMPLETE", `could not build a complete answer right now (${why}); this did not use a free try`, "retry in a minute");
 
 // ── trial counter ───────────────────────────────────────────────────────
-const used = new Map<string, number>();
-let usedDay = "";
-function key(client: string, now: Date) {
-  const day = now.toISOString().slice(0, 10);
-  if (day !== usedDay) (used.clear(), (usedDay = day));
-  return client;
+// Shared across server instances: one row per (hashed client, UTC day) in Postgres, via trial_used / trial_consume.
+// The client is the request IP, hashed with a server-side salt; the raw IP is never stored. If the counter can't be
+// read or written, a small in-memory count per instance is used instead (a trial allowance, never a security control).
+type CounterDb = { query: PGlite["query"]; writeOne?: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> };
+const mem = new Map<string, number>();
+const dayOf = (now: Date) => now.toISOString().slice(0, 10);
+export function clientHash(client: string): string {
+  return createHash("sha256").update((process.env.TRIAL_SALT ?? "keldrin-trial-v1") + "|" + client).digest("hex").slice(0, 32);
 }
-export function triesLeft(client: string, now = new Date()): number {
-  return Math.max(0, FREE_TRIES_PER_DAY - (used.get(key(client, now)) ?? 0));
+export async function triesLeft(db: CounterDb, client: string, now = new Date()): Promise<number> {
+  const h = clientHash(client);
+  try {
+    const r = await db.query<{ n: number }>("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
+    return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
+  } catch {
+    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
+  }
 }
-export function useTry(client: string, now = new Date()): number {
-  const k = key(client, now);
-  if (used.size > 50_000) used.clear();
-  used.set(k, (used.get(k) ?? 0) + 1);
-  return triesLeft(client, now);
+export async function useTry(db: CounterDb, client: string, now = new Date()): Promise<number> {
+  const h = clientHash(client);
+  try {
+    const sql = "SELECT trial_consume($1, $2::date) AS n";
+    const r = db.writeOne ? await db.writeOne(sql, [h, dayOf(now)]) : await db.query<{ n: number }>(sql, [h, dayOf(now)]);
+    return Math.max(0, FREE_TRIES_PER_DAY - Number((r.rows[0] as { n?: number })?.n ?? FREE_TRIES_PER_DAY));
+  } catch {
+    if (mem.size > 50_000) mem.clear();
+    const k = h + dayOf(now);
+    mem.set(k, (mem.get(k) ?? 0) + 1);
+    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(k) ?? 0));
+  }
 }
 export function resetTrials() {
-  used.clear();
+  mem.clear();
 }
 export const trialUsedUp = (): Out => ({
   status: 402,
