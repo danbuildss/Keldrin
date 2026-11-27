@@ -1,0 +1,2 @@
+== run 1 2026-11-27T09:54:54Z
+  supabase migrate: exit 0, 6s

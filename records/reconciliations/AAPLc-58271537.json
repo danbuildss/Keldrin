@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376:sec:67c1129934b1",
+  "reconciliation_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376:sec:932a138975d9",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb200000000000000000000c2e324d24d7eecd1fb:399166b9-8068-42a5-8924-8ce881d49376",
-   "payload_sha256": "67c1129934b13c8825177a1e5ad563d34d87071bbcbbe284eccb8fc5bfefdd20"
+   "payload_sha256": "932a138975d972a4e1b92fb407466f8ca10126ac018c40546a6c1d9989437225"
   },
   "company": {
    "cik": "0000320193",
@@ -16,7 +16,7 @@
     "AAPL"
    ],
    "resolution_evidence": [
-    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=07279d12774865fe",
+    "https://efts.sec.gov/LATEST/search-index?keysTyped=Apple%20Inc. sha256=d56a9b6dad0a2b8d",
     "https://data.sec.gov/submissions/CIK0000320193.json sha256=7c22869dc335882f"
    ]
   },
@@ -52,7 +52,7 @@
    "declared_on": null,
    "declared_month": null,
    "quote": "” Apple’s board of directors has declared a cash dividend of $0.27 per share of the Company’s common stock … The dividend is payable on November 16, 2026, to shareholders of record as of the close of business on November 12, 2026",
-   "offset": 1957,
+   "offset": 1956,
    "accession": "0000320193-26-000024",
    "form": "8-K",
    "filed": "2026-11-02",
@@ -126,16 +126,16 @@
    "The quarter containing the action has no SEC XBRL dividend fact yet (reporting lag)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:47:24.233Z"
+  "generated_at": "2026-11-27T09:51:58.662Z"
  },
- "payload_sha256": "9d1cf60dbb680cf7ac35c5b5078d69f5a4f5b456dbcff2a6440dc7ba23d9b203",
+ "payload_sha256": "1bb61077712f293b91c0fe2066e8a3065510811945ef7c358e703d59deef747c",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash 67c1129934b13c88"
+    "evidence": "record hash 932a138975d972a4"
    },
    {
     "claim": "declaration candidate filings exist as stated",
@@ -173,6 +173,6 @@
     "evidence": "answer 35550825000 at 58271536"
    }
   ],
-  "checked_at": "2026-11-27T08:47:25.380Z"
+  "checked_at": "2026-11-27T09:51:59.866Z"
  }
 }

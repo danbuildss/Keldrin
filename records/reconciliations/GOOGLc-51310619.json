@@ -3,11 +3,11 @@
   "schema_version": "0.2",
   "record_type": "reconciliation",
   "synthetic": false,
-  "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec:d2e66841e30f",
+  "reconciliation_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33:sec:7eb236fa7f71",
   "action_kind": "cash_dividend",
   "issuer_action": {
    "record_id": "kld:8453:0xb2000000000000000000002d0ba3164cc74f58b7:e82812a6-0b24-41c4-8ed1-322d1b466d33",
-   "payload_sha256": "d2e66841e30fc92ad0006a9518d926958fa80b2aab4fc518d2898096b7f20597"
+   "payload_sha256": "7eb236fa7f71eccb994ed69e9b60629643b20cac00d2030964c801f56cfbc76c"
   },
   "company": {
    "cik": "0001652044",
@@ -80,7 +80,7 @@
    "declared_on": null,
    "declared_month": "2026-07",
    "quote": "a quarterly cash dividend of $0.22 per share on our Class A, Class B, and Class C stock … the common stock dividend is payable on September 14, 2026 to stockholders of record for each of the company's Class A, Class B, and Class C shares as of September 7, 2026",
-   "offset": 5471,
+   "offset": 5460,
    "accession": "0001652044-26-000066",
    "form": "8-K",
    "filed": "2026-07-22",
@@ -167,16 +167,16 @@
    "Share class of the underlying (needs SEC filing text or the ADGM prospectus)."
   ],
   "status": "partially_reconciled",
-  "generated_at": "2026-11-27T08:46:42.449Z"
+  "generated_at": "2026-11-27T09:51:16.050Z"
  },
- "payload_sha256": "3067e79e45c8eab14fb3a7d9b79b799d8ccf1255d73728bd1ccbced8871a2153",
+ "payload_sha256": "a7ce891ef52ae1d53e6a2a71bd50bf9b257bf61eb5afb70617a6331eb5be1650",
  "review": {
   "verdict": "CONFIRMED",
   "claims": [
    {
     "claim": "links the exact issuer-action payload",
     "verdict": "CONFIRMED",
-    "evidence": "record hash d2e66841e30fc92a"
+    "evidence": "record hash 7eb236fa7f71eccb"
    },
    {
     "claim": "SEC XBRL fact re-fetched",
@@ -229,6 +229,6 @@
     "evidence": "recomputed 0.13089789"
    }
   ],
-  "checked_at": "2026-11-27T08:46:44.178Z"
+  "checked_at": "2026-11-27T09:51:17.797Z"
  }
 }

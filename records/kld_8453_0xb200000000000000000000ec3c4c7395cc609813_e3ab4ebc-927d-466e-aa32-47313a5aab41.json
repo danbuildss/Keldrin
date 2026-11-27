@@ -90,20 +90,20 @@
   "sources": [
    {
     "id": "chain-change",
-    "url": "https://mainnet.base.org",
+    "url": "https://base-mainnet.g.alchemy.com",
     "kind": "base_rpc",
     "sha256": null,
     "locator": "eth_call multiplier() on 0xB200000000000000000000eC3c4c7395Cc609813 at blocks 53926630 and 53926631; block hash 0x2e4f2f536277a23ead0d522cf466b01a8c4ff301016835060f56f33f18574010",
-    "retrieved_at": "2026-11-27T08:03:05.436Z",
+    "retrieved_at": "2026-11-27T09:43:15.360Z",
     "rights_state": "public"
    },
    {
     "id": "tx-0x1b8f5f46-41",
-    "url": "https://mainnet.base.org",
+    "url": "https://base-mainnet.g.alchemy.com",
     "kind": "base_tx_log",
     "sha256": null,
     "locator": "receipt 0x1b8f5f46a2d7728ae283f2019a56b399e19f7f66647ef455073c95bf2a061119 log 41 (Announcement id=e3ab4ebc-927d-466e-aa32-47313a5aab41)",
-    "retrieved_at": "2026-11-27T08:03:05.436Z",
+    "retrieved_at": "2026-11-27T09:43:15.360Z",
     "rights_state": "public"
    },
    {
@@ -112,7 +112,7 @@
     "kind": "coinbase_corporate_action",
     "sha256": "142b6595ad2be2241feff70b0cbe1078d07610f3688976110ef2159cbd63b10f",
     "locator": "whole document",
-    "retrieved_at": "2026-11-27T08:03:05.263Z",
+    "retrieved_at": "2026-11-27T09:43:15.142Z",
     "rights_state": "unknown"
    }
   ],
@@ -120,7 +120,7 @@
   "record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
   "synthetic": false,
   "supersedes": null,
-  "observed_at": "2026-11-27T08:03:05.436Z",
+  "observed_at": "2026-11-27T09:43:15.360Z",
   "record_type": "issuer_action",
   "verification": {
    "state": "draft",
@@ -179,14 +179,14 @@
    }
   ]
  },
- "payload_sha256": "6b739a7952f5610514afc8c964ceeba91e2e96b8d4f743d08b908801dbcbb2a4",
+ "payload_sha256": "300fae155a4a48d7a6ee47e3d7062e2eee44acac47f4cb5b2cc18263cb0d07de",
  "review": {
-  "review_id": "rev-6b739a7952f5-1795766778595",
+  "review_id": "rev-300fae155a4a-1795773056702",
   "record_id": "kld:8453:0xb200000000000000000000ec3c4c7395cc609813:e3ab4ebc-927d-466e-aa32-47313a5aab41",
   "revision": 1,
-  "payload_sha256": "6b739a7952f5610514afc8c964ceeba91e2e96b8d4f743d08b908801dbcbb2a4",
+  "payload_sha256": "300fae155a4a48d7a6ee47e3d7062e2eee44acac47f4cb5b2cc18263cb0d07de",
   "reviewer": "keldrin-verifier/0.1 (independent code path, live re-fetch)",
-  "checked_at": "2026-11-27T08:06:18.595Z",
+  "checked_at": "2026-11-27T09:50:56.702Z",
   "verdict": "CONFIRMED",
   "claims": [
    {
