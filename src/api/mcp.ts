@@ -80,7 +80,8 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
         return toolResult(out, (b) => {
           const d = b.data;
           const nav = d.nav ? `last NAV $${d.nav.nav} (${Math.round(d.nav.age_s / 60)} min old, ${d.staleness.state})` : `NAV unavailable (${d.nav_unavailable_reason})`;
-          const dex = d.dex?.price_usd ? `; DEX $${Number(d.dex.price_usd).toFixed(2)} (${d.dex.nav_premium_pct >= 0 ? "+" : ""}${d.dex.nav_premium_pct}% vs NAV)` : "";
+          const gap = typeof d.dex?.nav_premium_pct === "number" ? `${d.dex.nav_premium_pct >= 0 ? "+" : ""}${d.dex.nav_premium_pct}% vs NAV` : `gap vs NAV withheld: ${d.dex?.premium_unavailable_reason ?? "unavailable"}`;
+          const dex = d.dex?.price_usd ? `; DEX $${Number(d.dex.price_usd).toFixed(2)} (${gap})` : "";
           return `${d.symbol}: market ${d.market.session}; ${nav}${dex}. The NAV is the last published reference, not a live equity price.`;
         });
       }

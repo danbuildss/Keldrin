@@ -118,3 +118,8 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Smoke test against a locally served copy with live Base reads: get_market_context NVDAc → "market after; last NAV $149.61 (5 min old, expected_closed); DEX $149.78 (+0.1157% vs NAV)"; get_dex_price AAPLc → $350.35 on uniswap_v4 (USDC), 2% depth $7,848; get_nav_history TSLAc → 4 daily points, CONFIRMED.
 - Fix found by the smoke test: a trading day after the newest indexed round was reported as "missing"; now reported as `not_yet_indexed_days`.
 - Tests: MCP protocol, tools, errors, NAV switch, GET-only elsewhere.
+## Phase 10: CLI `npx keldrin` (2026-11-27)
+- Built: `src/npm/cli.ts` → `npm/cli.js` (zero runtime dependencies, Node ≥ 20): assets, actions, nav, context, dex, session, verify-nav (re-reads served rounds with getRoundData on Base and compares every field), verify-dex (re-reads the main pool's slot0 at the served block), mcp (stdio bridge to the remote /mcp). Exit codes 0 ok, 1 mismatch, 2 error.
+- Earlier manual run against production: verify-nav matched every sampled round.
+- Tests (offline, test/cli.test.ts): help/version/unknown command; symbol resolution; market context with the gap shown and withheld (never "null%"); verify-nav exit 0 on match and 1 on a 1-unit answer mismatch; MCP bridge answers requests and stays silent on notifications. CI rebuilds npm/cli.js and fails on any diff.
+- `npm pack --dry-run`: 3 files, 4.7 kB. Not published: the founder publishes.

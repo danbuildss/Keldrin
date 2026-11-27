@@ -39,3 +39,5 @@
 2026-11-27 — CD-003 follow-up: MAXXAGENT agreed to test. Reviewed the implementation vs their 4 requirements (no restart needed); wrote PLAN_DEVELOPER_RELEASE.md with acceptance criteria, developer docs (live vs planned) and a partner page. Nothing built.
 
 2026-11-27 — Phase 5 built: NAV indexer, independent verifier, session calendar, /nav/history (off by default). 13/13 feeds CONFIRMED locally (36,375 rounds). Fixed 7 of 8 review findings; the independent-context review is still owed.
+
+2026-11-27 — Phases 8–10. Phase 8 independent review found a blocker (depth estimates from liquidity math can be inflated without real backing); fixed by capping depth with balanceOf and requiring corroboration for Uniswap v4 pools, plus 7 smaller fixes. Re-ran discovery and the verifier on live Base: 416 pools, 13/13 CONFIRMED. With honest depths, AAPLc's main market moved from a deep but uncorroborated v4 pool to a v3 pool. Phase 10 CLI tested offline (help, symbols, withheld gap, verify-nav match/mismatch exit codes, MCP bridge). Lesson: a "deepest pool" rule needs a depth number that can't be faked.

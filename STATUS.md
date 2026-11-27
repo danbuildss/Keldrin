@@ -63,3 +63,10 @@
 - 5b: official NAV history (live windows; phase-1 decimals conflict excluded); verifier on Base's public RPC; 13/13 CONFIRMED. Independent re-review running.
 - 6: market context, per-asset corporate actions, testing package built; 99 tests. Not deployed (needs a merge; NAV-based routes stay off until NAV_HISTORY_PUBLIC=true).
 - Next, Phase 7 (approved): front page, final independent review, outside-in tests on the preview, go-live by the founder, message to MAXXAGENT. Founder inputs needed: feedback channel, name on the page.
+
+## Phases 8–10 (approved 2026-11-27: "approve 8–13")
+- Phase 8, DEX price: built, independently reviewed (1 blocker + 7 findings, all fixed: depth capped by real pool balances, uncapped v4 pools need corroboration, >1% fee pools excluded, gap vs NAV withheld when the NAV is stale). 416 pools, 13/13 CONFIRMED locally after the fixes. Not deployed: needs the PR merged, then one scheduled run fills dex_pools and dex_reviews in Supabase.
+- Phase 9, remote MCP at POST /mcp (6 read-only tools) + server.json for the MCP Registry: built, not deployed (same PR).
+- Phase 10, CLI `npx keldrin` (npm/): built, 4 offline tests, CI checks the bundle matches the source. The name `keldrin` was free on npm on 2026-11-27. The founder publishes (`npm publish` from npm/).
+- Tests: 119 pass, 1 skipped.
+- Next: PR for 8–10 → founder merges → founder runs the robot → outside-in check of /dex and /mcp on production → founder publishes the CLI. Then Phase 11 (x402: needs payout wallet address, facilitator route, price), 12 (website from the founder's design + feedback form), 13 (launch).
