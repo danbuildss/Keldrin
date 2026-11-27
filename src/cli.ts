@@ -229,6 +229,11 @@ async function supabaseCmd(sub: string) {
     await q("authenticated can read records? (must be denied)", "SET ROLE authenticated; SELECT count(*) FROM keldrin.records");
     await q("reader can read confirmed records", "SET ROLE keldrin_reader; SELECT count(*) AS confirmed FROM keldrin.confirmed_records");
     await q("reader cannot write (must be denied)", "SET ROLE keldrin_reader; INSERT INTO keldrin.runs (run_id, kind, started_at) VALUES ('x','x',now())");
+    await q("writer can read confirmed records", "SET ROLE keldrin_writer; SELECT count(*) AS confirmed FROM keldrin.confirmed_records");
+    await q("writer cannot delete (must be denied)", "SET ROLE keldrin_writer; DELETE FROM keldrin.runs WHERE false");
+    await q("writer cannot update records (must be denied)", "SET ROLE keldrin_writer; UPDATE keldrin.records SET record_type = record_type WHERE false");
+    await q("writer cannot read migrations (must be denied)", "SET ROLE keldrin_writer; SELECT count(*) FROM keldrin.schema_migrations");
+    await q("writer cannot create tables (must be denied)", "SET ROLE keldrin_writer; CREATE TABLE keldrin.x_probe (a int)");
     await q("records are append-only (must raise)", "UPDATE keldrin.records SET record_type = record_type WHERE false OR true");
     await q("keldrin not exposed via Data API schemas", "SELECT current_setting('pgrst.db_schemas', true) AS pgrst_db_schemas");
   } else {

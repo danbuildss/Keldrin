@@ -35,3 +35,8 @@
 - Token: exploratory only (docs/TOKEN_RESEARCH.md). "Public calls" and "a treasury of stocks" conflict with CLAUDE.md; nothing built.
 - Proposed scope changes (NOT approved; TASKS.md T020–T026): earnings release events from 8-K 2.02; announced upcoming earnings dates; headline results; derived ex-dividend date; dividend history; asset context endpoint; DEX market data and fundamentals as P1. Excluded: results vs expectations (needs licensed consensus).
 - Recommended order: Phase 4 scheduling first, then earnings.
+
+## Phase 4 (approved 2026-11-27) — in progress
+- Done: keldrin_writer role (live, NOLOGIN), writer adapter, 6-hourly schedule (disabled until RESEARCH_ENABLED), real-Postgres test, full pipeline proven as the writer role (BACKEND_PROOF.md).
+- Waiting on founder: writer password + GitHub environment secrets (docs/PHASE4_SCHEDULE.md), then one manual run.
+- Breakra study: docs/BREAKRA_STUDY.md (lessons for x402, MCP, SKILL.md and metrics; proposals not approved).

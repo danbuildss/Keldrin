@@ -13,3 +13,5 @@ Append dated lesson with evidence, failure mode, proposed action and reviewer ve
 2026-11-27 — Lesson: never keep two stores that number revisions independently and then sync them; the primary store must compute revisions. Gate run 1 showed 0 servable records in Supabase (fail-closed). Fix: Supabase is the primary store.
 2026-11-27 — Lesson: placeholder substitution must be a single pass over the original SQL; inserted literals ($kld$2026…) can contain text that looks like a placeholder ($2). Regression test added.
 2026-11-27 — Lesson: "payable date passed, no adjustment" usually meant the token did not exist yet on the record date (9 of 9 cases). Check token issuance before calling anything late.
+
+- 2026-11-27: Pipeline commands always write evidence to records/, even when pointed at a test database. Run local or test pipelines with a clean check of `git status records/` before committing (a throwaway-DB run slipped into a commit once and was reverted).

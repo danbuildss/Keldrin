@@ -11,7 +11,7 @@
 | T007 | P0 | Implement adapters and job state | IN_PROGRESS (adapters done; job leases/dead letter in Phase 2) | Phase 1 P1-03; job state in Phase 2 |
 | T008 | P0 | Expand coverage to five approved assets | VERIFIED beyond scope (all 435 tokens; gold set pending) | Phase 2; needs log indexer + RPC decision (D9) |
 | T009 | P0 | REST feed + sample consumer | VERIFIED locally (OpenAPI spec pending Phase 3) | Localhost subset in Phase 1 P1-08; full Phase 3 |
-| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | OPEN | Manual runs proven; separate credentials; founder enable |
+| T010 | P1 | Native Actions scheduling + health (Aeon pack later) | IN_PROGRESS (Phase 4: code proven; founder secrets pending) | Manual runs proven; separate credentials; founder enable |
 | T011 | P1 | x402 one paid route | OPEN | Entitlement and cost approvals, testnet proof, replay/outage handling |
 | T012 | P1 | Public evidence UI and docs | OPEN | Only after backend gate |
 | T013 | P1 | Founder-led builder integrations / interviews | IN_PROGRESS (CD-001, CD-002; CUSTOMER_DISCOVERY.md) | Validates differentiation hypothesis |
@@ -44,3 +44,7 @@ Phase 1 (approved 2026-11-27, re-sequenced): DONE locally, see BACKEND_PROOF.md.
 Status vocabulary: OPEN, PROPOSED, APPROVED, IN_PROGRESS, BLOCKED, VERIFIED. VERIFIED requires reproducible evidence linked in BACKEND_PROOF.md or FINDINGS_INDEX.md. Do not silently promote tasks. Work on one approved phase at a time.
 
 Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calendar VERIFIED; P2-02 Alchemy indexer VERIFIED; P2-03 Supabase VERIFIED; P2-04 reconciliations + OpenAPI VERIFIED; P2-05 pinned Actions + manual workflow VERIFIED; P2-06 earnings dates OPEN (deferred). Gold set: template ready, annotation OPEN (founder).
+| T028 | P1 (proposed) | SKILL.md at /skill.md (agent guide, as in Breakra) | PROPOSED | docs/BREAKRA_STUDY.md lesson 4 |
+| T029 | P1 (proposed) | Remote read-only MCP endpoint /mcp + MCP Registry listing | PROPOSED | Replaces the T015 shape; founder submits listings |
+| T030 | P1 (proposed) | Public self-verification of records | PROPOSED | Lesson 6 |
+| T031 | P1 | Decide the x402 host (Bankr x402 Cloud vs Vercel + facilitator) | OPEN (research) | Does Bankr support secrets? Phase 5 |
