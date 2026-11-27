@@ -8,8 +8,10 @@ import { findChangePoints, gatherEvidence } from "./pipeline/discover.ts";
 import { buildIssuerActionRecord, hashRecord, type IssuerActionRecord } from "./pipeline/records.ts";
 import { hashReconciliation, reconcileAction } from "./pipeline/reconcile.ts";
 import { verifyIdentities } from "./pipeline/registry.ts";
-import { verifyDeclaration, verifyIssuerAction, verifyReconciliation } from "./verify/verify.ts";
-import { buildCalendar } from "./pipeline/calendar.ts";
+import { verifyDeclaration, verifyIssuerAction, verifyIssuerAnnouncement, verifyReconciliation } from "./verify/verify.ts";
+import { buildCalendar, mergeIssuerAnnounced } from "./pipeline/calendar.ts";
+import { scanLogs } from "./pipeline/indexer.ts";
+import { getCorporateAction } from "./adapters/coinbase.ts";
 import { canonicalJson } from "./lib/canonical.ts";
 
 const args = process.argv.slice(2);
@@ -112,19 +114,41 @@ async function calendar(symbols?: string[]) {
   const scope = symbols ?? (await db.query<{ symbol: string }>("SELECT DISTINCT payload->'asset'->>'symbol' AS symbol FROM confirmed_records ORDER BY 1")).rows.map((r) => r.symbol);
   const asOf = new Date();
   const snapshotId = "snap-" + asOf.toISOString().replace(/[:.]/g, "-");
-  const { entries, skipped } = await buildCalendar(db, scope, asOf);
+  // Issuer side: announced-but-not-applied actions from the log index (needs a log-capable RPC).
+  const assetRows = (await db.query<{ contract_address: string; symbol: string }>("SELECT contract_address, symbol FROM assets")).rows;
+  const pending: Parameters<typeof mergeIssuerAnnounced>[1] = [];
+  try {
+    const idx = await scanLogs(new Set(assetRows.map((a) => a.contract_address)));
+    for (const [uuid, anns] of Object.entries(idx.byUuid)) {
+      const ca = (await getCorporateAction(uuid)).data;
+      if (ca.status !== "CORPORATE_ACTION_STATUS_ANNOUNCED") continue;
+      const sym = assetRows.find((a) => a.contract_address.toLowerCase() === ca.contract_address.toLowerCase())?.symbol ?? ca.symbol;
+      pending.push({ contract: ca.contract_address, symbol: sym, uuid, status: ca.status, description: ca.description, announcedAt: ca.announced_at ?? null, anns });
+    }
+    console.log("calendar: " + pending.length + " issuer-announced action(s) not yet applied");
+  } catch (e) {
+    console.log("calendar: issuer-announced side skipped (" + String((e as Error).message).slice(0, 100) + ")");
+  }
+  const secScope = [...new Set([...scope, ...pending.map((p) => p.symbol)])];
+  const built = await buildCalendar(db, secScope, asOf);
+  const entries = mergeIssuerAnnounced(built.entries, pending, asOf);
+  const skipped = built.skipped;
   const out: unknown[] = [];
   for (const e of entries) {
-    const review = await verifyDeclaration(JSON.parse(JSON.stringify(e.declaration)));
+    const parts = [] as { verdict: string; claims: unknown[] }[];
+    if (e.declaration) parts.push(await verifyDeclaration(JSON.parse(JSON.stringify(e.declaration))));
+    if (e.issuer_announcement) parts.push(await verifyIssuerAnnouncement(e.token.contract_address, JSON.parse(JSON.stringify(e.issuer_announcement))));
+    const verdict = parts.some((p) => p.verdict === "REJECTED") ? "REJECTED" : parts.some((p) => p.verdict === "UNSURE") || !parts.length ? "UNSURE" : "CONFIRMED";
+    const review = { verdict, claims: parts.flatMap((p) => p.claims), checked_at: new Date().toISOString() };
     await db.query(
       "INSERT INTO calendar_entries (snapshot_id, entry_id, as_of, contract_address, state, payable_date, payload, review_verdict, review) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
-      [snapshotId, e.entry_id, e.as_of, e.token.contract_address, e.state, e.declaration.payable_date, JSON.stringify(e), review.verdict, JSON.stringify(review)],
+      [snapshotId, e.entry_id, e.as_of, e.token.contract_address, e.state, e.declaration?.payable_date ?? null, JSON.stringify(e), review.verdict, JSON.stringify(review)],
     );
     out.push({ entry: e, review });
-    console.log("  " + review.verdict.padEnd(9) + " " + e.token.symbol.padEnd(7) + " " + e.state.padEnd(12) + " $" + e.declaration.per_share + " record " + e.declaration.record_date + " payable " + e.declaration.payable_date + (e.applied_record_id ? " -> applied" : ""));
+    console.log("  " + review.verdict.padEnd(9) + " " + e.token.symbol.padEnd(7) + " " + e.state.padEnd(12) + (e.declaration ? " $" + e.declaration.per_share + " record " + e.declaration.record_date + " payable " + e.declaration.payable_date : " " + (e.issuer_announcement?.description ?? "")) + (e.issuer_announcement ? " [issuer-announced]" : "") + (e.applied_record_id ? " -> applied" : ""));
   }
   mkdirSync(OUT, { recursive: true });
-  writeFileSync(join(OUT, "calendar-latest.json"), JSON.stringify({ snapshot_id: snapshotId, as_of: asOf.toISOString(), scope, skipped, entries: out }, null, 1) + "\n");
+  writeFileSync(join(OUT, "calendar-latest.json"), JSON.stringify({ snapshot_id: snapshotId, as_of: asOf.toISOString(), scope: secScope, skipped, entries: out }, null, 1) + "\n");
   console.log("calendar: " + entries.length + " entr(ies) for " + scope.length + " token(s); skipped " + JSON.stringify(skipped));
   await db.close();
 }

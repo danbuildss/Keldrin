@@ -2,6 +2,7 @@ import { getAddress } from "viem";
 import type { PGlite } from "@electric-sql/pglite";
 import { declarationCandidates, filingsIndex, resolveCik, underlyingTicker } from "./company.ts";
 import { extractDividendDeclarations, filingDocuments, type Declaration } from "./declarations.ts";
+import type { Announcement } from "./discover.ts";
 
 // Leading calendar: dividends a company has DECLARED (SEC filing text, with evidence) mapped to the token
 // that should adjust. State is derived, never assumed:
@@ -13,14 +14,17 @@ import { extractDividendDeclarations, filingDocuments, type Declaration } from "
 export type CalendarEntry = {
   entry_id: string;
   token: { chain_id: 8453; contract_address: string; symbol: string };
-  company: { cik: string; name: string };
-  declaration: Declaration & { accession: string; form: string; filed: string; document_url: string; document_sha256: string };
-  state: "upcoming" | "applied" | "not_observed";
+  company: { cik: string; name: string } | null;
+  declaration: (Declaration & { accession: string; form: string; filed: string; document_url: string; document_sha256: string }) | null;
+  issuer_announcement: IssuerAnnouncement | null;
+  state: "upcoming" | "applied" | "not_observed" | "announced";
   expected_adjustment_date: string | null;
   applied_record_id: string | null;
   basis: string;
   as_of: string;
 };
+
+export type IssuerAnnouncement = { corporate_action_uuid: string; status: string; description: string; announced_at: string | null; announcements: { tx_hash: string; block: string; log_index: number; id: string; uri: string; caller: string }[] };
 
 export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Date(), lookbackDays = 120): Promise<{ entries: CalendarEntry[]; skipped: { symbol: string; reason: string }[] }> {
   const pattern = await observedPattern(db);
@@ -60,6 +64,7 @@ export async function buildCalendar(db: PGlite, symbols: string[], asOf = new Da
             token: { chain_id: 8453, contract_address: getAddress(asset.contract_address), symbol },
             company: { cik: r.cik, name: r.name },
             declaration: { ...x, accession: cand.accession, form: cand.form, filed: cand.filed, document_url: d.url, document_sha256: d.sha256 },
+            issuer_announcement: null,
             state,
             expected_adjustment_date: state === "applied" ? null : x.payable_date,
             applied_record_id: applied?.record_id ?? null,
@@ -87,4 +92,41 @@ async function observedPattern(db: PGlite): Promise<string> {
     if (ck.result === "pass") same++;
   }
   return n ? `${same} of ${n} reconciled dividends adjusted on the payable date` : "no reconciled dividends yet";
+}
+
+/**
+ * Merge issuer announcements that are ANNOUNCED (not yet applied) into the calendar. When an SEC
+ * "upcoming" declaration exists for the same token it is enriched (both sides agree something is
+ * coming); otherwise an "announced" entry is added with no expected date (none is evidenced).
+ */
+export function mergeIssuerAnnounced(entries: CalendarEntry[], pending: { contract: string; symbol: string; uuid: string; status: string; description: string; announcedAt: string | null; anns: Announcement[] }[], asOf: Date): CalendarEntry[] {
+  const out = [...entries];
+  for (const p of pending) {
+    const ia: IssuerAnnouncement = {
+      corporate_action_uuid: p.uuid,
+      status: p.status,
+      description: p.description,
+      announced_at: p.announcedAt,
+      announcements: p.anns.map((a) => ({ tx_hash: a.txHash, block: a.block, log_index: a.logIndex, id: a.id, uri: a.uri, caller: a.caller })),
+    };
+    const sec = out.find((e) => e.token.contract_address.toLowerCase() === p.contract.toLowerCase() && e.state === "upcoming" && !e.issuer_announcement);
+    if (sec) {
+      sec.issuer_announcement = ia;
+      sec.basis += " The issuer has also announced this action onchain (status " + p.status + ").";
+      continue;
+    }
+    out.push({
+      entry_id: `cal:8453:${p.contract.toLowerCase()}:ca:${p.uuid}`,
+      token: { chain_id: 8453, contract_address: getAddress(p.contract), symbol: p.symbol },
+      company: null,
+      declaration: null,
+      issuer_announcement: ia,
+      state: "announced",
+      expected_adjustment_date: null,
+      applied_record_id: null,
+      basis: "Announced onchain by the issuer and not yet applied. No dated company declaration has been evidenced yet, so no expected date is given.",
+      as_of: asOf.toISOString(),
+    });
+  }
+  return out.sort((a, b) => (a.expected_adjustment_date ?? "9999").localeCompare(b.expected_adjustment_date ?? "9999") || a.token.symbol.localeCompare(b.token.symbol));
 }
