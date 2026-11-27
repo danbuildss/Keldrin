@@ -77,4 +77,4 @@
 
 ## Phase 12 (approved 2026-11-27): website
 - Built: public/index.html (keystone logo, lowercase wordmark, Base colours, halftone/flow/count/marquee/reveal animations with reduced-motion support, live numbers from /health, /mcp and one market-context call; never the metered snapshot), POST /v1/feedback (validated, honeypot, 5 per client per day, stored only through feedback_submit; IP never stored). API index also at /v1.
-- Waiting on the founder: approval to store feedback (applies migrations 008 + supabase/011). Until then the form answers "Feedback isn't open yet".
+- LIVE: site at keldrin.vercel.app (PR #21); feedback storage approved, applied and checked. The founder reads submissions in Supabase → Table Editor → schema keldrin → feedback. Next: Phase 13 (launch).

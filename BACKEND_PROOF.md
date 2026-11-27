@@ -139,3 +139,7 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Tests: 125 pass, 1 skipped (incl. two server instances sharing one count; the IP is not stored).
 - Counter fix (PR #20): writeOne's guard did not match the statement it allows, so every write fell back to memory. Fixed with one shared constant; a real-Postgres test as keldrin_reader catches it (fails without the fix); CI now runs it on a Postgres service (127/127, 0 skipped in CI).
 - Outside check after #20 (production): 4 calls → left 2, 1, 2, 2, and Supabase `trial_usage` holds 3 rows for today (n = 2, 1, 1): the database count works. This session's outgoing traffic leaves from rotating IP addresses (3 distinct client hashes for 4 calls), so a single-IP 2→1→0→402 sequence could not be shown from here; Vercel sets x-forwarded-for itself, so it can't be faked to test. To be confirmed from one browser by the founder.
+
+## Phase 12: website + feedback (2026-11-27)
+- PR #21 merged; https://keldrin.vercel.app/ serves the site (200, text/html); /v1, /health unchanged (200).
+- Feedback storage approved and applied (008_feedback.sql, supabase/011_feedback_grants.sql). Per-role check on Supabase: keldrin_reader can call feedback_submit; reader and writer reading feedback → permission denied; anon → denied. Live check: a bad email → 400 BAD_EMAIL; one self-test submission through production → 200, stored (hashed client, 32 hex), then deleted.
