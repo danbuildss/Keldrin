@@ -1,0 +1,17 @@
+{
+ "data": {
+  "ny_date": "2026-11-27",
+  "ny_time": "09:21",
+  "is_trading_day": true,
+  "early_close": true,
+  "calendar_version": "nyse-2026-2027.1",
+  "session": "pre",
+  "next_open": "2026-11-27T14:30:00.000Z",
+  "next_close": "2026-11-27T18:00:00.000Z",
+  "last_close": "2026-11-25T21:00:00.000Z"
+ },
+ "meta": {
+  "as_of": "2026-11-27T14:21:43.441Z",
+  "schema_version": "0.2"
+ }
+}

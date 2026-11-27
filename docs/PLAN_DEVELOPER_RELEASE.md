@@ -24,7 +24,7 @@ Build:
 - Route with `from`, `to`, `interval=round|daily`, `limit` (max 1,000), `cursor`.
 - Session calendar module (shared with Phase 6), needed for daily closes.
 
-Response fields per observation: `chain_id`, `token`, `feed`, `phase_id`, `aggregator`, `round_id` (proxy id, decimal string), `aggregator_round_id`, `answer_raw`, `decimals`, `nav` (exact decimal string), `updated_at`, `retrieved_at`, `session_day` (for daily). Response `quality`: `first_round_at`, `last_round_at`, `rounds_indexed`, `missing_round_ids`, `max_in_session_gap_s`, `verification` (verdict, sampled n, checked_at), `coverage_note`.
+Response fields per observation: `chain_id`, `token`, `feed`, `phase_id`, `aggregator`, `round_id` (proxy id, decimal string), `aggregator_round_id`, `answer_raw`, `decimals`, `nav` (exact decimal string), `updated_at`, `retrieved_at`, `session_day` (for daily). Response `quality`: `official_rounds`, `first_official_round_at`, `last_official_round_at`, `missing_round_ids`, `max_in_session_gap_s`, `p99_in_session_gap_s`, `phases`, `verification` (verdict, sampled n, checked_at), `coverage_note`.
 
 Acceptance:
 1. **NVDAc first:** every round from phase 1 round 1 to the latest indexed is stored. The count equals the onchain counts per phase, measured independently.

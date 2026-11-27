@@ -75,3 +75,16 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Live proof (local store, research/phase5/runs/2026-11-27-nav-verify-5b-public-rpc.log): all 12 two-phase feeds switched at block 49,669,080 (matches the reviewer's independent measurement for GOOGLc); 13/13 CONFIRMED via the public RPC; official rounds e.g. NVDAc 1,920 of 2,065 (30 overlap excluded; phase 1 excluded for its decimals conflict).
 - Observation for Phase 6: the longest in-session gaps between rounds reach about 6 h on some feeds, so staleness must be judged per feed (p99), not by one fixed threshold.
 - Tests: 94 pass + the real-Postgres test. Supabase migration 005/008 applied.
+
+## Phase 5b re-review (2026-11-27)
+- A second independent review found no blocker (the overlap blocker is resolved) and 5 should-fix items, all fixed: per-row decimals served from the round's own aggregator (phase-1 rows: 18 decimals, raw answer only, `nav: null` with a reason; found on TSLAc); phase-boundary search throws on transient errors, self-checks, and re-searches a stored boundary that fails; the review pins the phase rows it checked (`phase_observed_block` in `covered`) and the API serves only those; the verifier checks each window's end, that the current phase has none, and the stored times against block timestamps; the verifier marks UNSURE if it reads through the same RPC host as the indexer, and records its host.
+- Not done (nits): `nav_feeds.decimals` is stored once (a proxy decimals change makes the verifier reject; it fails closed); no mocked-chain test of `indexFeed` gap retry; quality field names now `official_rounds` / `first_official_round_at` (plan wording updated).
+- Live: 13/13 CONFIRMED with all new checks (research/phase5/runs/2026-11-27-nav-verify-5b-rereview-fixes.log).
+
+## Phase 6: market context, per-asset corporate actions, testing package (2026-11-27)
+- Approved by the founder ("i approve everything so start 5b and the rest").
+- Built: `src/lib/marketSession.ts` (session open/pre/after/closed/weekend/holiday/calendar_not_covered, next open/close, last close; staleness classes with a per-feed threshold from the verified p99 in-session gap), `GET /v1/market/session`, `GET /v1/assets/{contract}/market-context` (latest NAV read live from Base's public RPC, round id, age, staleness; degrades to nav: null with a reason; no DEX price; behind the NAV switch), `GET /v1/assets/{contract}/corporate-actions` (per-asset verified events with multiplier/uiMultiplier before/after, effective time, announcement txs, evidence links). OpenAPI 0.5.0, llms.txt.
+- Real outputs (local verified store + live Base reads) in docs/developers/examples/: NVDAc market context at 09:2x ET = pre-market, NAV 152.84717833 (round 36893488147419105182), expected_closed; NVDAc daily closes Nov 17–25 with no missing days; GOOGLc corporate actions with evidence links.
+- Measured limitation: in-session gaps between official rounds are long (NVDAc p99 ≈ 3.7 h, max ≈ 6 h), so `unexpectedly_stale` is a conservative alarm. Documented in docs/developers/DATA_FRESHNESS.md.
+- Tests: 99 pass (+ the real-Postgres test). Independent review of Phase 6: still to run in Phase 7.
+- Testing package: docs/developers/QUICKSTART.md (rewritten), examples/, docs/partners/MAXXAGENT_TEST_MESSAGE.md (draft for the founder to send).

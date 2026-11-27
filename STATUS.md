@@ -58,3 +58,8 @@
 ## Competitive review 001 (2026-11-27): Proof of Stock
 - Complementary: they do authenticity plus the live premium and sessions; Keldrin does history, corporate actions, risk and research. In their public code, none of our 8 core capabilities were found (docs/research/PROOF_OF_STOCK.md). No direction change.
 - Effect on Phase 6 (proposed): don't build DEX price or premium; keep market context focused on Chainlink round age and staleness, plus corporate actions per stock.
+
+## Phases 5b + 6 (approved 2026-11-27)
+- 5b: official NAV history (live windows; phase-1 decimals conflict excluded); verifier on Base's public RPC; 13/13 CONFIRMED. Independent re-review running.
+- 6: market context, per-asset corporate actions, testing package built; 99 tests. Not deployed (needs a merge; NAV-based routes stay off until NAV_HISTORY_PUBLIC=true).
+- Next, Phase 7 (approved): front page, final independent review, outside-in tests on the preview, go-live by the founder, message to MAXXAGENT. Founder inputs needed: feedback channel, name on the page.

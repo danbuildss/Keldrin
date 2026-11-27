@@ -5380,7 +5380,7 @@ var keldrin_v1_default = {
   openapi: "3.1.0",
   info: {
     title: "Keldrin API",
-    version: "0.4.0",
+    version: "0.5.0",
     description: "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
   },
   servers: [
@@ -6160,6 +6160,172 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/market/session": {
+      get: {
+        summary: "US equity session right now (NYSE calendar 2026-2027)",
+        responses: {
+          "200": {
+            description: "Session",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    data: {
+                      type: "object",
+                      properties: {
+                        session: {
+                          type: "string",
+                          enum: [
+                            "open",
+                            "pre",
+                            "after",
+                            "closed",
+                            "weekend",
+                            "holiday",
+                            "calendar_not_covered"
+                          ]
+                        },
+                        ny_date: {
+                          type: "string"
+                        },
+                        ny_time: {
+                          type: "string"
+                        },
+                        is_trading_day: {
+                          type: [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        early_close: {
+                          type: "boolean"
+                        },
+                        next_open: {
+                          type: [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        next_close: {
+                          type: [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        last_close: {
+                          type: [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        calendar_version: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{contract}/market-context": {
+      get: {
+        summary: "Session, latest Chainlink NAV (live, with round id and age) and staleness for one token",
+        description: "The latest round is read live from Base's public RPC (cached up to 30 s). staleness: fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered, judged against the feed's own verified p99 in-session gap (threshold = max(2 \xD7 p99, 30 min)). Provider failures degrade to nav: null with nav_unavailable_reason. No DEX price is served (dex.unavailable_reason). Returns 503 NAV_NOT_ENABLED until enabled.",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Market context"
+          },
+          "400": {
+            description: "Bad address",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "UNKNOWN_ASSET",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            description: "NAV_NOT_ENABLED",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{contract}/corporate-actions": {
+      get: {
+        summary: "One token's verified corporate actions with multiplier and uiMultiplier detail",
+        description: "Same events as /v1/events for the token, plus operator description, announced_at, effective block/time, ui_multiplier_before/after_wad and its effective time (when the UIMultiplierUpdated event exists), announcement transactions and evidence links (onchain tx, Coinbase issuer record, SEC filing, Keldrin record).",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Corporate actions"
+          },
+          "400": {
+            description: "Bad address",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "UNKNOWN_ASSET",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
@@ -6735,13 +6901,17 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail) : rev?.detail;
   if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered)) return e(503, "NAV_NOT_VERIFIED", `NAV history for ${feed.symbol} is not independently verified (${rev ? rev.verdict : "no review yet"})`, "Keldrin fails closed; read the feed onchain meanwhile: " + feed.feed_address);
   const covered2 = JSON.stringify(detail.covered);
-  const ph = `ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_time, live_to_time, (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS dec_ok
-                     FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC)`;
+  const phCte = (cov) => `ph AS (SELECT DISTINCT ON (phase_id) phase_id, live_from_time, live_to_time, aggregator_decimals,
+                     (aggregator_decimals IS NOT NULL AND aggregator_decimals = proxy_decimals) AS dec_ok
+                     FROM nav_phases WHERE chain_id=$1 AND feed_address=$2
+                       AND observed_block <= COALESCE((SELECT (c->>'phase_observed_block')::bigint FROM jsonb_array_elements(${cov}::jsonb) c WHERE (c->>'phase')::int = nav_phases.phase_id), -1)
+                     ORDER BY phase_id, observed_block DESC)`;
+  const ph = phCte("$5");
   const liveExpr = "(ph.live_from_time IS NULL OR r.updated_at >= ph.live_from_time) AND (ph.live_to_time IS NULL OR r.updated_at < ph.live_to_time)";
   const cols = `r.round_id::text AS round_id, r.phase_id, r.aggregator_round_id::text AS aggregator_round_id, r.aggregator_address, r.answer::text AS answer, r.decimals,
     to_char(r.started_at AT TIME ZONE 'UTC', ${iso}) AS started_at, to_char(r.updated_at AT TIME ZONE 'UTC', ${iso}) AS updated_at, r.answered_in_round::text AS answered_in_round,
     to_char(r.retrieved_at AT TIME ZONE 'UTC', ${iso}) AS retrieved_at, r.retrieved_block::text AS retrieved_block, extract(epoch from r.updated_at)::bigint::text AS updated_unix,
-    (${liveExpr}) AS proxy_live, ph.dec_ok AS decimals_ok`;
+    (${liveExpr}) AS proxy_live, ph.dec_ok AS decimals_ok, ph.aggregator_decimals AS aggregator_decimals`;
   const coveredExpr = "r.round_id <= (SELECT (c->>'max_round_id')::numeric FROM jsonb_array_elements($5::jsonb) c WHERE (c->>'phase')::int = r.phase_id)";
   const officialExpr = `(${liveExpr}) AND ph.dec_ok`;
   const lo = interval === "daily" ? new Date(Date.parse(from + "T00:00:00Z") - 864e5).toISOString() : from + "T00:00:00Z";
@@ -6767,26 +6937,30 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
       [CHAIN_ID, feed.feed_address, lo, hi, covered2]
     )).rows;
   }
-  const item = (r, flags) => ({
-    chain_id: CHAIN_ID,
-    token: feed.token_address,
-    feed: feed.feed_address,
-    round_id: r.round_id,
-    phase_id: r.phase_id,
-    aggregator_round_id: r.aggregator_round_id,
-    aggregator: r.aggregator_address,
-    answer_raw: r.answer,
-    decimals: r.decimals,
-    nav: formatNav(r.answer, r.decimals),
-    started_at: r.started_at,
-    updated_at: r.updated_at,
-    answered_in_round: r.answered_in_round,
-    retrieved_at: r.retrieved_at,
-    retrieved_block: r.retrieved_block,
-    ...flags ? { official: Boolean(r.proxy_live && r.decimals_ok), proxy_live: Boolean(r.proxy_live), decimals_ok: Boolean(r.decimals_ok) } : {}
-  });
+  const item = (r, flags) => {
+    const dec = r.aggregator_decimals ?? r.decimals;
+    return {
+      chain_id: CHAIN_ID,
+      token: feed.token_address,
+      feed: feed.feed_address,
+      round_id: r.round_id,
+      phase_id: r.phase_id,
+      aggregator_round_id: r.aggregator_round_id,
+      aggregator: r.aggregator_address,
+      answer_raw: r.answer,
+      decimals: dec,
+      nav: r.decimals_ok === false ? null : formatNav(r.answer, dec),
+      ...r.decimals_ok === false ? { nav_unavailable_reason: "aggregator_decimals_differ_from_proxy" } : {},
+      started_at: r.started_at,
+      updated_at: r.updated_at,
+      answered_in_round: r.answered_in_round,
+      retrieved_at: r.retrieved_at,
+      retrieved_block: r.retrieved_block,
+      ...flags ? { official: Boolean(r.proxy_live && r.decimals_ok), proxy_live: Boolean(r.proxy_live), decimals_ok: Boolean(r.decimals_ok) } : {}
+    };
+  };
   const span = (await db2.query(
-    `WITH ${ph} SELECT to_char(min(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS first, to_char(max(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS last, count(*)::int AS n
+    `WITH ${phCte("$3")} SELECT to_char(min(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS first, to_char(max(r.updated_at) AT TIME ZONE 'UTC', ${iso}) AS last, count(*)::int AS n
      FROM nav_rounds r JOIN ph ON ph.phase_id = r.phase_id WHERE r.chain_id=$1 AND r.feed_address=$2 AND ${coveredExpr.replace("$5", "$3")} AND ${officialExpr}`,
     [CHAIN_ID, feed.feed_address, covered2]
   )).rows[0];
@@ -6839,11 +7013,190 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row, false) })), meta: { ...meta, count: d.closes.length, quality } } };
 }
 
+// src/lib/marketSession.ts
+var isoS = (s) => s === null ? null : new Date(s * 1e3).toISOString();
+var dayShift = (date, n) => new Date(Date.parse(date + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+function lastSessionClose(nowSec) {
+  const today = nyParts(nowSec).date;
+  for (let i = 0; i <= 10; i++) {
+    const d = dayShift(today, -i);
+    const td = isTradingDay(d);
+    if (td === null) return null;
+    if (td && sessionClose(d) <= nowSec) return sessionClose(d);
+  }
+  return null;
+}
+function nextSession(nowSec) {
+  const today = nyParts(nowSec).date;
+  for (let i = 0; i <= 10; i++) {
+    const d = dayShift(today, i);
+    const td = isTradingDay(d);
+    if (td === null) return null;
+    if (td && sessionOpen(d) > nowSec) return { open: sessionOpen(d), close: sessionClose(d) };
+  }
+  return null;
+}
+function marketNow(nowSec) {
+  const p = nyParts(nowSec);
+  const td = isTradingDay(p.date);
+  const early = EARLY_CLOSES.has(p.date);
+  const hhmm = `${String(Math.floor(p.minutes / 60)).padStart(2, "0")}:${String(p.minutes % 60).padStart(2, "0")}`;
+  const base = { ny_date: p.date, ny_time: hhmm, is_trading_day: td, early_close: early, calendar_version: CALENDAR_VERSION };
+  if (td === null) return { ...base, session: "calendar_not_covered", next_open: null, next_close: null, last_close: null };
+  let session;
+  if (!td) session = p.weekday === "Sat" || p.weekday === "Sun" ? "weekend" : "holiday";
+  else if (nowSec >= sessionOpen(p.date) && nowSec < sessionClose(p.date)) session = "open";
+  else if (nowSec >= nyTime(p.date, 4, 0) && nowSec < sessionOpen(p.date)) session = "pre";
+  else if (nowSec >= sessionClose(p.date) && nowSec < (early ? nyTime(p.date, 17, 0) : nyTime(p.date, 20, 0))) session = "after";
+  else session = "closed";
+  const nxt = nextSession(nowSec);
+  return {
+    ...base,
+    session,
+    next_open: isoS(nxt?.open ?? null),
+    next_close: session === "open" ? isoS(sessionClose(p.date)) : isoS(nxt?.close ?? null),
+    last_close: isoS(lastSessionClose(nowSec))
+  };
+}
+var STALENESS_METHOD = "v1: threshold = max(2 \xD7 the feed's p99 in-session gap between official rounds, 30 min). Open session: stale if no round for longer than the threshold since the later of the last round and today's open. Otherwise: expected_closed if the last round is no older than the threshold before the last session close, else unexpectedly_stale.";
+function classifyStaleness(nowSec, updatedSec, p99GapS) {
+  const m = marketNow(nowSec);
+  if (m.session === "calendar_not_covered") return { state: "calendar_not_covered", threshold_s: null };
+  if (p99GapS === null || p99GapS <= 0) return { state: "unknown", threshold_s: null };
+  const threshold = Math.max(2 * p99GapS, 1800);
+  if (m.session === "open") {
+    const since = Math.max(updatedSec, sessionOpen(m.ny_date));
+    return { state: nowSec - since <= threshold ? "fresh" : "unexpectedly_stale", threshold_s: threshold };
+  }
+  const last = lastSessionClose(nowSec);
+  if (last === null) return { state: "calendar_not_covered", threshold_s: threshold };
+  return { state: updatedSec >= last - threshold ? "expected_closed" : "unexpectedly_stale", threshold_s: threshold };
+}
+
+// src/api/marketContext.ts
+var PUBLIC_RPC_URL = process.env.MARKET_RPC_URL || "https://mainnet.base.org";
+var cache = /* @__PURE__ */ new Map();
+var CACHE_MS = 3e4;
+var word = (hex, i) => BigInt("0x" + hex.slice(2 + i * 64, 2 + (i + 1) * 64));
+var liveLatestRound = async (feed) => {
+  const hit = cache.get(feed);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
+  const r = await fetch(PUBLIC_RPC_URL, {
+    method: "POST",
+    signal: AbortSignal.timeout(5e3),
+    headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.4" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: feed, data: "0xfeaf968c" }, "latest"] })
+  });
+  const j = await r.json();
+  if (!j.result || j.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
+  const a = word(j.result, 1);
+  const value = { round_id: word(j.result, 0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(word(j.result, 3)), read_at: (/* @__PURE__ */ new Date()).toISOString() };
+  cache.set(feed, { at: Date.now(), value });
+  return value;
+};
+async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), readRound = liveLatestRound) {
+  const asset = (await db2.query("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
+  if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
+  const nowSec = Math.floor(now.getTime() / 1e3);
+  const market = marketNow(nowSec);
+  const feed = (await db2.query("SELECT feed_address, decimals FROM nav_feeds WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY discovered_at DESC LIMIT 1", [CHAIN_ID, contract])).rows[0];
+  const dex = { price: null, nav_premium: null, unavailable_reason: "no_approved_dex_source", note: "Keldrin does not serve a DEX price yet; compare against an onchain pool yourself." };
+  const base = { token: asset.contract_address, symbol: asset.symbol, market, dex };
+  if (!feed) return { status: 200, body: { data: { ...base, feed: null, nav: null, nav_unavailable_reason: "no_nav_feed", staleness: { state: "unknown", threshold_s: null } } } };
+  const rev = (await db2.query(
+    "SELECT verdict, detail FROM nav_reviews WHERE chain_id=$1 AND feed_address=$2 ORDER BY checked_at DESC LIMIT 1",
+    [CHAIN_ID, feed.feed_address]
+  )).rows[0];
+  const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail) : rev?.detail;
+  if (!rev || rev.verdict !== "CONFIRMED") return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "feed_not_verified", staleness: { state: "unknown", threshold_s: null } } } };
+  const p99 = detail?.stats?.p99_in_session_gap_s ?? null;
+  let round;
+  try {
+    round = await readRound(feed.feed_address);
+  } catch {
+    return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_unavailable", staleness: { state: "unknown", threshold_s: null } } } };
+  }
+  const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  const id = BigInt(round.round_id);
+  return {
+    status: 200,
+    body: {
+      data: {
+        ...base,
+        feed: feed.feed_address,
+        nav: {
+          round_id: round.round_id,
+          phase_id: Number(id >> 64n),
+          answer_raw: round.answer_raw,
+          decimals: feed.decimals,
+          nav: formatNav(round.answer_raw, feed.decimals),
+          updated_at: new Date(round.updated_unix * 1e3).toISOString(),
+          age_s: Math.max(0, nowSec - round.updated_unix),
+          read_at: round.read_at,
+          source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (cached up to 30 s)",
+          label: "Last published total-return reference per token, not a live equity price. It already includes dividends and splits."
+        },
+        staleness: { state: st.state, threshold_s: st.threshold_s, p99_in_session_gap_s: p99, method: STALENESS_METHOD }
+      }
+    }
+  };
+}
+
+// src/api/assetActions.ts
+async function assetCorporateActions(db2, contract) {
+  const asset = (await db2.query("SELECT contract_address, symbol, multiplier_wad::text AS multiplier_wad FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
+  if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
+  const events = await listEvents(db2, { contract });
+  const ids = [...new Set(events.map((e2) => e2.record_id).filter((x) => !!x))];
+  const recs = /* @__PURE__ */ new Map();
+  for (const id of ids) {
+    const r = (await db2.query("SELECT payload, review_id FROM confirmed_records WHERE record_id=$1", [id])).rows[0];
+    if (r) recs.set(id, { payload: typeof r.payload === "string" ? JSON.parse(r.payload) : r.payload, review_id: r.review_id });
+  }
+  const data = events.map((e2) => {
+    const rec = e2.record_id ? recs.get(e2.record_id) : void 0;
+    const p = rec?.payload;
+    const ui = p?.multiplier_events?.find((m) => m.event === "UIMultiplierUpdated");
+    const uuid = e2.issuer_corporate_action_uuid;
+    return {
+      ...e2,
+      operator_description: p?.action?.operator_description ?? null,
+      announced_at: p?.issuer_record?.announced_at ?? null,
+      effective_block: p?.action?.effective?.block ?? null,
+      effective_at: p?.action?.effective?.time ?? null,
+      ui_multiplier_before_wad: ui?.args?.oldMultiplier ?? null,
+      ui_multiplier_after_wad: ui?.args?.newMultiplier ?? null,
+      ui_multiplier_effective_at: ui?.args?.effectiveAtTimestamp ? new Date(Number(ui.args.effectiveAtTimestamp) * 1e3).toISOString() : null,
+      announcements: (p?.announcements ?? []).map((a) => ({ id: a.id, block: a.block, tx_hash: a.tx_hash, uri: a.uri })),
+      evidence: {
+        onchain_tx: e2.onchain_tx,
+        issuer_record_url: uuid ? `https://api.coinbase.com/v1/tokenized-stocks/corporate-actions/${uuid}` : null,
+        sec_filing_url: e2.sec_filing_url,
+        keldrin_record: e2.record_id ? `/v1/actions/${encodeURIComponent(e2.record_id)}` : null
+      },
+      verification: rec ? { state: "confirmed", review_id: rec.review_id } : { state: e2.status === "predicted" ? "predicted_from_filing" : "not_applicable" }
+    };
+  });
+  return {
+    status: 200,
+    body: {
+      data,
+      meta: {
+        token: asset.contract_address,
+        symbol: asset.symbol,
+        current_multiplier_wad: asset.multiplier_wad,
+        count: data.length,
+        accounting_note: "The token's balance never changes for a dividend or split: the multiplier (WAD, 1e18) does. Shares per token = multiplier / 1e18. The Chainlink NAV is already total-return (it includes the multiplier): never apply the multiplier to the NAV again."
+      }
+    }
+  };
+}
+
 // src/api/server.ts
 var ADDR = /^0x[0-9a-fA-F]{40}$/;
 function send(res, status, body, type = "application/json") {
-  const cache = status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store";
-  res.writeHead(status, { "content-type": type, "cache-control": cache, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
+  const cache2 = status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store";
+  res.writeHead(status, { "content-type": type, "cache-control": cache2, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
   res.end(typeof body === "string" ? body : JSON.stringify(body, null, 1));
 }
 var RATE = { limit: Number(process.env.RATE_LIMIT_PER_MIN ?? 120), windowMs: 6e4 };
@@ -6871,6 +7224,9 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
 - GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
+- GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
+- GET /v1/market/session \u2014 the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
@@ -6905,7 +7261,7 @@ async function handle(db2, req, res) {
     }
     const url = new URL(req.url ?? "/", "http://localhost");
     const p = url.pathname.replace(/\/+$/, "") || "/";
-    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/health"] }));
+    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/market/session", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -6963,6 +7319,15 @@ async function handle(db2, req, res) {
     if (p === "/v1/assets") {
       const rows = await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+    }
+    const meta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
+    if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }));
+    const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
+    if (cm) {
+      if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
+      const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {
