@@ -5,3 +5,17 @@ registry: 435 tokens (5 pages); scope 435
 identity: verified 435, incomplete 0, mismatch 0
 discover: sampled multiplier() for 435 tokens at 10 blocks
 discover: token 0/435, 0 change point(s) so far
+discover: token 50/435, 5 change point(s) so far
+discover: token 100/435, 9 change point(s) so far
+discover: token 150/435, 13 change point(s) so far
+discover: token 200/435, 13 change point(s) so far
+discover: token 250/435, 13 change point(s) so far
+discover: token 300/435, 13 change point(s) so far
+discover: token 350/435, 13 change point(s) so far
+discover: token 400/435, 13 change point(s) so far
+discover: 13 multiplier change point(s)
+pending scheduled updates: 0
+  CONFIRMED SANc     applied 53559803 ratio 1.010571078868727418 [instant_path_deprecated_setter,multiple_announcement_ids]
+  CONFIRMED GOOGLc   applied 51310619 ratio 1.000377118676784179 [instant_path_deprecated_setter,legacy_event_only,multiple_announcement_ids]
+  CONFIRMED ORCLc    applied 52991540 ratio 1.000039988323338582 [instant_path_deprecated_setter,multiple_announcement_ids]
+  CONFIRMED SNDKc    applied 59802122 ratio 8 [multiple_announcement_ids]
