@@ -4,7 +4,8 @@ import { listEvents } from "./events.ts";
 // GET /v1/assets/{contract}/corporate-actions (Phase 6). One token's corporate actions, applied and upcoming, from
 // the same verified records as /v1/events, plus the onchain detail an integrator needs to account for them: the
 // multiplier and uiMultiplier before/after (WAD), the uiMultiplier effective time, announcement transactions and
-// evidence links. Nothing new is inferred here; every field comes from an independently CONFIRMED record.
+// evidence links. Onchain fields come from an independently CONFIRMED record; issuer-supplied text is grouped under
+// issuer_context and labelled as such. Nothing new is inferred here.
 
 type Json = Record<string, any>;
 type Out = { status: number; body: unknown };
@@ -22,17 +23,22 @@ export async function assetCorporateActions(db: PGlite, contract: string): Promi
   const data = events.map((e) => {
     const rec = e.record_id ? recs.get(e.record_id) : undefined;
     const p = rec?.payload;
-    const ui = (p?.multiplier_events as Json[] | undefined)?.find((m) => m.event === "UIMultiplierUpdated");
+    // the UIMultiplierUpdated that belongs to this action: same block as the scheduling (or effective) block and the same new value
+    const evBlock = p?.action?.scheduling_block ?? p?.action?.effective?.block;
+    const ui = (p?.multiplier_events as Json[] | undefined)?.find((m) => m.event === "UIMultiplierUpdated" && String(m.block) === String(evBlock) && m.args?.newMultiplier === p?.action?.multiplier_after_wad);
     const uuid = e.issuer_corporate_action_uuid;
     return {
       ...e,
-      operator_description: p?.action?.operator_description ?? null,
-      announced_at: p?.issuer_record?.announced_at ?? null,
       effective_block: p?.action?.effective?.block ?? null,
       effective_at: p?.action?.effective?.time ?? null,
+      effective_at_scheduled: p?.action?.effective_at_scheduled ?? null,
       ui_multiplier_before_wad: ui?.args?.oldMultiplier ?? null,
       ui_multiplier_after_wad: ui?.args?.newMultiplier ?? null,
       ui_multiplier_effective_at: ui?.args?.effectiveAtTimestamp ? new Date(Number(ui.args.effectiveAtTimestamp) * 1000).toISOString() : null,
+      ...(p && !ui ? { ui_multiplier_unavailable_reason: (p.flags as string[] | undefined)?.includes("legacy_event_only") ? "legacy_event_only" : "no_matching_ui_multiplier_event" } : {}),
+      issuer_context: p
+        ? { operator_description: p.action?.operator_description ?? null, operator_description_source: "operator-supplied text in the onchain announcement; not verified", announced_at: p.issuer_record?.announced_at ?? null, announced_at_source: "Coinbase issuer record (api.coinbase.com corporate action)" }
+        : null,
       announcements: ((p?.announcements as Json[] | undefined) ?? []).map((a) => ({ id: a.id, block: a.block, tx_hash: a.tx_hash, uri: a.uri })),
       evidence: {
         onchain_tx: e.onchain_tx,
@@ -40,7 +46,9 @@ export async function assetCorporateActions(db: PGlite, contract: string): Promi
         sec_filing_url: e.sec_filing_url,
         keldrin_record: e.record_id ? `/v1/actions/${encodeURIComponent(e.record_id)}` : null,
       },
-      verification: rec ? { state: "confirmed", review_id: rec.review_id } : { state: e.status === "predicted" ? "predicted_from_filing" : "not_applicable" },
+      verification: rec
+        ? { state: "confirmed", review_id: rec.review_id }
+        : { state: "confirmed_calendar_entry", basis: e.sec_filing_url ? "SEC declaration" : "issuer announcement onchain", note: "from an independently CONFIRMED calendar entry; no applied onchain record yet" },
     };
   });
   return {

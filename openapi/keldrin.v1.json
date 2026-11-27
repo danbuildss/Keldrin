@@ -858,7 +858,7 @@
   "/v1/assets/{contract}/market-context": {
    "get": {
     "summary": "Session, latest Chainlink NAV (live, with round id and age) and staleness for one token",
-    "description": "The latest round is read live from Base's public RPC (cached up to 30 s). staleness: fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered, judged against the feed's own verified p99 in-session gap (threshold = max(2 \u00d7 p99, 30 min)). Provider failures degrade to nav: null with nav_unavailable_reason. No DEX price is served (dex.unavailable_reason). Returns 503 NAV_NOT_ENABLED until enabled.",
+    "description": "The latest round is read live from Base's public RPC (reused up to 30 s in the server; responses are not CDN-cached) and served only if its phase was covered by the latest CONFIRMED review with matching decimals. staleness (method v2): trading (regular-session) seconds since the round, across days, against threshold = max(2 \u00d7 the feed's p99 in-session gap, 30 min): fresh | expected_closed | unexpectedly_stale | unknown | calendar_not_covered. Failures degrade to nav: null with nav_unavailable_reason (no_nav_feed, feed_not_verified, rpc_unavailable, rpc_result_invalid, phase_not_reviewed, aggregator_decimals_differ_from_proxy). No DEX price. Returns 503 NAV_NOT_ENABLED until enabled.",
     "parameters": [
      {
       "name": "contract",
