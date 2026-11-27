@@ -1,0 +1,23 @@
+{
+  "name": "keldrin",
+  "private": true,
+  "type": "module",
+  "description": "Keldrin: verified corporate-action intelligence for tokenized stocks on Base (Phase 1, local only).",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "check:kit": "python3 scripts/check_kit.py",
+    "registry": "node src/cli.ts registry",
+    "discover": "node src/cli.ts discover",
+    "verify": "node src/cli.ts verify",
+    "proof:googl": "node src/cli.ts proof-googl",
+    "serve": "node src/cli.ts serve",
+    "proof": "node src/cli.ts proof"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.16",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "viem": "2.21.54"
+  }
+}
