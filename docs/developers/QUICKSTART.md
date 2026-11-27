@@ -35,6 +35,12 @@ curl -s "https://keldrin.vercel.app/v1/assets/0xb20000000000000000000078ee7ce2fE
 ```
 Read onchain at one pinned block from Keldrin's independently verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 against USDC, WETH or ETH). Each pool shows its price in USD and an estimated 2% depth; `main` is the deepest usable pool. Market context also carries `dex.nav_premium_pct` (DEX vs last NAV). Launchpad pools with hooks are excluded, so some tokens (e.g. TSLAc, INTCc today) have no usable plain USD/ETH market and return `main: null` with a reason.
 
+## 5. MCP (agents) ✅ (after the Phase 9 deploy)
+```bash
+claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
+```
+Tools: `list_assets`, `get_corporate_actions`, `get_nav_history`, `get_market_context`, `get_dex_price`, `get_market_session`. Same data and the same fail-closed rules as the REST API. No key.
+
 ## Real example responses
 Captured from production (https://keldrin.vercel.app) on 2026-11-27 at about 14:43 UTC, during the regular session: `docs/developers/examples/`. They are real responses, not hand-written.
 

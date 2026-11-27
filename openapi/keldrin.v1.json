@@ -990,6 +990,36 @@
      }
     }
    }
+  },
+  "/mcp": {
+   "post": {
+    "summary": "Remote MCP server (Streamable HTTP, stateless JSON; no SSE)",
+    "description": "One JSON-RPC 2.0 message per POST (max 64 KB): initialize, ping, tools/list, tools/call. Read-only tools: list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Tool results carry a plain lead sentence, the JSON, and structuredContent; API errors come back as isError with the same codes as the REST API. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "JSON-RPC response"
+     },
+     "202": {
+      "description": "Notification accepted"
+     },
+     "400": {
+      "description": "Parse error / invalid request"
+     },
+     "413": {
+      "description": "Body over 64 KB"
+     }
+    }
+   }
   }
  },
  "components": {

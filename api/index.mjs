@@ -9259,6 +9259,36 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/mcp": {
+      post: {
+        summary: "Remote MCP server (Streamable HTTP, stateless JSON; no SSE)",
+        description: "One JSON-RPC 2.0 message per POST (max 64 KB): initialize, ping, tools/list, tools/call. Read-only tools: list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Tool results carry a plain lead sentence, the JSON, and structuredContent; API errors come back as isError with the same codes as the REST API. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object"
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "JSON-RPC response"
+          },
+          "202": {
+            description: "Notification accepted"
+          },
+          "400": {
+            description: "Parse error / invalid request"
+          },
+          "413": {
+            description: "Body over 64 KB"
+          }
+        }
+      }
     }
   },
   components: {
@@ -9777,7 +9807,7 @@ function formatNav(answer, decimals) {
   const frac = digits.slice(digits.length - decimals).replace(/0+$/, "");
   return (neg ? "-" : "") + int + (frac ? "." + frac : "");
 }
-function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3)) {
+function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), indexedUntilSec = null) {
   const byDay = /* @__PURE__ */ new Map();
   for (const r of rows) {
     const t = Number(r.updated_unix);
@@ -9789,15 +9819,17 @@ function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3)) {
   const closes = [];
   const missing_trading_days = [];
   const not_covered_days = [];
+  const not_yet_indexed_days = [];
   for (const d of dateRange(from, to)) {
     const td = isTradingDay(d);
     if (td === null) not_covered_days.push(d);
     if (td !== true) continue;
     const r = byDay.get(d);
     if (r) closes.push({ session_day: d, session_close: new Date(sessionClose(d) * 1e3).toISOString(), provisional: sessionClose(d) > nowSec, row: r });
+    else if (indexedUntilSec !== null && sessionOpen(d) > indexedUntilSec) not_yet_indexed_days.push(d);
     else if (sessionClose(d) <= nowSec) missing_trading_days.push(d);
   }
-  return { closes, missing_trading_days, not_covered_days };
+  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days };
 }
 var e = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -9938,8 +9970,9 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
     meta.order = "updated_at, then round_id";
     return { status: 200, body: { data: page.map((r) => item(r, include === "all")), meta: { ...meta, count: page.length, quality } } };
   }
-  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3));
+  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3), span.last ? Date.parse(span.last) / 1e3 : null);
   quality.missing_trading_days = d.missing_trading_days;
+  quality.not_yet_indexed_days = d.not_yet_indexed_days;
   quality.not_covered_days = d.not_covered_days;
   meta.calendar_version = CALENDAR_VERSION;
   meta.daily_rule = "last official round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no official in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet; limit and cursor do not apply";
@@ -10320,8 +10353,134 @@ async function assetCorporateActions(db2, contract) {
   };
 }
 
-// src/api/server.ts
+// src/version.ts
+var PACKAGE_VERSION = "0.6.0";
+
+// src/api/mcp.ts
+var PROTOCOL_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
+var tokenArg = { type: "string", description: "Token contract address (0x\u2026) or exact Coinbase symbol, e.g. NVDAc. Addresses are preferred." };
+var ro = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
+var TOOLS = [
+  { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that Keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
+  { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from Keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_market_session", title: "US equity session now", description: "Whether the US stock market is open right now, with next open/close and last close (NYSE calendar 2026-2027; beyond it: calendar_not_covered).", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } }
+];
+var isObj = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 var ADDR = /^0x[0-9a-fA-F]{40}$/;
+async function resolveToken(db2, token) {
+  if (typeof token !== "string" || !token.trim()) throw new ToolError("token is required (contract address or exact symbol)");
+  const t = token.trim();
+  if (ADDR.test(t)) return t;
+  const m = (await db2.query("SELECT contract_address FROM assets WHERE symbol = $1", [t])).rows;
+  if (m.length === 0) throw new ToolError(`no token with exact symbol ${t.slice(0, 40)}; use list_assets or a contract address`);
+  if (m.length > 1) throw new ToolError(`${m.length} tokens use symbol ${t.slice(0, 40)}; pass the contract address`);
+  return m[0].contract_address;
+}
+var ToolError = class extends Error {
+};
+function toolResult(out, lead) {
+  const body = out.body;
+  if (out.status !== 200) {
+    const e2 = body?.error ?? { code: "ERROR", message: "request failed" };
+    return { content: [{ type: "text", text: `${e2.code}: ${e2.message}${e2.hint ? " \u2192 " + e2.hint : ""}` }], isError: true };
+  }
+  return { content: [{ type: "text", text: lead(body) }, { type: "text", text: JSON.stringify(body) }], structuredContent: body, isError: false };
+}
+async function callTool(db2, name, args) {
+  const navOn = process.env.NAV_HISTORY_PUBLIC === "true";
+  const navOff = { status: 503, body: { error: { code: "NAV_NOT_ENABLED", message: "NAV data is not publicly enabled on this server" } } };
+  try {
+    switch (name) {
+      case "list_assets": {
+        const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
+        const rows = (await db2.query(
+          "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
+        )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
+        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with a verified NAV feed.`);
+      }
+      case "get_corporate_actions": {
+        const out = await assetCorporateActions(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} corporate action(s); next: ${b.data.find((e2) => e2.status === "predicted")?.expected_adjustment_date ?? "none announced"}. Shares per token = multiplier / 1e18.`);
+      }
+      case "get_nav_history": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const q = new URLSearchParams();
+        for (const k of ["interval", "from", "to"]) if (typeof args[k] === "string") q.set(k, args[k]);
+        if (typeof args.limit === "number") q.set("limit", String(args.limit));
+        const out = await navHistory(db2, await resolveToken(db2, args.token), q);
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} ${b.meta.interval} NAV point(s) ${b.meta.from}..${b.meta.to}; verification ${b.meta.quality.verification.verdict}; missing trading days: ${(b.meta.quality.missing_trading_days ?? []).length}. Total-return NAV: do not apply the multiplier again.`);
+      }
+      case "get_market_context": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const out = await marketContext(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => {
+          const d = b.data;
+          const nav = d.nav ? `last NAV $${d.nav.nav} (${Math.round(d.nav.age_s / 60)} min old, ${d.staleness.state})` : `NAV unavailable (${d.nav_unavailable_reason})`;
+          const dex = d.dex?.price_usd ? `; DEX $${Number(d.dex.price_usd).toFixed(2)} (${d.dex.nav_premium_pct >= 0 ? "+" : ""}${d.dex.nav_premium_pct}% vs NAV)` : "";
+          return `${d.symbol}: market ${d.market.session}; ${nav}${dex}. The NAV is the last published reference, not a live equity price.`;
+        });
+      }
+      case "get_dex_price": {
+        const out = await liveDex(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => {
+          const d = b.data;
+          return d.main ? `${d.symbol}: $${Number(d.main.price_usd).toFixed(2)} on ${d.main.venue} (${d.main.quote}), est. 2% depth $${Math.round(d.main.depth_2pct_usd)}${d.main.thin_market ? " (thin market)" : ""}, block ${d.block}.` : `${d.symbol}: no usable DEX price (${d.unavailable_reason}).`;
+        });
+      }
+      case "get_market_session": {
+        const m = marketNow(Math.floor(Date.now() / 1e3));
+        return toolResult({ status: 200, body: { data: m } }, () => `US market: ${m.session} (${m.ny_date} ${m.ny_time} New York); next open ${m.next_open ?? "unknown"}.`);
+      }
+      default:
+        throw Object.assign(new Error(`Unknown tool: ${String(name).slice(0, 80)}`), { rpc: -32602 });
+    }
+  } catch (e2) {
+    if (e2 instanceof ToolError) return { content: [{ type: "text", text: e2.message }], isError: true };
+    throw e2;
+  }
+}
+async function handleMcp(db2, raw) {
+  if (!isObj(raw)) return { status: 400, body: { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request: one JSON-RPC object per POST (batches are not supported)" } } };
+  const msg = raw;
+  const isRequest = msg.id !== void 0 && msg.id !== null;
+  const reply = (result) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id, result } });
+  const error = (code, message) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id ?? null, error: { code, message } } });
+  try {
+    switch (msg.method) {
+      case "initialize": {
+        const asked = isObj(msg.params) ? msg.params.protocolVersion : void 0;
+        const version3 = typeof asked === "string" && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0];
+        return reply({
+          protocolVersion: version3,
+          capabilities: { tools: {} },
+          serverInfo: { name: "keldrin", title: "Keldrin", version: PACKAGE_VERSION },
+          instructions: "Keldrin is a verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices. Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
+        });
+      }
+      case "ping":
+        return reply({});
+      case "tools/list":
+        return reply({ tools: TOOLS });
+      case "tools/call": {
+        const p = isObj(msg.params) ? msg.params : {};
+        return reply(await callTool(db2, p.name, isObj(p.arguments) ? p.arguments : {}));
+      }
+      default:
+        if (!isRequest) return { status: 202, body: null };
+        return error(-32601, `Method not found: ${String(msg.method).slice(0, 80)}`);
+    }
+  } catch (err2) {
+    const code = err2.rpc ?? -32603;
+    return isRequest ? error(code, code === -32603 ? "Internal error" : err2.message) : { status: 202, body: null };
+  }
+}
+
+// src/api/server.ts
+var ADDR2 = /^0x[0-9a-fA-F]{40}$/;
 function send(res, status, body, type = "application/json", cacheOverride) {
   const cache2 = cacheOverride ?? (status === 200 ? "public, max-age=30, s-maxage=60, stale-while-revalidate=300" : "no-store");
   res.writeHead(status, { "content-type": type, "cache-control": cache2, "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS" });
@@ -10355,6 +10514,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
 - GET /v1/assets/{contract}/dex \u2014 live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
+- POST /mcp \u2014 remote MCP server (Streamable HTTP, stateless): tools list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
 - GET /v1/market/session \u2014 the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
@@ -10378,22 +10538,52 @@ function dbFailureReason(e2) {
   if (/database_url is not set/.test(msg)) return "not_configured";
   return "unknown";
 }
+async function readBody(req, max) {
+  const pre = req.body;
+  if (pre !== void 0 && pre !== null) {
+    const s = typeof pre === "string" ? pre : Buffer.isBuffer(pre) ? pre.toString("utf8") : JSON.stringify(pre);
+    return Buffer.byteLength(s) > max ? null : s;
+  }
+  let size2 = 0;
+  const chunks = [];
+  for await (const c of req) {
+    size2 += c.length;
+    if (size2 > max) return null;
+    chunks.push(c);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
 async function handle(db2, req, res) {
   try {
     if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
-    if (req.method !== "GET") return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", "use GET"));
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const p = url.pathname.replace(/\/+$/, "") || "/";
+    const isMcp = p === "/mcp" && req.method === "POST";
+    if (req.method !== "GET" && !isMcp) return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
     const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
     const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
     if (retry !== null) {
       res.setHeader("retry-after", String(retry));
       return send(res, 429, err("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
     }
-    const url = new URL(req.url ?? "/", "http://localhost");
-    const p = url.pathname.replace(/\/+$/, "") || "/";
-    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/health"] }));
+    if (isMcp) {
+      const raw = await readBody(req, 64 * 1024);
+      if (raw === null) return send(res, 413, { jsonrpc: "2.0", id: null, error: { code: -32600, message: "request body over 64 KB" } }, void 0, "no-store");
+      let msg;
+      try {
+        msg = JSON.parse(raw);
+      } catch {
+        return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, void 0, "no-store");
+      }
+      const out = await handleMcp(db2, msg);
+      if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
+      return send(res, out.status, out.body, void 0, "no-store");
+    }
+    if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
+    if (p === "/") return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
-      if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR2.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const status = url.searchParams.get("status");
       if (status && !["predicted", "confirmed_onchain", "verified_matched", "late", "unknown"].includes(status)) return send(res, 400, err("BAD_STATUS", "status must be predicted, confirmed_onchain, verified_matched, late or unknown"));
       let since = null;
@@ -10433,7 +10623,7 @@ async function handle(db2, req, res) {
     }
     if (p === "/v1/calendar") {
       const contract = url.searchParams.get("contract");
-      if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR2.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const state = url.searchParams.get("state");
       if (state && !["upcoming", "applied", "not_observed", "announced"].includes(state)) return send(res, 400, err("BAD_STATE", "state must be upcoming, applied, not_observed or announced"));
       const snap = (await db2.query("SELECT snapshot_id, max(as_of) AS as_of FROM calendar_entries GROUP BY snapshot_id ORDER BY 2 DESC LIMIT 1")).rows[0];
@@ -10453,20 +10643,20 @@ async function handle(db2, req, res) {
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");
     const dm = p.match(/^\/v1\/assets\/([^/]+)\/dex$/);
     if (dm) {
-      if (!ADDR.test(dm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR2.test(dm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const out = await liveDex(db2, dm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, "no-store");
     }
     const cm = p.match(/^\/v1\/assets\/([^/]+)\/(market-context|corporate-actions)$/);
     if (cm) {
-      if (!ADDR.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR2.test(cm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {
-      if (!ADDR.test(nm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR2.test(nm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "NAV history is not publicly enabled yet", "read the Chainlink feed onchain meanwhile; GET /llms.txt lists what is live"));
       const out = await navHistory(db2, nm[1], url.searchParams);
       const body = out.status === 200 ? { ...out.body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...out.body.meta } } : out.body;
@@ -10474,7 +10664,7 @@ async function handle(db2, req, res) {
     }
     const am = p.match(/^\/v1\/assets\/([^/]+)$/);
     if (am) {
-      if (!ADDR.test(am[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (!ADDR2.test(am[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       const row = (await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text, identity FROM assets WHERE lower(contract_address)=lower($1)", [am[1]])).rows[0];
       if (!row) return send(res, 404, err("UNKNOWN_ASSET", `no tracked asset ${am[1]}`, "GET /v1/assets lists tracked tokens"));
       return send(res, 200, ok(row));
@@ -10482,7 +10672,7 @@ async function handle(db2, req, res) {
     if (p === "/v1/actions") {
       let contract = url.searchParams.get("contract");
       const symbol = url.searchParams.get("symbol");
-      if (contract && !ADDR.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (contract && !ADDR2.test(contract)) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
       if (!contract && symbol) {
         const m = (await db2.query("SELECT contract_address FROM assets WHERE symbol = $1", [symbol])).rows;
         if (m.length === 0) return send(res, 404, err("UNKNOWN_SYMBOL", `no token with exact symbol ${symbol}`, "symbols are exact token symbols such as GOOGLc; prefer contract="));

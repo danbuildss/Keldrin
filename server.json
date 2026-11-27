@@ -1,0 +1,10 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.danbuildss/keldrin",
+  "title": "Keldrin",
+  "description": "Verified record for Coinbase tokenized stocks on Base: corporate actions, Chainlink NAV history with round ids, market context and onchain DEX prices.",
+  "version": "0.6.0",
+  "websiteUrl": "https://keldrin.vercel.app",
+  "repository": { "url": "https://github.com/danbuildss/Keldrin", "source": "github" },
+  "remotes": [{ "type": "streamable-http", "url": "https://keldrin.vercel.app/mcp" }]
+}

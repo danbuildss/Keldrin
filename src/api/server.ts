@@ -8,6 +8,7 @@ import { marketContext } from "./marketContext.ts";
 import { assetCorporateActions } from "./assetActions.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
+import { handleMcp } from "./mcp.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -52,6 +53,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/assets/{contract}/corporate-actions — one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context — US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm). No DEX price
 - GET /v1/assets/{contract}/dex — live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
+- POST /mcp — remote MCP server (Streamable HTTP, stateless): tools list_assets, get_corporate_actions, get_nav_history, get_market_context, get_dex_price, get_market_session. Add with: claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
 - GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
@@ -78,20 +80,53 @@ export function dbFailureReason(e: unknown): string {
   return "unknown";
 }
 
+/** Read a request body up to `max` bytes; null if larger. Vercel may pre-parse JSON into req.body. */
+async function readBody(req: IncomingMessage, max: number): Promise<string | null> {
+  const pre = (req as unknown as { body?: unknown }).body;
+  if (pre !== undefined && pre !== null) {
+    const s = typeof pre === "string" ? pre : Buffer.isBuffer(pre) ? pre.toString("utf8") : JSON.stringify(pre);
+    return Buffer.byteLength(s) > max ? null : s;
+  }
+  let size = 0;
+  const chunks: Buffer[] = [];
+  for await (const c of req) {
+    size += (c as Buffer).length;
+    if (size > max) return null;
+    chunks.push(c as Buffer);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 export async function handle(db: PGlite, req: IncomingMessage, res: ServerResponse) {
   try {
     if (req.method === "OPTIONS") return send(res, 204, "", "text/plain");
-    if (req.method !== "GET") return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", "use GET"));
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const p = url.pathname.replace(/\/+$/, "") || "/";
+    // The only non-GET route: the remote MCP endpoint (JSON-RPC over POST; every tool is read-only).
+    const isMcp = p === "/mcp" && req.method === "POST";
+    if (req.method !== "GET" && !isMcp) return send(res, 405, err("METHOD_NOT_ALLOWED", "read-only API", p === "/mcp" ? "MCP: POST one JSON-RPC message (Streamable HTTP, stateless)" : "use GET"));
     const fwd = String(req.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
     const retry = rateLimited(fwd || req.socket?.remoteAddress || "unknown");
     if (retry !== null) {
       res.setHeader("retry-after", String(retry));
       return send(res, 429, err("RATE_LIMITED", `more than ${RATE.limit} requests per minute`, `retry after ${retry} s; cached responses are served by the CDN`));
     }
-    const url = new URL(req.url ?? "/", "http://localhost");
-    const p = url.pathname.replace(/\/+$/, "") || "/";
+    if (isMcp) {
+      const raw = await readBody(req, 64 * 1024);
+      if (raw === null) return send(res, 413, { jsonrpc: "2.0", id: null, error: { code: -32600, message: "request body over 64 KB" } }, undefined, "no-store");
+      let msg: unknown;
+      try {
+        msg = JSON.parse(raw);
+      } catch {
+        return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, undefined, "no-store");
+      }
+      const out = await handleMcp(db, msg);
+      if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
+      return send(res, out.status, out.body as Json, undefined, "no-store");
+    }
+    if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/health"] }));
+    if (p === "/" ) return send(res, 200, ok({ name: "Keldrin API", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");

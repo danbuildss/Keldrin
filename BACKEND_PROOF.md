@@ -106,3 +106,9 @@ For each proof append date, commit, command, actual exit code, output path, sour
 - Live proof (local store, live Base): 416 pools discovered for 13 tokens in 8 s; dex-verify 13/13 CONFIRMED, every pool re-derived (research/phase5/runs/2026-11-27-dex-verify-local.log). In session (≈14:5x UTC), DEX vs NAV: AAPLc −1.74% (v4 USDC, depth $7.8k), AMZNc −0.15%, ANTc +0.83%, CRCLc −0.28% (thin), GOOGLc +0.66%, METAc −0.15% (thin), MSFTc +0.84% (thin), MSTRc −0.23%, NVDAc +0.24% (v3 USDC, depth $8.6k), SNDKc −0.75% (thin), SPCXc +1.06% (thin). TSLAc and INTCc: no plain USD/ETH pool with usable depth; TSLAc's large pools are launchpad (hooked) pools paired with meme tokens, which are excluded by design. Uniswap v2 and PancakeSwap v3 were checked for both: none.
 - Real v4 pool id reproduced in tests (NVDAc/ETH 0x08bc5d…e16).
 - Tests: 108 pass + the real-Postgres test. Supabase migration applied. Independent review: running.
+
+## Phase 9: remote MCP server (2026-11-27)
+- Built: `src/api/mcp.ts` (Streamable HTTP, stateless JSON-RPC; initialize/ping/tools/list/tools/call; 6 read-only tools calling the same functions as the REST API; tokens by address or exact symbol; API errors as isError with the same codes), POST /mcp as the only non-GET route (64 KB limit, rate limit, no-store), server.json for the MCP Registry, `src/version.ts` = package.json version.
+- Smoke test against a locally served copy with live Base reads: get_market_context NVDAc → "market after; last NAV $149.61 (5 min old, expected_closed); DEX $149.78 (+0.1157% vs NAV)"; get_dex_price AAPLc → $350.35 on uniswap_v4 (USDC), 2% depth $7,848; get_nav_history TSLAc → 4 daily points, CONFIRMED.
+- Fix found by the smoke test: a trading day after the newest indexed round was reported as "missing"; now reported as `not_yet_indexed_days`.
+- Tests: MCP protocol, tools, errors, NAV switch, GET-only elsewhere.
