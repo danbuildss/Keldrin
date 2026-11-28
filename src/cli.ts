@@ -313,14 +313,14 @@ async function earningsIndexCmd() {
   const res = await indexEarnings(db, flag("symbols")?.split(","));
   const covered = res.tokens.filter((t) => t.releases > 0);
   for (const t of covered) console.log(`  ${t.symbol.padEnd(8)} releases ${t.releases}, new ${t.added}`);
-  console.log(`earnings-index: ${res.tokens.length} token(s), ${covered.length} with releases, ${res.tokens.reduce((n, t) => n + t.added, 0)} new; not covered: ${res.tokens.length - covered.length}`);
+  console.log(`earnings-index: ${res.tokens.length} token(s) read (${res.skipped_recent} skipped: read in the last 20 h), ${covered.length} with releases, ${res.tokens.reduce((n, t) => n + t.added, 0)} new; not covered: ${res.tokens.length - covered.length}`);
   await db.close();
 }
 
 /** Phase 6.2: independently re-check stored releases against SEC filing headers on www.sec.gov. */
 async function earningsVerifyCmd() {
   const db = await openDb(DB_DIR);
-  const tally = await verifyEarnings(db);
+  const tally = await verifyEarnings(db, Number(flag("limit") ?? 1500));
   console.log(`earnings-verify: ${JSON.stringify(tally)}`);
   await db.close();
   if (tally.REJECTED) process.exit(1);

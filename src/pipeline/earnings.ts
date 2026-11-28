@@ -1,4 +1,5 @@
 import type { PGlite } from "@electric-sql/pglite";
+import { randomUUID } from "node:crypto";
 import { CHAIN_ID, LIMITS, SEC_USER_AGENT } from "../config.ts";
 import { fetchJson } from "../lib/http.ts";
 import { resolveCik, underlyingTicker } from "./company.ts";
@@ -54,12 +55,18 @@ export async function filingsSince(cik: string, since = EARNINGS_SINCE): Promise
 }
 
 /** One run: for each identity-verified token (or `symbols`), resolve the SEC company once and append new releases. */
-export async function indexEarnings(db: PGlite, symbols?: string[]): Promise<{ tokens: { symbol: string; releases: number; added: number; note?: string }[] }> {
+export async function indexEarnings(db: PGlite, symbols?: string[], maxAgeHours = 20): Promise<{ tokens: { symbol: string; releases: number; added: number; note?: string }[]; skipped_recent: number }> {
   const assets = (await db.query<{ contract_address: string; symbol: string; name: string }>(
     "SELECT contract_address, symbol, name FROM assets WHERE chain_id = $1 AND identity_state = 'verified' ORDER BY symbol", [CHAIN_ID],
   )).rows.filter((a) => !symbols || symbols.includes(a.symbol));
   const res: { symbol: string; releases: number; added: number; note?: string }[] = [];
+  // companies read in the last `maxAgeHours` are skipped (earnings come quarterly; one read a day is enough)
+  const recentRows = (await db.query<{ k: string }>(`SELECT DISTINCT lower(contract_address) AS k FROM earnings_scans WHERE chain_id = $1 AND scanned_at > now() - make_interval(hours => $2)`, [CHAIN_ID, Math.max(0, Math.floor(maxAgeHours))])).rows;
+  const recent = new Set(recentRows.map((r) => r.k));
+  let skipped_recent = 0;
+  const record = async (contract: string, found: number, note?: string) => db.query("INSERT INTO earnings_scans (scan_id, chain_id, contract_address, releases_found, note) VALUES ($1,$2,$3,$4,$5)", [randomUUID(), CHAIN_ID, contract, found, note ?? null]);
   for (const a of assets) {
+    if (!symbols && recent.has(a.contract_address.toLowerCase())) { skipped_recent++; continue; }
     const ticker = underlyingTicker(a.symbol);
     if (!ticker) { res.push({ symbol: a.symbol, releases: 0, added: 0, note: "no underlying ticker" }); continue; }
     let cik = (await db.query<{ cik: string }>("SELECT cik FROM sec_companies WHERE chain_id=$1 AND lower(contract_address)=lower($2) ORDER BY resolved_at DESC LIMIT 1", [CHAIN_ID, a.contract_address])).rows[0]?.cik;
@@ -71,7 +78,7 @@ export async function indexEarnings(db: PGlite, symbols?: string[]): Promise<{ t
         res.push({ symbol: a.symbol, releases: 0, added: 0, note: "CIK lookup failed: " + String((e as Error).message).slice(0, 120) });
         continue;
       }
-      if (!r.cik) { res.push({ symbol: a.symbol, releases: 0, added: 0, note: r.reason }); continue; }
+      if (!r.cik) { res.push({ symbol: a.symbol, releases: 0, added: 0, note: r.reason }); await record(a.contract_address, 0, r.reason); continue; }
       cik = r.cik;
       await db.query("INSERT INTO sec_companies (chain_id, contract_address, cik, company_name, ticker, evidence) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING",
         [CHAIN_ID, a.contract_address, cik, r.name, ticker, JSON.stringify(r.evidence)]);
@@ -86,11 +93,13 @@ export async function indexEarnings(db: PGlite, symbols?: string[]): Promise<{ t
         added += ins.rows.length;
       }
       const files6k = recent.form.some((f) => f === "6-K");
-      res.push({ symbol: a.symbol, releases: rel.length, added, ...(rel.length === 0 && files6k ? { note: "files 6-K (foreign issuer): not covered" } : {}) });
+      const note = rel.length === 0 && files6k ? "files 6-K (foreign issuer): not covered" : undefined;
+      res.push({ symbol: a.symbol, releases: rel.length, added, ...(note ? { note } : {}) });
+      await record(a.contract_address, rel.length, note);
     } catch (e) {
       // one company's SEC error never stops the others; it is retried next run
       res.push({ symbol: a.symbol, releases: 0, added: 0, note: "SEC read failed: " + String((e as Error).message).slice(0, 120) });
     }
   }
-  return { tokens: res };
+  return { tokens: res, skipped_recent };
 }
