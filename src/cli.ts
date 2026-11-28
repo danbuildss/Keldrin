@@ -19,6 +19,8 @@ import { verifyNavFeed } from "./verify/navVerify.ts";
 import { indexDexPools } from "./pipeline/dexPools.ts";
 import { verifyDexPools } from "./verify/dexVerify.ts";
 import { indexPayments } from "./pipeline/payments.ts";
+import { indexEarnings } from "./pipeline/earnings.ts";
+import { verifyEarnings } from "./verify/earningsVerify.ts";
 import { rpc as chainRpc } from "./adapters/chain.ts";
 import { RPC_URL } from "./config.ts";
 
@@ -305,6 +307,25 @@ async function paymentsIndexCmd() {
   await db.close();
 }
 
+/** Phase 6.2: earnings releases (SEC 8-K item 2.02) for identity-verified tokens, append-only. */
+async function earningsIndexCmd() {
+  const db = await openDb(DB_DIR);
+  const res = await indexEarnings(db, flag("symbols")?.split(","));
+  const covered = res.tokens.filter((t) => t.releases > 0);
+  for (const t of covered) console.log(`  ${t.symbol.padEnd(8)} releases ${t.releases}, new ${t.added}`);
+  console.log(`earnings-index: ${res.tokens.length} token(s), ${covered.length} with releases, ${res.tokens.reduce((n, t) => n + t.added, 0)} new; not covered: ${res.tokens.length - covered.length}`);
+  await db.close();
+}
+
+/** Phase 6.2: independently re-check stored releases against SEC filing headers on www.sec.gov. */
+async function earningsVerifyCmd() {
+  const db = await openDb(DB_DIR);
+  const tally = await verifyEarnings(db);
+  console.log(`earnings-verify: ${JSON.stringify(tally)}`);
+  await db.close();
+  if (tally.REJECTED) process.exit(1);
+}
+
 /** Phase 8: independently re-derive every stored pool (public RPC) and record a review per token. */
 async function dexVerifyCmd() {
   const db = await openDb(DB_DIR);
@@ -347,6 +368,8 @@ const commands: Record<string, () => Promise<void>> = {
   "nav-verify": navVerifyCmd,
   "dex-index": dexIndexCmd,
   "payments-index": paymentsIndexCmd,
+  "earnings-index": earningsIndexCmd,
+  "earnings-verify": earningsVerifyCmd,
   "dex-verify": dexVerifyCmd,
   serve: async () => {
     const db = await openDb(DB_DIR);

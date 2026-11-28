@@ -9902,6 +9902,41 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/assets/{contract}/earnings": {
+      get: {
+        summary: "The company's earnings releases (SEC 8-K item 2.02)",
+        description: "SEC Form 8-K (and 8-K/A) filings that list item 2.02 (Results of Operations and Financial Condition) since 2025-01-01, with SEC's acceptance time (UTC), filed date, accession and links to the filing and its index. Read from SEC's submissions index (including its older pages, so complete since 2025-01-01) and served only after a re-check against the filing's own headers on www.sec.gov: form, item, filed date, acceptance time and filer CIK (latest review CONFIRMED). is_amendment marks an 8-K/A. Facts only: no estimates, consensus or predicted dates. Foreign issuers filing 6-K are not covered (meta.unavailable_reason).",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Earnings releases",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Bad address"
+          },
+          "404": {
+            description: "Unknown asset"
+          }
+        }
+      }
     }
   },
   components: {
@@ -11159,6 +11194,52 @@ async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
   };
 }
 
+// src/api/earnings.ts
+var iso2 = `'YYYY-MM-DD"T"HH24:MI:SS"Z"'`;
+async function assetEarnings(db2, contract) {
+  const a = (await db2.query("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
+  if (!a) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
+  const co = (await db2.query("SELECT cik, company_name, ticker FROM sec_companies WHERE chain_id=$1 AND lower(contract_address)=lower($2) ORDER BY resolved_at DESC LIMIT 1", [CHAIN_ID, contract])).rows[0];
+  const rows = (await db2.query(
+    `SELECT e.accession, e.form, e.items, to_char(e.filed_date, 'YYYY-MM-DD') AS filed_date, to_char(e.accepted_at AT TIME ZONE 'UTC', ${iso2}) AS accepted_at,
+            to_char(e.report_date, 'YYYY-MM-DD') AS report_date, e.primary_document_url, r.verdict, to_char(r.checked_at AT TIME ZONE 'UTC', ${iso2}) AS checked_at
+     FROM earnings_releases e LEFT JOIN LATERAL (SELECT verdict, checked_at FROM earnings_reviews v WHERE v.accession = e.accession AND lower(v.contract_address) = lower(e.contract_address) ORDER BY checked_at DESC LIMIT 1) r ON true
+     WHERE e.chain_id = $1 AND lower(e.contract_address) = lower($2) ORDER BY e.accepted_at DESC`,
+    [CHAIN_ID, contract]
+  )).rows;
+  const ok2 = rows.filter((r) => r.verdict === "CONFIRMED");
+  const data = ok2.map((r) => ({
+    event_type: "earnings_release",
+    form: r.form,
+    is_amendment: r.form === "8-K/A",
+    items: r.items,
+    accession: r.accession,
+    filed_date: r.filed_date,
+    accepted_at: r.accepted_at,
+    report_date: r.report_date,
+    sec_filing_url: r.primary_document_url,
+    sec_index_url: r.primary_document_url.replace(/\/[^/]+$/, `/${r.accession}-index.htm`),
+    verification: { verdict: r.verdict, checked_at: r.checked_at }
+  }));
+  return {
+    status: 200,
+    body: {
+      data,
+      meta: {
+        token: a.contract_address,
+        symbol: a.symbol,
+        company: co ? { cik: co.cik, name: co.company_name, ticker: co.ticker } : null,
+        count: data.length,
+        not_yet_verified: rows.filter((r) => r.verdict !== "CONFIRMED" && r.verdict !== "REJECTED").length,
+        rejected: rows.filter((r) => r.verdict === "REJECTED").length,
+        ...co ? {} : { unavailable_reason: "no SEC company resolved for this token yet (foreign issuers filing 6-K, ETFs and unmatched tickers are not covered)" },
+        semantics: "An earnings release = an SEC Form 8-K that lists item 2.02 (Results of Operations and Financial Condition), at SEC's acceptance time. Item 2.02 is usually the quarterly results release, but can also be preliminary results or a restatement; an 8-K/A (is_amendment) amends an earlier filing. Facts only: no estimates, consensus or predicted dates. Results are in the filing (exhibit 99.1); keldrin does not summarise them.",
+        source: "SEC submissions index on data.sec.gov (including its older pages, so the list is complete since 2025-01-01), each release re-checked against the filing's own headers on www.sec.gov (form, item, filed date, acceptance time, filer CIK)."
+      }
+    }
+  };
+}
+
 // src/api/coverage.ts
 var UNKNOWN_COVERAGE = { coverage_level: "unknown", capabilities: { identity: false, corporate_actions: false, nav_history: false, risk: false, market_context: false, dex_price: false } };
 var COVERAGE_SQL = `
@@ -11391,6 +11472,7 @@ var TOOLS = [
   { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_earnings", title: "Earnings releases from SEC filings", description: "The company's earnings releases for a tokenized stock: SEC Form 8-K filings listing item 2.02 (Results of Operations), with SEC's exact acceptance time and links to the filing. Each re-checked against the filing's own headers on www.sec.gov. Facts only: no estimates or predicted dates.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
@@ -11448,6 +11530,10 @@ async function callTool(db2, name, args, client) {
         if (!navOn) return toolResult(navOff, () => "");
         const out = await assetRisk(db2, await resolveToken(db2, args.token));
         return toolResult(out, (b) => `${b.data.symbol}: 30-day volatility ${b.data.volatility_30d_annualized.value_pct ?? "n/a"}% (annualized), max drawdown since start ${b.data.max_drawdown_since_start.value_pct ?? "n/a"}%, from ${b.data.closes_used} official closes to ${b.data.as_of_close}. NAV-based, not advice.`);
+      }
+      case "get_earnings": {
+        const out = await assetEarnings(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} verified earnings release(s)${b.data[0] ? `; latest accepted by SEC ${b.data[0].accepted_at} (${b.data[0].sec_filing_url})` : ""}${b.meta.unavailable_reason ? `; ${b.meta.unavailable_reason}` : ""}. Facts from SEC filings, not estimates.`);
       }
       case "get_market_context": {
         if (!navOn) return toolResult(navOff, () => "");
@@ -11509,7 +11595,7 @@ async function handleMcp(db2, raw, client = "mcp") {
           protocolVersion: version3,
           capabilities: { tools: {} },
           serverInfo: { name: "keldrin", title: "keldrin", version: PACKAGE_VERSION },
-          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
+          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_earnings for SEC earnings releases, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
         });
       }
       case "ping":
@@ -11657,6 +11743,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
+- GET /v1/assets/{contract}/earnings \u2014 the company's earnings releases: SEC Form 8-K filings listing item 2.02, with SEC's exact acceptance time, filing and index links; each re-checked against the filing's own headers on www.sec.gov. Facts only, complete since 2025-01-01; foreign issuers (6-K) not covered
 - GET /v1/assets/{contract}/risk \u2014 NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
@@ -11735,7 +11822,7 @@ async function handle(db2, req, res) {
       return send(res, out.status, out.body, void 0, "no-store");
     }
     if (p === "/mcp") return send(res, 405, err3("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/earnings", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -11832,6 +11919,12 @@ async function handle(db2, req, res) {
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
+    }
+    const em = p.match(/^\/v1\/assets\/([^/]+)\/earnings$/);
+    if (em) {
+      if (!ADDR3.test(em[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      const out = await assetEarnings(db2, em[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body);
     }
     const rm = p.match(/^\/v1\/assets\/([^/]+)\/risk$/);
     if (rm) {

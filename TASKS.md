@@ -21,7 +21,7 @@
 | T017 | P3 | Additional market/sector analytics | OPEN | Separate licenses |
 | T018 | P1 | Investigate multiplier anomalies SNDKc (8) and PMc (1.5588) | IN_PROGRESS (SNDKc = verified 8-for-1 split; PMc unexplained lead) | Needs log indexer; leads, not claims |
 | T019 | P1 | Earnings calendar events (second event class) | PROPOSED (split into T020–T022) | After corporate actions (D5) |
-| T020 | P0 (proposed) | Earnings release events: detect 8-K item 2.02, exact filing time, link press release | PROPOSED | CD-001; SEC submissions (keyless); gold set of real releases; independent verifier |
+| T020 | P0 | Earnings release events: detect 8-K item 2.02, exact filing time, link press release | BUILT 2026-11-28 (approved; /v1/assets/{c}/earnings, MCP get_earnings; migration 011 + grants 014 applied) | CD-001; SEC submissions (keyless); gold set of real releases; independent verifier |
 | T021 | P0 (proposed) | Upcoming earnings dates, only when announced in a filing or release | PROPOSED | Unknown when not announced; no licensed calendars |
 | T022 | P1 (proposed) | Headline results (revenue, EPS) quoted from release text; XBRL after 10-Q | PROPOSED | No interpretation; results vs expectations EXCLUDED (licensed consensus) |
 | T023 | P0 (proposed) | Derived ex-dividend date (T+1 rule), labelled derived with the rule | PROPOSED | CD-001 implied; field `ex_date_basis` |
@@ -74,4 +74,6 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T054 | P1 | x402 payment count on /transparency | BUILT 2026-11-28: robot step payments-index + tables x402_payments/x402_payment_scans (applied to Supabase); first stored count after merge and the next robot run | src/api/stats.ts |
 | T055 | P1 | Launch kit: thread, video script, form text | DRAFTED (docs/LAUNCH_KIT.md); founder posts | docs/LAUNCH_KIT.md |
 | T057 | P0 | Coverage level + capabilities per token (ROADMAP 1.3) | BUILT 2026-11-28 (/v1/assets, MCP list_assets, Explorer) | src/api/coverage.ts |
-| T058 | P0 | Privacy and terms page (ROADMAP 1.1) | BUILT 2026-11-28; text awaits founder approval | public/legal.html |
+| T058 | P0 | Privacy and terms page (ROADMAP 1.1) | DONE: live at /legal, text approved by the founder 2026-11-28 | public/legal.html |
+| T059 | P1 | Phase 3 outreach and build-in-public drafts | DRAFTED 2026-11-28 (docs/outreach/PHASE3_DRAFTS.md); founder sends |
+| T060 | P1 | Reliable robot schedule via cron-job.org (founder creates token + 2 jobs; then GitHub schedules removed) | WAITING on founder |

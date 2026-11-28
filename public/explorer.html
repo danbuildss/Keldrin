@@ -61,7 +61,7 @@ async function stock(q) {
   const a = assets.ok ? assets.body.data.find((x) => x.symbol === q || x.contract_address.toLowerCase() === q.toLowerCase()) : null;
   if (!a) { main.innerHTML = `<section><a href="/explorer">← Explorer</a><p class="lead">No tracked token "${esc(q)}".</p></section>`; return; }
   const c = a.contract_address;
-  const [mc, hist, ca, dex, rk] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`), getJson(`/v1/assets/${c}/risk`)]);
+  const [mc, hist, ca, dex, rk, er] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`), getJson(`/v1/assets/${c}/risk`), getJson(`/v1/assets/${c}/earnings`)]);
   const ctx = mc.ok ? mc.body.data : null, hasNav = hist.ok;
   const closes = hasNav ? hist.body.data.map((x) => ({ d: x.session_day, v: Number(x.nav) })) : [];
   const actions = ca.ok ? ca.body.data : [];
@@ -94,7 +94,10 @@ async function stock(q) {
     ${dd?.main ? `<div>Main pool <a class="mono" href="${dd.main.pool.length === 42 ? basescan("address", esc(dd.main.pool)) : "https://app.uniswap.org/explore/pools/base/" + esc(dd.main.pool)}" target="_blank" rel="noopener">${esc(short(dd.main.pool))} ↗</a> at block <span class="mono">${esc(dd.block)}</span><br><span class="note">${dd.pools_total} verified pools · <span class="mono">npx keldrin verify-dex ${esc(a.symbol)}</span></span></div>` : `<div class="note">DEX: ${esc(dd?.unavailable_reason || "no usable pool")}</div>`}
     <div>Token <a class="mono" href="${basescan("token", esc(c))}" target="_blank" rel="noopener">${esc(short(c))} ↗</a> · multiplier <span class="mono">${(Number(a.multiplier_wad) / 1e18).toFixed(6)}</span></div>
     <div><a class="btn" href="/playground?endpoint=${hasNav ? "market-context" : "corporate-actions"}&token=${encodeURIComponent(c)}">See these as API calls →</a></div></div></section>`;
-  main.innerHTML = head + navBlock + actBlock + proof;
+  const ers = er.ok ? er.body.data : [];
+  const erRows = ers.slice(0, 8).map((e) => `<tr><td class="mono">${esc(e.accepted_at.replace("T", " ").slice(0, 16))} UTC</td><td>${esc(e.form)} · item 2.02</td><td class="mono" style="font-size:11px">${esc(e.accession)}</td><td>${SEC_URL.test(e.sec_filing_url) ? `<a href="${esc(e.sec_filing_url)}" target="_blank" rel="noopener">filing ↗</a>` : ""} ${SEC_URL.test(e.sec_index_url) ? `<a href="${esc(e.sec_index_url)}" target="_blank" rel="noopener">index ↗</a>` : ""}</td></tr>`).join("");
+  const erBlock = `<section style="padding-top:0"><span class="label">Earnings releases · SEC</span><div class="scroll" style="margin-top:10px">${ers.length ? `<table><thead><tr><th>Accepted by SEC</th><th>Filing</th><th>Accession</th><th>Evidence</th></tr></thead><tbody>${erRows}</tbody></table>` : `<p class="note">${esc(er.ok ? (er.body.meta?.unavailable_reason || "No verified earnings releases recorded yet.") : "Earnings releases unavailable right now.")}</p>`}</div><p class="note" style="margin-top:8px">Form 8-K filings that list item 2.02 (results of operations), at SEC's acceptance time, each re-checked against the filing's own headers. Facts from filings: no estimates or predicted dates.</p></section>`;
+  main.innerHTML = head + navBlock + actBlock + erBlock + proof;
   if (hasNav) $("#rng").addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     $("#rng").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));

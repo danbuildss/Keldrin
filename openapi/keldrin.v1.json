@@ -1633,6 +1633,41 @@
           }
         }
       }
+    },
+    "/v1/assets/{contract}/earnings": {
+      "get": {
+        "summary": "The company's earnings releases (SEC 8-K item 2.02)",
+        "description": "SEC Form 8-K (and 8-K/A) filings that list item 2.02 (Results of Operations and Financial Condition) since 2025-01-01, with SEC's acceptance time (UTC), filed date, accession and links to the filing and its index. Read from SEC's submissions index (including its older pages, so complete since 2025-01-01) and served only after a re-check against the filing's own headers on www.sec.gov: form, item, filed date, acceptance time and filer CIK (latest review CONFIRMED). is_amendment marks an 8-K/A. Facts only: no estimates, consensus or predicted dates. Foreign issuers filing 6-K are not covered (meta.unavailable_reason).",
+        "parameters": [
+          {
+            "name": "contract",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Earnings releases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad address"
+          },
+          "404": {
+            "description": "Unknown asset"
+          }
+        }
+      }
     }
   },
   "components": {

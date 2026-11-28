@@ -22,7 +22,7 @@ async function t(name, path, check, init) {
 const j = (o) => JSON.stringify(o);
 const mcp = (body) => ({ method: "POST", headers: { "content-type": "application/json" }, body: j(body) });
 
-await t("website", "/", (r, b) => [r.status === 200 && String(b).includes("keldrin, built by SOMEHOW"), r.headers.get("content-security-policy") ? "CSP set" : "no CSP"]);
+await t("website", "/", (r, b) => [r.status === 200 && /keldrin, built by (<a [^>]*>)?SOMEHOW/.test(String(b)), r.headers.get("content-security-policy") ? "CSP set" : "no CSP"]);
 await t("agent guide", "/skill.md", (r, b) => [r.status === 200 && String(b).includes("50000"), r.headers.get("content-type")]);
 await t("agent guide (upper case)", "/SKILL.md", (r) => [r.status === 200, ""]);
 await t("developer quick start", "/start.md", (r, b) => [r.status === 200 && String(b).includes("0x04689a41629776563E6822F76f2e57D148d28513"), ""]);
@@ -43,7 +43,7 @@ await t("DEX NVDAc", `/v1/assets/${NV}/dex`, (r, b) => [r.status === 200 && !!b.
 await t("bad address", "/v1/assets/0x123/dex", (r, b) => [r.status === 400 && b.error?.code === "BAD_ADDRESS", b.error?.code]);
 await t("free report NVDAc (uses 1 free try)", "/v1/report?token=NVDAc", (r, b) => [r.status === 200 || r.status === 402, r.status === 200 ? `tries left ${b.meta?.free_tries_left_today}` : b.error?.code]);
 await t("free report unknown token", "/v1/report?token=ZZZc", (r, b) => [r.status === 404 || r.status === 402, b.error?.code]);
-await t("MCP tools/list", "/mcp", (r, b) => [r.status === 200 && b.result?.tools?.length === 9, `${b.result?.tools?.length} tools`], mcp({ jsonrpc: "2.0", id: 1, method: "tools/list" }));
+await t("MCP tools/list", "/mcp", (r, b) => [r.status === 200 && b.result?.tools?.length === 10, `${b.result?.tools?.length} tools`], mcp({ jsonrpc: "2.0", id: 1, method: "tools/list" }));
 await t("MCP get_market_context", "/mcp", (r, b) => [r.status === 200 && b.result?.isError === false, b.result?.content?.[0]?.text?.slice(0, 90)], mcp({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "get_market_context", arguments: { token: "NVDAc" } } }));
 await t("MCP get_nav_history", "/mcp", (r, b) => [r.status === 200 && b.result?.isError === false, b.result?.content?.[0]?.text?.slice(0, 90)], mcp({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "get_nav_history", arguments: { token: "NVDAc", from: "2026-11-20" } } }));
 await t("feedback rejects bad input", "/v1/feedback", (r, b) => [r.status === 400 && b.error?.code === "BAD_EMAIL", b.error?.code], { method: "POST", headers: { "content-type": "application/json" }, body: j({ email: "nope" }) });

@@ -2,6 +2,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { assetCorporateActions } from "./assetActions.ts";
 import { navHistory } from "./nav.ts";
 import { assetRisk } from "./risk.ts";
+import { assetEarnings } from "./earnings.ts";
 import { coverageMap } from "./coverage.ts";
 import { marketContext } from "./marketContext.ts";
 import { liveDex } from "./dex.ts";
@@ -22,6 +23,7 @@ export const TOOLS = [
   { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1000, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_earnings", title: "Earnings releases from SEC filings", description: "The company's earnings releases for a tokenized stock: SEC Form 8-K filings listing item 2.02 (Results of Operations), with SEC's exact acceptance time and links to the filing. Each re-checked against the filing's own headers on www.sec.gov. Facts only: no estimates or predicted dates.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
@@ -86,6 +88,10 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
         const out = await assetRisk(db, await resolveToken(db, args.token));
         return toolResult(out, (b) => `${b.data.symbol}: 30-day volatility ${b.data.volatility_30d_annualized.value_pct ?? "n/a"}% (annualized), max drawdown since start ${b.data.max_drawdown_since_start.value_pct ?? "n/a"}%, from ${b.data.closes_used} official closes to ${b.data.as_of_close}. NAV-based, not advice.`);
       }
+      case "get_earnings": {
+        const out = await assetEarnings(db, await resolveToken(db, args.token));
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} verified earnings release(s)${b.data[0] ? `; latest accepted by SEC ${b.data[0].accepted_at} (${b.data[0].sec_filing_url})` : ""}${b.meta.unavailable_reason ? `; ${b.meta.unavailable_reason}` : ""}. Facts from SEC filings, not estimates.`);
+      }
       case "get_market_context": {
         if (!navOn) return toolResult(navOff, () => "");
         const out = await marketContext(db, await resolveToken(db, args.token));
@@ -148,7 +154,7 @@ export async function handleMcp(db: PGlite, raw: unknown, client = "mcp"): Promi
           protocolVersion: version,
           capabilities: { tools: {} },
           serverInfo: { name: "keldrin", title: "keldrin", version: PACKAGE_VERSION },
-          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer.",
+          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_earnings for SEC earnings releases, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer.",
         });
       }
       case "ping":
