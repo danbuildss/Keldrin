@@ -4119,9 +4119,9 @@ var require_utils2 = __commonJS({
         return Array.from(new Uint8Array(hash2)).map((b) => b.toString(16).padStart(2, "0")).join("");
       }
     }
-    async function postgresMd5PasswordHash(user, password, salt) {
+    async function postgresMd5PasswordHash(user, password, salt2) {
       const inner = await md5(password + user);
-      const outer = await md5(Buffer.concat([Buffer.from(inner), salt]));
+      const outer = await md5(Buffer.concat([Buffer.from(inner), salt2]));
       return "md5" + outer;
     }
     async function sha256(text) {
@@ -4134,9 +4134,9 @@ var require_utils2 = __commonJS({
       const key = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
       return await subtleCrypto.sign("HMAC", key, textEncoder.encode(msg));
     }
-    async function deriveKey(password, salt, iterations) {
+    async function deriveKey(password, salt2, iterations) {
       const key = await subtleCrypto.importKey("raw", textEncoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-      const params = { name: "PBKDF2", hash: "SHA-256", salt, iterations };
+      const params = { name: "PBKDF2", hash: "SHA-256", salt: salt2, iterations };
       return await subtleCrypto.deriveBits(params, key, 32 * 8, ["deriveBits"]);
     }
   }
@@ -4381,10 +4381,10 @@ var require_sasl = __commonJS({
       } else if (!isPrintableChars(nonce)) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: nonce must only contain printable characters");
       }
-      const salt = attrPairs.get("s");
-      if (!salt) {
+      const salt2 = attrPairs.get("s");
+      if (!salt2) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: salt missing");
-      } else if (!isBase64(salt)) {
+      } else if (!isBase64(salt2)) {
         throw new Error("SASL: SCRAM-SERVER-FIRST-MESSAGE: salt must be base64");
       }
       const iterationText = attrPairs.get("i");
@@ -4396,7 +4396,7 @@ var require_sasl = __commonJS({
       const iteration = parseInt(iterationText, 10);
       return {
         nonce,
-        salt,
+        salt: salt2,
         iteration
       };
     }
@@ -5210,9 +5210,9 @@ var require_messages = __commonJS({
     };
     exports.ParameterStatusMessage = ParameterStatusMessage;
     var AuthenticationMD5Password = class {
-      constructor(length, salt) {
+      constructor(length, salt2) {
         this.length = length;
-        this.salt = salt;
+        this.salt = salt2;
         this.name = "authenticationMD5Password";
       }
     };
@@ -5905,8 +5905,8 @@ var require_parser = __commonJS({
         case 5:
           if (message.length === 12) {
             message.name = "authenticationMD5Password";
-            const salt = reader.bytes(4);
-            return new messages_1.AuthenticationMD5Password(LATEINIT_LENGTH, salt);
+            const salt2 = reader.bytes(4);
+            return new messages_1.AuthenticationMD5Password(LATEINIT_LENGTH, salt2);
           }
           break;
         case 10:
@@ -8271,8 +8271,9 @@ var keldrin_v1_default = {
   openapi: "3.1.0",
   info: {
     title: "Keldrin API",
-    version: "0.6.0",
-    description: "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN."
+    version: "0.7.0",
+    description: "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN.",
+    "x-guidance": "Free one-stock routes under /v1. One-call snapshot (/v1/snapshot) and report (/v1/report?token=) give 3 free complete answers per client per day, then 402 FREE_TRIES_USED with the paid links. Paid: GET /api/snapshot and /api/report (forward to Bankr x402 Cloud): x402 v2, scheme exact, network eip155:8453, USDC, amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Sign once, never re-sign automatically; only a 2xx is charged. Agent guide: https://keldrin.vercel.app/skill.md"
   },
   servers: [
     {
@@ -9289,6 +9290,558 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/snapshot": {
+      get: {
+        operationId: "snapshotFreeTry",
+        summary: "All verified stocks in one answer (3 free per day)",
+        description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed, in one answer: latest NAV with round id and age, freshness, main DEX price with depth and gap vs NAV, next corporate action; plus the US session. 3 free complete answers per client per UTC day (shared with /v1/report), then 402 FREE_TRIES_USED with the paid x402 links. Incomplete answers are 503 and use no try.",
+        responses: {
+          "200": {
+            description: "Complete snapshot; meta.free_tries_left_today"
+          },
+          "402": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/report": {
+      get: {
+        operationId: "reportFreeTry",
+        summary: "Everything on one stock (3 free per day)",
+        description: "Everything keldrin verifies about one token in one answer: corporate actions with evidence, market context (live NAV, freshness, DEX gap), 30 daily NAV closes with round ids, every verified DEX pool. Same 3 free tries as /v1/snapshot, then 402.",
+        parameters: [
+          {
+            name: "token",
+            in: "query",
+            required: true,
+            schema: {
+              type: "string"
+            },
+            description: "Exact symbol (e.g. NVDAc) or 0x contract address"
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Complete report"
+          },
+          "400": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/snapshot": {
+      get: {
+        operationId: "snapshotPaid",
+        summary: "All verified stocks in one answer ($0.05 USDC on Base, x402)",
+        description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed, in one answer: latest NAV with round id and age, freshness, main DEX price with depth and gap vs NAV, next corporate action; plus the US session. Forwards to https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot (same terms). Only a 2xx is charged.",
+        "x-payment-info": {
+          price: "0.05",
+          currency: "USDC",
+          network: "eip155:8453",
+          scheme: "exact",
+          x402Version: 2,
+          amount: "50000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          payTo: "0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0",
+          facilitator: "Bankr x402 Cloud"
+        },
+        responses: {
+          "200": {
+            description: "Complete snapshot (charged)"
+          },
+          "402": {
+            description: "Payment required (x402 v2): terms in the payment-required header (base64 JSON). scheme exact, network eip155:8453, USDC, amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0.",
+            headers: {
+              "payment-required": {
+                schema: {
+                  type: "string"
+                },
+                description: "Base64 JSON with the x402 payment requirements"
+              }
+            }
+          },
+          "503": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/report": {
+      get: {
+        operationId: "reportPaid",
+        summary: "Everything on one stock ($0.05 USDC on Base, x402)",
+        description: "Everything keldrin verifies about one token in one answer: corporate actions with evidence, market context (live NAV, freshness, DEX gap), 30 daily NAV closes with round ids, every verified DEX pool. Forwards to https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report (same terms). Only a 2xx is charged.",
+        parameters: [
+          {
+            name: "token",
+            in: "query",
+            required: true,
+            schema: {
+              type: "string"
+            },
+            description: "Exact symbol (e.g. NVDAc) or 0x contract address"
+          }
+        ],
+        "x-payment-info": {
+          price: "0.05",
+          currency: "USDC",
+          network: "eip155:8453",
+          scheme: "exact",
+          x402Version: 2,
+          amount: "50000",
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          payTo: "0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0",
+          facilitator: "Bankr x402 Cloud"
+        },
+        responses: {
+          "200": {
+            description: "Complete report (charged)"
+          },
+          "400": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            description: "Payment required (x402 v2): terms in the payment-required header (base64 JSON). scheme exact, network eip155:8453, USDC, amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0.",
+            headers: {
+              "payment-required": {
+                schema: {
+                  type: "string"
+                },
+                description: "Base64 JSON with the x402 payment requirements"
+              }
+            }
+          },
+          "404": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/feedback": {
+      post: {
+        operationId: "feedback",
+        summary: "Website feedback form",
+        description: "Email required; X handle and message optional. 5 per client per day.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: [
+                  "email"
+                ],
+                properties: {
+                  email: {
+                    type: "string"
+                  },
+                  x: {
+                    type: "string"
+                  },
+                  message: {
+                    type: "string",
+                    maxLength: 1e3
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Received"
+          },
+          "400": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Error (never charged)",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                        message: {
+                          type: "string"
+                        },
+                        hint: {
+                          type: "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/skill.md": {
+      get: {
+        operationId: "skill",
+        summary: "Agent guide (when to use keldrin, how to read answers, how to pay)",
+        responses: {
+          "200": {
+            description: "Markdown"
+          }
+        }
+      }
     }
   },
   components: {
@@ -9807,7 +10360,7 @@ function formatNav(answer, decimals) {
   const frac = digits.slice(digits.length - decimals).replace(/0+$/, "");
   return (neg ? "-" : "") + int + (frac ? "." + frac : "");
 }
-function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), indexedUntilSec = null) {
+function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), indexedUntilSec = null, coveredFromSec = null) {
   const byDay = /* @__PURE__ */ new Map();
   for (const r of rows) {
     const t = Number(r.updated_unix);
@@ -9820,16 +10373,21 @@ function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), inde
   const missing_trading_days = [];
   const not_covered_days = [];
   const not_yet_indexed_days = [];
+  const before_coverage_days = [];
   for (const d of dateRange(from, to)) {
     const td = isTradingDay(d);
     if (td === null) not_covered_days.push(d);
     if (td !== true) continue;
     const r = byDay.get(d);
+    if (!r && coveredFromSec !== null && sessionClose(d) < coveredFromSec) {
+      before_coverage_days.push(d);
+      continue;
+    }
     if (r) closes.push({ session_day: d, session_close: new Date(sessionClose(d) * 1e3).toISOString(), provisional: sessionClose(d) > nowSec, row: r });
     else if (indexedUntilSec !== null && sessionOpen(d) > indexedUntilSec) not_yet_indexed_days.push(d);
     else if (sessionClose(d) <= nowSec) missing_trading_days.push(d);
   }
-  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days };
+  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days, before_coverage_days };
 }
 var e = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -9970,10 +10528,11 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
     meta.order = "updated_at, then round_id";
     return { status: 200, body: { data: page.map((r) => item(r, include === "all")), meta: { ...meta, count: page.length, quality } } };
   }
-  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3), span.last ? Date.parse(span.last) / 1e3 : null);
+  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3), span.last ? Date.parse(span.last) / 1e3 : null, span.first ? Date.parse(span.first) / 1e3 : null);
   quality.missing_trading_days = d.missing_trading_days;
   quality.not_yet_indexed_days = d.not_yet_indexed_days;
   quality.not_covered_days = d.not_covered_days;
+  quality.before_coverage = d.before_coverage_days.length ? { trading_days: d.before_coverage_days.length, first: d.before_coverage_days[0], last: d.before_coverage_days[d.before_coverage_days.length - 1], note: "trading days before the feed's first official round; not missing data" } : null;
   meta.calendar_version = CALENDAR_VERSION;
   meta.daily_rule = "last official round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no official in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet; limit and cursor do not apply";
   return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row, false) })), meta: { ...meta, count: d.closes.length, quality } } };
@@ -10397,131 +10956,10 @@ async function assetCorporateActions(db2, contract) {
 }
 
 // src/version.ts
-var PACKAGE_VERSION = "0.6.0";
+var PACKAGE_VERSION = "0.7.0";
 
-// src/api/mcp.ts
-var PROTOCOL_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
-var tokenArg = { type: "string", description: "Token contract address (0x\u2026) or exact Coinbase symbol, e.g. NVDAc. Addresses are preferred." };
-var ro = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
-var TOOLS = [
-  { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that Keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
-  { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
-  { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
-  { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
-  { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from Keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
-  { name: "get_market_session", title: "US equity session now", description: "Whether the US stock market is open right now, with next open/close and last close (NYSE calendar 2026-2027; beyond it: calendar_not_covered).", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } }
-];
-var isObj = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var ADDR = /^0x[0-9a-fA-F]{40}$/;
-async function resolveToken(db2, token) {
-  if (typeof token !== "string" || !token.trim()) throw new ToolError("token is required (contract address or exact symbol)");
-  const t = token.trim();
-  if (ADDR.test(t)) return t;
-  const m = (await db2.query("SELECT contract_address FROM assets WHERE symbol = $1", [t])).rows;
-  if (m.length === 0) throw new ToolError(`no token with exact symbol ${t.slice(0, 40)}; use list_assets or a contract address`);
-  if (m.length > 1) throw new ToolError(`${m.length} tokens use symbol ${t.slice(0, 40)}; pass the contract address`);
-  return m[0].contract_address;
-}
-var ToolError = class extends Error {
-};
-function toolResult(out, lead) {
-  const body = out.body;
-  if (out.status !== 200) {
-    const e2 = body?.error ?? { code: "ERROR", message: "request failed" };
-    return { content: [{ type: "text", text: `${e2.code}: ${e2.message}${e2.hint ? " \u2192 " + e2.hint : ""}` }], isError: true };
-  }
-  return { content: [{ type: "text", text: lead(body) }, { type: "text", text: JSON.stringify(body) }], structuredContent: body, isError: false };
-}
-async function callTool(db2, name, args) {
-  const navOn = process.env.NAV_HISTORY_PUBLIC === "true";
-  const navOff = { status: 503, body: { error: { code: "NAV_NOT_ENABLED", message: "NAV data is not publicly enabled on this server" } } };
-  try {
-    switch (name) {
-      case "list_assets": {
-        const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
-        const rows = (await db2.query(
-          "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
-        )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
-        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
-        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with a verified NAV feed.`);
-      }
-      case "get_corporate_actions": {
-        const out = await assetCorporateActions(db2, await resolveToken(db2, args.token));
-        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} corporate action(s); next: ${b.data.find((e2) => e2.status === "predicted")?.expected_adjustment_date ?? "none announced"}. Shares per token = multiplier / 1e18.`);
-      }
-      case "get_nav_history": {
-        if (!navOn) return toolResult(navOff, () => "");
-        const q = new URLSearchParams();
-        for (const k of ["interval", "from", "to"]) if (typeof args[k] === "string") q.set(k, args[k]);
-        if (typeof args.limit === "number") q.set("limit", String(args.limit));
-        const out = await navHistory(db2, await resolveToken(db2, args.token), q);
-        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} ${b.meta.interval} NAV point(s) ${b.meta.from}..${b.meta.to}; verification ${b.meta.quality.verification.verdict}; missing trading days: ${(b.meta.quality.missing_trading_days ?? []).length}. Total-return NAV: do not apply the multiplier again.`);
-      }
-      case "get_market_context": {
-        if (!navOn) return toolResult(navOff, () => "");
-        const out = await marketContext(db2, await resolveToken(db2, args.token));
-        return toolResult(out, (b) => {
-          const d = b.data;
-          const nav = d.nav ? `last NAV $${d.nav.nav} (${Math.round(d.nav.age_s / 60)} min old, ${d.staleness.state})` : `NAV unavailable (${d.nav_unavailable_reason})`;
-          const gap = typeof d.dex?.nav_premium_pct === "number" ? `${d.dex.nav_premium_pct >= 0 ? "+" : ""}${d.dex.nav_premium_pct}% vs NAV` : `gap vs NAV withheld: ${d.dex?.premium_unavailable_reason ?? "unavailable"}`;
-          const dex = d.dex?.price_usd ? `; DEX $${Number(d.dex.price_usd).toFixed(2)} (${gap})` : "";
-          return `${d.symbol}: market ${d.market.session}; ${nav}${dex}. The NAV is the last published reference, not a live equity price.`;
-        });
-      }
-      case "get_dex_price": {
-        const out = await liveDex(db2, await resolveToken(db2, args.token));
-        return toolResult(out, (b) => {
-          const d = b.data;
-          return d.main ? `${d.symbol}: $${Number(d.main.price_usd).toFixed(2)} on ${d.main.venue} (${d.main.quote}), est. 2% depth $${Math.round(d.main.depth_2pct_usd)}${d.main.thin_market ? " (thin market)" : ""}, block ${d.block}.` : `${d.symbol}: no usable DEX price (${d.unavailable_reason}).`;
-        });
-      }
-      case "get_market_session": {
-        const m = marketNow(Math.floor(Date.now() / 1e3));
-        return toolResult({ status: 200, body: { data: m } }, () => `US market: ${m.session} (${m.ny_date} ${m.ny_time} New York); next open ${m.next_open ?? "unknown"}.`);
-      }
-      default:
-        throw Object.assign(new Error(`Unknown tool: ${String(name).slice(0, 80)}`), { rpc: -32602 });
-    }
-  } catch (e2) {
-    if (e2 instanceof ToolError) return { content: [{ type: "text", text: e2.message }], isError: true };
-    throw e2;
-  }
-}
-async function handleMcp(db2, raw) {
-  if (!isObj(raw)) return { status: 400, body: { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request: one JSON-RPC object per POST (batches are not supported)" } } };
-  const msg = raw;
-  const isRequest = msg.id !== void 0 && msg.id !== null;
-  const reply = (result) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id, result } });
-  const error = (code, message) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id ?? null, error: { code, message } } });
-  try {
-    switch (msg.method) {
-      case "initialize": {
-        const asked = isObj(msg.params) ? msg.params.protocolVersion : void 0;
-        const version3 = typeof asked === "string" && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0];
-        return reply({
-          protocolVersion: version3,
-          capabilities: { tools: {} },
-          serverInfo: { name: "keldrin", title: "Keldrin", version: PACKAGE_VERSION },
-          instructions: "Keldrin is a verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices. Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
-        });
-      }
-      case "ping":
-        return reply({});
-      case "tools/list":
-        return reply({ tools: TOOLS });
-      case "tools/call": {
-        const p = isObj(msg.params) ? msg.params : {};
-        return reply(await callTool(db2, p.name, isObj(p.arguments) ? p.arguments : {}));
-      }
-      default:
-        if (!isRequest) return { status: 202, body: null };
-        return error(-32601, `Method not found: ${String(msg.method).slice(0, 80)}`);
-    }
-  } catch (err4) {
-    const code = err4.rpc ?? -32603;
-    return isRequest ? error(code, code === -32603 ? "Internal error" : err4.message) : { status: 202, body: null };
-  }
-}
+// src/api/trial.ts
+import { createHash } from "node:crypto";
 
 // node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib2(), 1);
@@ -10583,7 +11021,6 @@ function openPg(connectionString) {
 }
 
 // src/api/trial.ts
-import { createHash } from "node:crypto";
 var FREE_TRIES_PER_DAY = 3;
 var PAID = {
   price: "0.05 USDC on Base",
@@ -10591,40 +11028,45 @@ var PAID = {
   snapshot: "https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot",
   report: "https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report"
 };
-var ADDR2 = /^0x[0-9a-fA-F]{40}$/;
+var ADDR = /^0x[0-9a-fA-F]{40}$/;
 var TRANSIENT = /* @__PURE__ */ new Set(["rpc_unavailable", "rpc_result_invalid"]);
-var UNVERIFIED = /* @__PURE__ */ new Set(["feed_not_verified", "phase_not_reviewed"]);
+var UNVERIFIED = /* @__PURE__ */ new Set(["feed_not_verified", "phase_not_reviewed", "aggregator_decimals_differ_from_proxy"]);
 var err = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var incomplete = (why) => err(503, "INCOMPLETE", `could not build a complete answer right now (${why}); this did not use a free try`, "retry in a minute");
-var mem = /* @__PURE__ */ new Map();
 var dayOf = (now) => now.toISOString().slice(0, 10);
+function salt() {
+  if (process.env.TRIAL_SALT) return process.env.TRIAL_SALT;
+  if (process.env.DATABASE_URL) return createHash("sha256").update("keldrin-trial-salt|" + process.env.DATABASE_URL).digest("hex");
+  if (process.env.VERCEL) throw new Error("no secret salt configured");
+  return "keldrin-local-test-only";
+}
 function clientHash(client) {
-  return createHash("sha256").update((process.env.TRIAL_SALT ?? "keldrin-trial-v1") + "|" + client).digest("hex").slice(0, 32);
+  return createHash("sha256").update(salt() + "|" + client).digest("hex").slice(0, 32);
 }
 async function triesLeft(db2, client, now = /* @__PURE__ */ new Date()) {
-  const h = clientHash(client);
   try {
-    const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
+    const r = await db2.query("SELECT trial_used($1, $2::date) AS n", [clientHash(client), dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
   } catch (e2) {
-    console.warn("free-try counter read failed; using the in-memory count:", e2.message);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
+    console.warn("free-try counter unavailable (failing closed):", e2.message);
+    return -1;
   }
 }
 async function useTry(db2, client, now = /* @__PURE__ */ new Date()) {
-  const h = clientHash(client);
   try {
-    const sql = TRIAL_CONSUME_SQL;
-    const r = db2.writeOne ? await db2.writeOne(sql, [h, dayOf(now)]) : await db2.query(sql, [h, dayOf(now)]);
-    return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY));
+    const args = [clientHash(client), dayOf(now)];
+    const r = db2.writeOne ? await db2.writeOne(TRIAL_CONSUME_SQL, args) : await db2.query(TRIAL_CONSUME_SQL, args);
+    const n = Number(r.rows[0]?.n ?? FREE_TRIES_PER_DAY + 1);
+    return Math.max(0, FREE_TRIES_PER_DAY - n);
   } catch (e2) {
-    console.warn("free-try counter write failed; using the in-memory count:", e2.message);
-    if (mem.size > 5e4) mem.clear();
-    const k = h + dayOf(now);
-    mem.set(k, (mem.get(k) ?? 0) + 1);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(k) ?? 0));
+    console.warn("free-try counter write failed:", e2.message);
+    return 0;
   }
 }
+var trialUnavailable = () => ({
+  status: 503,
+  body: { error: { code: "FREE_TRIES_UNAVAILABLE", message: "free tries can't be counted right now, so none are given; this did not use a try", hint: "retry in a minute, use the paid link, or use the free one-stock routes" }, pay: PAID }
+});
 var trialUsedUp = () => ({
   status: 402,
   body: { error: { code: "FREE_TRIES_USED", message: `the ${FREE_TRIES_PER_DAY} free tries for today are used; each further answer is ${PAID.price} via x402`, hint: "call the paid endpoint with an x402 client (e.g. Bankr); the one-stock routes under /v1/assets stay free" }, pay: PAID }
@@ -10663,7 +11105,7 @@ async function snapshot(db2, now = /* @__PURE__ */ new Date(), readRound = liveL
 async function report(db2, token, now = /* @__PURE__ */ new Date(), readRound = liveLatestRound, readDex = liveDex) {
   const t = token.trim();
   if (!t || t.length > 64) return err(400, "TOKEN_REQUIRED", "pass ?token=<exact symbol or 0x contract address>, e.g. NVDAc");
-  const rows = (await db2.query(ADDR2.test(t) ? "SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)" : "SELECT contract_address, symbol FROM assets WHERE symbol=$1", [t])).rows;
+  const rows = (await db2.query(ADDR.test(t) ? "SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)" : "SELECT contract_address, symbol FROM assets WHERE symbol=$1", [t])).rows;
   if (rows.length === 0) return err(404, "UNKNOWN_ASSET", `no tracked token ${t.slice(0, 64)}`, "GET /v1/assets lists tracked tokens");
   if (rows.length > 1) return err(409, "AMBIGUOUS_SYMBOL", `${rows.length} tokens use symbol ${t.slice(0, 40)}`, "pass the contract address");
   const a = rows[0];
@@ -10690,6 +11132,147 @@ async function report(db2, token, now = /* @__PURE__ */ new Date(), readRound = 
     })(), 1e4);
   } catch (e2) {
     return incomplete(e2.message);
+  }
+}
+
+// src/api/mcp.ts
+var PROTOCOL_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
+var tokenArg = { type: "string", description: "Token contract address (0x\u2026) or exact Coinbase symbol, e.g. NVDAc. Addresses are preferred." };
+var ro = { readOnlyHint: true, idempotentHint: true, openWorldHint: false };
+var TOOLS = [
+  { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that Keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
+  { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from Keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_report", title: "Everything on one stock", description: "Corporate actions with evidence, market context (live NAV, freshness, DEX gap), 30 daily NAV closes with round ids and every verified DEX pool, for one token. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link and never pays by itself.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
+  { name: "get_market_session", title: "US equity session now", description: "Whether the US stock market is open right now, with next open/close and last close (NYSE calendar 2026-2027; beyond it: calendar_not_covered).", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } }
+];
+var isObj = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var ADDR2 = /^0x[0-9a-fA-F]{40}$/;
+async function resolveToken(db2, token) {
+  if (typeof token !== "string" || !token.trim()) throw new ToolError("token is required (contract address or exact symbol)");
+  const t = token.trim();
+  if (ADDR2.test(t)) return t;
+  const m = (await db2.query("SELECT contract_address FROM assets WHERE symbol = $1", [t])).rows;
+  if (m.length === 0) throw new ToolError(`no token with exact symbol ${t.slice(0, 40)}; use list_assets or a contract address`);
+  if (m.length > 1) throw new ToolError(`${m.length} tokens use symbol ${t.slice(0, 40)}; pass the contract address`);
+  return m[0].contract_address;
+}
+var ToolError = class extends Error {
+};
+function toolResult(out, lead) {
+  const body = out.body;
+  if (out.status !== 200) {
+    const e2 = body?.error ?? { code: "ERROR", message: "request failed" };
+    return { content: [{ type: "text", text: `${e2.code}: ${e2.message}${e2.hint ? " \u2192 " + e2.hint : ""}` }], isError: true };
+  }
+  return { content: [{ type: "text", text: lead(body) }, { type: "text", text: JSON.stringify(body) }], structuredContent: body, isError: false };
+}
+async function callTool(db2, name, args, client) {
+  const navOn = process.env.NAV_HISTORY_PUBLIC === "true";
+  const navOff = { status: 503, body: { error: { code: "NAV_NOT_ENABLED", message: "NAV data is not publicly enabled on this server" } } };
+  try {
+    switch (name) {
+      case "list_assets": {
+        const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
+        const rows = (await db2.query(
+          "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
+        )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
+        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
+      }
+      case "get_corporate_actions": {
+        const out = await assetCorporateActions(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} corporate action(s); next: ${b.data.find((e2) => e2.status === "predicted")?.expected_adjustment_date ?? "none announced"}. Shares per token = multiplier / 1e18.`);
+      }
+      case "get_nav_history": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const q = new URLSearchParams();
+        for (const k of ["interval", "from", "to"]) if (typeof args[k] === "string") q.set(k, args[k]);
+        if (typeof args.limit === "number") q.set("limit", String(args.limit));
+        const out = await navHistory(db2, await resolveToken(db2, args.token), q);
+        return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} ${b.meta.interval} NAV point(s) ${b.meta.from}..${b.meta.to}; verification ${b.meta.quality.verification.verdict}; missing trading days: ${(b.meta.quality.missing_trading_days ?? []).length}. Total-return NAV: do not apply the multiplier again.`);
+      }
+      case "get_market_context": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const out = await marketContext(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => {
+          const d = b.data;
+          const nav = d.nav ? `last NAV $${d.nav.nav} (${Math.round(d.nav.age_s / 60)} min old, ${d.staleness.state})` : `NAV unavailable (${d.nav_unavailable_reason})`;
+          const gap = typeof d.dex?.nav_premium_pct === "number" ? `${d.dex.nav_premium_pct >= 0 ? "+" : ""}${d.dex.nav_premium_pct}% vs NAV` : `gap vs NAV withheld: ${d.dex?.premium_unavailable_reason ?? "unavailable"}`;
+          const dex = d.dex?.price_usd ? `; DEX $${Number(d.dex.price_usd).toFixed(2)} (${gap})` : "";
+          return `${d.symbol}: market ${d.market.session}; ${nav}${dex}. The NAV is the last published reference, not a live equity price.`;
+        });
+      }
+      case "get_dex_price": {
+        const out = await liveDex(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => {
+          const d = b.data;
+          return d.main ? `${d.symbol}: $${Number(d.main.price_usd).toFixed(2)} on ${d.main.venue} (${d.main.quote}), est. 2% depth $${Math.round(d.main.depth_2pct_usd)}${d.main.thin_market ? " (thin market)" : ""}, block ${d.block}.` : `${d.symbol}: no usable DEX price (${d.unavailable_reason}).`;
+        });
+      }
+      case "get_snapshot":
+      case "get_report": {
+        const before = await triesLeft(db2, client);
+        if (before === -1) return { content: [{ type: "text", text: `FREE_TRIES_UNAVAILABLE: free tries can't be counted right now, so none are given. Paid (${PAID.price}, x402, ask the user first): ${name === "get_snapshot" ? PAID.snapshot : PAID.report}` }], structuredContent: trialUnavailable().body, isError: true };
+        if (before === 0) {
+          const used = trialUsedUp();
+          return { content: [{ type: "text", text: `FREE_TRIES_USED: today's 3 free snapshots/reports are used. Each further answer is ${PAID.price} via x402: ${name === "get_snapshot" ? PAID.snapshot : PAID.report}${name === "get_report" ? "?token=<token>" : ""}. Ask the user before paying; never pay automatically.` }], structuredContent: used.body, isError: true };
+        }
+        const out = name === "get_snapshot" ? await snapshot(db2) : await report(db2, typeof args.token === "string" ? args.token : "");
+        if (out.status !== 200) return toolResult(out, () => "");
+        const left = await useTry(db2, client);
+        const body = out.body;
+        const withMeta = { ...body, meta: { ...body.meta ?? {}, free_tries_left_today: left, paid: PAID } };
+        return toolResult({ status: 200, body: withMeta }, (b) => name === "get_snapshot" ? `${b.data.count} verified stocks; market ${b.data.market.session}. ${left} free snapshot/report tries left today.` : `${b.data.symbol}: ${b.data.corporate_actions.length} corporate action(s), ${b.data.nav_daily_30d ? b.data.nav_daily_30d.meta.count + " daily NAV closes" : "no NAV feed"}, ${b.data.dex_pools?.pools_total ?? 0} DEX pools. ${left} free tries left today.`);
+      }
+      case "get_market_session": {
+        const m = marketNow(Math.floor(Date.now() / 1e3));
+        return toolResult({ status: 200, body: { data: m } }, () => `US market: ${m.session} (${m.ny_date} ${m.ny_time} New York); next open ${m.next_open ?? "unknown"}.`);
+      }
+      default:
+        throw Object.assign(new Error(`Unknown tool: ${String(name).slice(0, 80)}`), { rpc: -32602 });
+    }
+  } catch (e2) {
+    if (e2 instanceof ToolError) return { content: [{ type: "text", text: e2.message }], isError: true };
+    throw e2;
+  }
+}
+async function handleMcp(db2, raw, client = "mcp") {
+  if (!isObj(raw)) return { status: 400, body: { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request: one JSON-RPC object per POST (batches are not supported)" } } };
+  const msg = raw;
+  const isRequest = msg.id !== void 0 && msg.id !== null;
+  const reply = (result) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id, result } });
+  const error = (code, message) => ({ status: 200, body: { jsonrpc: "2.0", id: msg.id ?? null, error: { code, message } } });
+  try {
+    switch (msg.method) {
+      case "initialize": {
+        const asked = isObj(msg.params) ? msg.params.protocolVersion : void 0;
+        const version3 = typeof asked === "string" && PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0];
+        return reply({
+          protocolVersion: version3,
+          capabilities: { tools: {} },
+          serverInfo: { name: "keldrin", title: "Keldrin", version: PACKAGE_VERSION },
+          instructions: "Keldrin is a verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
+        });
+      }
+      case "ping":
+        return reply({});
+      case "tools/list":
+        return reply({ tools: TOOLS });
+      case "tools/call": {
+        const p = isObj(msg.params) ? msg.params : {};
+        return reply(await callTool(db2, p.name, isObj(p.arguments) ? p.arguments : {}, client));
+      }
+      default:
+        if (!isRequest) return { status: 202, body: null };
+        return error(-32601, `Method not found: ${String(msg.method).slice(0, 80)}`);
+    }
+  } catch (err4) {
+    const code = err4.rpc ?? -32603;
+    return isRequest ? error(code, code === -32603 ? "Internal error" : err4.message) : { status: 202, body: null };
   }
 }
 
@@ -10745,7 +11328,7 @@ var err3 = (code, message, hint) => ({ error: { code, message, ...hint ? { hint 
 var OPENAPI = keldrin_v1_default;
 var LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
-Every record is derived from chain state and independently re-verified; values are exact integers (WAD = 1e18).
+Corporate-action records are derived from chain state and independently re-verified; values are exact integers (WAD = 1e18). NAV and DEX values are read onchain at request time from independently checked feeds and pools.
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
@@ -10758,6 +11341,9 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/market/session \u2014 the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/snapshot \u2014 every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> \u2014 everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
+- Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= \u2014 x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
+- GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
+- GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
@@ -10830,7 +11416,7 @@ async function handle(db2, req, res) {
       } catch {
         return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, void 0, "no-store");
       }
-      const out = await handleMcp(db2, msg);
+      const out = await handleMcp(db2, msg, fwd || req.socket?.remoteAddress || "unknown");
       if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
       return send(res, out.status, out.body, void 0, "no-store");
     }
@@ -10899,6 +11485,7 @@ async function handle(db2, req, res) {
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
       let left = await triesLeft(db2, client);
+      if (left === -1) return send(res, 503, trialUnavailable().body, void 0, "no-store");
       if (left === 0) return send(res, 402, trialUsedUp().body, void 0, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db2) : await report(db2, url.searchParams.get("token") ?? "");
       if (out.status === 200) left = await useTry(db2, client);

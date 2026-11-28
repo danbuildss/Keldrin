@@ -24,47 +24,55 @@ export const PAID = {
 type Out = { status: number; body: unknown };
 const ADDR = /^0x[0-9a-fA-F]{40}$/;
 const TRANSIENT = new Set(["rpc_unavailable", "rpc_result_invalid"]);
-const UNVERIFIED = new Set(["feed_not_verified", "phase_not_reviewed"]);
+const UNVERIFIED = new Set(["feed_not_verified", "phase_not_reviewed", "aggregator_decimals_differ_from_proxy"]);
 const err = (status: number, code: string, message: string, hint?: string): Out => ({ status, body: { error: { code, message, ...(hint ? { hint } : {}) } } });
 const incomplete = (why: string) => err(503, "INCOMPLETE", `could not build a complete answer right now (${why}); this did not use a free try`, "retry in a minute");
 
 // ── trial counter ───────────────────────────────────────────────────────
-// Shared across server instances: one row per (hashed client, UTC day) in Postgres, via trial_used / trial_consume.
-// The client is the request IP, hashed with a server-side salt; the raw IP is never stored. If the counter can't be
-// read or written, a small in-memory count per instance is used instead (a trial allowance, never a security control).
+// Shared across server instances: one row per (hashed client, UTC day) in Postgres, via trial_used / trial_consume
+// (which refuses past the limit). The client is the request IP, hashed with a secret salt; the raw IP is never stored.
+// Fail closed: if the counter can't be read, no free answer is given (FREE_TRIES_UNAVAILABLE), never unlimited ones.
+// Two parallel calls with the last try left can both be answered; that is bounded by the rate limit and accepted.
 type CounterDb = { query: PGlite["query"]; writeOne?: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> };
-const mem = new Map<string, number>();
 const dayOf = (now: Date) => now.toISOString().slice(0, 10);
-export function clientHash(client: string): string {
-  return createHash("sha256").update((process.env.TRIAL_SALT ?? "keldrin-trial-v1") + "|" + client).digest("hex").slice(0, 32);
+/** Secret salt: TRIAL_SALT, else derived from the (secret) database URL. On Vercel with neither, hashing refuses. */
+function salt(): string {
+  if (process.env.TRIAL_SALT) return process.env.TRIAL_SALT;
+  if (process.env.DATABASE_URL) return createHash("sha256").update("keldrin-trial-salt|" + process.env.DATABASE_URL).digest("hex");
+  if (process.env.VERCEL) throw new Error("no secret salt configured");
+  return "keldrin-local-test-only";
 }
+export function clientHash(client: string): string {
+  return createHash("sha256").update(salt() + "|" + client).digest("hex").slice(0, 32);
+}
+/** Free tries left today, or -1 when the counter is unavailable (fail closed). */
 export async function triesLeft(db: CounterDb, client: string, now = new Date()): Promise<number> {
-  const h = clientHash(client);
   try {
-    const r = await db.query<{ n: number }>("SELECT trial_used($1, $2::date) AS n", [h, dayOf(now)]);
+    const r = await db.query<{ n: number }>("SELECT trial_used($1, $2::date) AS n", [clientHash(client), dayOf(now)]);
     return Math.max(0, FREE_TRIES_PER_DAY - Number(r.rows[0]?.n ?? 0));
   } catch (e) {
-    console.warn("free-try counter read failed; using the in-memory count:", (e as Error).message);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(h + dayOf(now)) ?? 0));
+    console.warn("free-try counter unavailable (failing closed):", (e as Error).message);
+    return -1;
   }
 }
+/** Count one complete free answer; returns the tries left (0 if the limit was already reached). */
 export async function useTry(db: CounterDb, client: string, now = new Date()): Promise<number> {
-  const h = clientHash(client);
   try {
-    const sql = TRIAL_CONSUME_SQL;
-    const r = db.writeOne ? await db.writeOne(sql, [h, dayOf(now)]) : await db.query<{ n: number }>(sql, [h, dayOf(now)]);
-    return Math.max(0, FREE_TRIES_PER_DAY - Number((r.rows[0] as { n?: number })?.n ?? FREE_TRIES_PER_DAY));
+    const args = [clientHash(client), dayOf(now)];
+    const r = db.writeOne ? await db.writeOne(TRIAL_CONSUME_SQL, args) : await db.query<{ n: number }>(TRIAL_CONSUME_SQL, args);
+    const n = Number((r.rows[0] as { n?: number | null })?.n ?? FREE_TRIES_PER_DAY + 1);
+    return Math.max(0, FREE_TRIES_PER_DAY - n);
   } catch (e) {
-    console.warn("free-try counter write failed; using the in-memory count:", (e as Error).message);
-    if (mem.size > 50_000) mem.clear();
-    const k = h + dayOf(now);
-    mem.set(k, (mem.get(k) ?? 0) + 1);
-    return Math.max(0, FREE_TRIES_PER_DAY - (mem.get(k) ?? 0));
+    console.warn("free-try counter write failed:", (e as Error).message);
+    return 0;
   }
 }
-export function resetTrials() {
-  mem.clear();
-}
+/** Kept for tests; the counter has no in-memory state any more. */
+export function resetTrials() {}
+export const trialUnavailable = (): Out => ({
+  status: 503,
+  body: { error: { code: "FREE_TRIES_UNAVAILABLE", message: "free tries can't be counted right now, so none are given; this did not use a try", hint: "retry in a minute, use the paid link, or use the free one-stock routes" }, pay: PAID },
+});
 export const trialUsedUp = (): Out => ({
   status: 402,
   body: { error: { code: "FREE_TRIES_USED", message: `the ${FREE_TRIES_PER_DAY} free tries for today are used; each further answer is ${PAID.price} via x402`, hint: "call the paid endpoint with an x402 client (e.g. Bankr); the one-stock routes under /v1/assets stay free" }, pay: PAID },

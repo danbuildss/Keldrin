@@ -83,6 +83,10 @@ test("daily closes: in-session only; after-hours, pre-market, weekend and holida
   const during = dailyCloses(rows, "2026-11-27", "2026-11-30", Date.parse("2026-11-27T17:00:00Z") / 1000);
   assert.equal(during.closes[0].provisional, true);
   assert.deepEqual(during.missing_trading_days, []);
+  // days that closed before the feed's first official round are before coverage, never "missing"
+  const covered = dailyCloses(rows, "2026-11-20", "2026-11-30", after, null, Date.parse("2026-11-25T16:00:00Z") / 1000);
+  assert.deepEqual(covered.before_coverage_days, ["2026-11-20", "2026-11-23", "2026-11-24"]);
+  assert.deepEqual(covered.missing_trading_days, ["2026-11-30"]);
 });
 
 test("daily closes across the DST switch (Nov 1 2026): close boundary moves from 20:00Z to 21:00Z", () => {

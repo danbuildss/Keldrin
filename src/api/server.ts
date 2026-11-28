@@ -10,7 +10,7 @@ import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
-import { PAID, report, snapshot, triesLeft, trialUsedUp, useTry } from "./trial.ts";
+import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
 // (view `confirmed_records`). Phase 1: localhost only; deployment needs founder approval.
@@ -46,7 +46,7 @@ const OPENAPI = OPENAPI_DOC as unknown as Json;
 
 export const LLMS_TXT = `# Keldrin
 > Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
-Every record is derived from chain state and independently re-verified; values are exact integers (WAD = 1e18).
+Corporate-action records are derived from chain state and independently re-verified; values are exact integers (WAD = 1e18). NAV and DEX values are read onchain at request time from independently checked feeds and pools.
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
@@ -59,6 +59,9 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/market/session — the US equity session right now (NYSE calendar 2026-2027; beyond it: calendar_not_covered)
 - GET /v1/snapshot — every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> — everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
+- Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= — x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
+- GET /start.md — 5-minute developer quick start (feeds, coverage, cURL)
+- GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -137,7 +140,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       } catch {
         return send(res, 400, { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, undefined, "no-store");
       }
-      const out = await handleMcp(db, msg);
+      const out = await handleMcp(db, msg, fwd || req.socket?.remoteAddress || "unknown");
       if (out.body === null) return send(res, 202, "", "text/plain", "no-store");
       return send(res, out.status, out.body as Json, undefined, "no-store");
     }
@@ -212,6 +215,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/v1/snapshot" || p === "/v1/report") {
       const client = fwd || req.socket?.remoteAddress || "unknown";
       let left = await triesLeft(db as never, client);
+      if (left === -1) return send(res, 503, trialUnavailable().body as Json, undefined, "no-store");
       if (left === 0) return send(res, 402, trialUsedUp().body as Json, undefined, "no-store");
       const out = p === "/v1/snapshot" ? await snapshot(db) : await report(db, url.searchParams.get("token") ?? "");
       if (out.status === 200) left = await useTry(db as never, client);

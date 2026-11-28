@@ -46,6 +46,8 @@ function fakeApi(opts: { premium: number | null }) {
     if (path.startsWith(`/v1/assets/${NV}/market-context`))
       return { status: 200, json: { data: { symbol: "NVDAc", market: { session: "open", next_open: null }, nav: { nav: "150", round_id: ROUND, age_s: 600 }, staleness: { state: opts.premium === null ? "unexpectedly_stale" : "fresh" }, dex: { price_usd: "151.5", venue: "uniswap_v3", nav_premium_pct: opts.premium, ...(opts.premium === null ? { premium_unavailable_reason: "nav_unexpectedly_stale" } : {}) } } } };
     if (path.startsWith(`/v1/assets/${NV}/nav/history`)) return { status: 200, json: { data: [served], meta: { symbol: "NVDAc", feed: FEED, interval: "round", quality: { verification: { verdict: "CONFIRMED" } } } } };
+    if (path === "/v1/snapshot") return { status: 200, json: { data: { market: { session: "open" }, count: 1, stocks: [{ symbol: "NVDAc", nav: { nav: "150" }, staleness: { state: "fresh" }, dex: { price_usd: "151.5", nav_premium_pct: 1 }, next_corporate_action: { event_type: "dividend", expected_adjustment_date: "2026-12-23" } }] }, meta: { free_tries_left_today: 2 } } };
+    if (path.startsWith("/v1/report")) return { status: 402, json: { error: { code: "FREE_TRIES_USED", message: "the 3 free tries for today are used" }, pay: { price: "0.05 USDC on Base", snapshot: "https://x402.example/keldrin-snapshot", report: "https://x402.example/keldrin-report" } } };
     if (path === "/mcp") {
       const m = JSON.parse(body);
       if (m.id === undefined) return { status: 202 };
@@ -121,6 +123,24 @@ test("CLI: mcp bridges stdio lines to the remote endpoint; notifications get no 
     const lines = r.out.trim().split("\n");
     assert.equal(lines.length, 1, r.out);
     assert.deepEqual(JSON.parse(lines[0]), { jsonrpc: "2.0", id: 7, result: { echoed: "tools/list" } });
+  } finally {
+    api.server.close();
+  }
+});
+
+test("CLI: snapshot shows every stock; when free tries are used, report shows the paid link and never pays", async () => {
+  const api = await fakeApi({ premium: 1 });
+  try {
+    const s = await run(["snapshot", `--api=${api.url}`]);
+    assert.equal(s.code, 0, s.err);
+    assert.match(s.out, /NVDAc/);
+    assert.match(s.out, /2 free tries left today/);
+    assert.match(s.out, /next dividend 2026-12-23/);
+    const r = await run(["report", "NVDAc", `--api=${api.url}`]);
+    assert.equal(r.code, 2);
+    assert.match(r.err, /FREE_TRIES_USED/);
+    assert.match(r.err, /https:\/\/x402\.example\/keldrin-report/);
+    assert.match(r.err, /never pays by itself/);
   } finally {
     api.server.close();
   }
