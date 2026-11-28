@@ -15,7 +15,8 @@ test("site: lowercase wordmark, SOMEHOW footer, honest live numbers, no metered 
   assert.match(html, /prefers-reduced-motion/);
   assert.match(html, /fetch\("\/health"|getJson\("\/health"\)/);
   assert.doesNotMatch(html, /getJson\("\/v1\/snapshot|fetch\("\/v1\/snapshot/, "the page must not spend visitors' free tries");
-  assert.doesNotMatch(html, /<script[^>]+src=/, "no third-party scripts");
+  const srcs = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(srcs, ["/_vercel/insights/script.js"], "no third-party scripts: only Vercel Analytics from our own origin");
   assert.match(html, /Not affiliated with Base, Coinbase or Chainlink/);
   assert.match(html, /Never sold or shared/);
 });
