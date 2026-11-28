@@ -82,3 +82,5 @@
 ## Phase 13 (approved 2026-11-27, expanded scope 2026-11-28): launch readiness, IN PROGRESS
 - Done: /skill.md and /start.md; x402 forwards on our origin + OpenAPI paid paths; MCP/CLI snapshot+report (never auto-pay); status checks; payer counter; independent launch review (10 findings fixed or accepted); NAV before_coverage fix; MCP Registry description fix; external tests 30/30 + CLI; real paid x402 tx 0x5c3665fc…ab05; MAXXAGENT package; listings research; operations audit; launch report (docs/LAUNCH_REPORT.md); research schedule every 8 h (GitHub Free).
 - Not complete until the founder actions in LAUNCH_REPORT §9 are done (rate-limit rule, Bankr redeploy, CLI 0.7.0, MAXXAGENT message, listings, hackathon submission).
+
+- 2026-11-28: founder actions done: rate-limit rule live, MAXXAGENT package sent, Bankr snapshot redeployed (v2); CLI 0.7.0 publish running. Analytics added (same-origin). Next-phase proposal written (docs/PUBLIC_PRODUCT_EXPERIENCE.md), awaiting approval. Brand unchanged by founder's instruction.

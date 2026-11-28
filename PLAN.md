@@ -9,3 +9,7 @@ v0.2: begin November 27. The phased dates are targets, not approved schedule; se
 
 ## 2026-11-27 revision (proposed, awaiting approval)
 Phase 5 nav/history → Phase 6 market-context + per-asset corporate actions + developer testing package → Phase 7 launch check (Monday). Details: docs/PLAN_DEVELOPER_RELEASE.md.
+
+
+## Proposed next (2026-11-28, awaiting approval)
+Public product experience after Phase 13: Explorer, API Playground and Transparency (P0), then Status and a verified events feed (P1). Same brand. Plan: docs/PUBLIC_PRODUCT_EXPERIENCE.md. Not approved yet.
