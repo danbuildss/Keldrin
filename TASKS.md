@@ -63,7 +63,7 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T045 | P0 | Phase 13 launch readiness | IN PROGRESS: agent guide, review fixes, external tests 30/30, paid tx, MAXXAGENT package, listings prep, ops audit, launch report done; founder actions open (docs/LAUNCH_REPORT.md §9) | docs/LAUNCH_REPORT.md |
 | T046 | P1 | Bankr snapshot 1.0.1 redeploy | DONE 2026-11-28 (Bankr version 2; terms re-checked) | bankr/x402/keldrin-snapshot |
 | T047 | P1 | Publish CLI 0.7.0 | DONE (founder) |
-| T056 | P1 | Publish CLI 0.7.1 (new description) + MCP Registry 0.7.1 + Bankr redeploy (descriptions) | OPEN (founder) | npm/ |
+| T056 | P1 | Publish CLI 0.7.1 + MCP Registry 0.7.1 + Bankr descriptions | CLI 0.7.1 published and Bankr descriptions updated (founder, 2026-11-28); MCP Registry: button added, founder runs it | npm/ |
 | T048 | P0 | Public Explorer + API Playground + Transparency (/v1/stats, /v1/overview) | BUILT 2026-11-28 (approved); awaiting merge + outside test | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
 | T049 | P1 (proposed) | Status history (status_checks) + Status page; verified events feed | PROPOSED | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
 | T050 | P1 | Vercel Web Analytics (same-origin script) | BUILT on branch; founder enables Analytics in Vercel and closes PR #22 | public/index.html |
