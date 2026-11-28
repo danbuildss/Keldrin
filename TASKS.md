@@ -74,4 +74,4 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T054 | P1 | x402 payment count on /transparency | BUILT 2026-11-28: robot step payments-index + tables x402_payments/x402_payment_scans (applied to Supabase); first stored count after merge and the next robot run | src/api/stats.ts |
 | T055 | P1 | Launch kit: thread, video script, form text | DRAFTED (docs/LAUNCH_KIT.md); founder posts | docs/LAUNCH_KIT.md |
 | T057 | P0 | Coverage level + capabilities per token (ROADMAP 1.3) | BUILT 2026-11-28 (/v1/assets, MCP list_assets, Explorer) | src/api/coverage.ts |
-| T058 | P0 | Privacy and terms page (ROADMAP 1.1) | BUILT 2026-11-28; text awaits founder approval | public/legal.html |
+| T058 | P0 | Privacy and terms page (ROADMAP 1.1) | DONE: live at /legal, text approved by the founder 2026-11-28 | public/legal.html |
