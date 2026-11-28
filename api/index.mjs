@@ -8351,7 +8351,8 @@ var keldrin_v1_default = {
               }
             }
           }
-        }
+        },
+        description: "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed; market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
       }
     },
     "/v1/assets/{contract}": {
@@ -11149,6 +11150,26 @@ async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
   };
 }
 
+// src/api/coverage.ts
+var COVERAGE_SQL = `
+  SELECT lower(a.contract_address) AS k, a.identity_state = 'verified' AS id_ok,
+    COALESCE((SELECT r.verdict = 'CONFIRMED' FROM nav_feeds f JOIN LATERAL (SELECT verdict FROM nav_reviews n WHERE n.chain_id = f.chain_id AND n.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) r ON true
+              WHERE f.chain_id = $1 AND lower(f.token_address) = lower(a.contract_address) ORDER BY f.discovered_at DESC LIMIT 1), false) AS nav_ok,
+    COALESCE((SELECT d.verdict = 'CONFIRMED' AND jsonb_array_length(COALESCE(d.detail->'covered', '[]'::jsonb)) > 0 FROM dex_reviews d
+              WHERE d.chain_id = $1 AND lower(d.token_address) = lower(a.contract_address) ORDER BY d.checked_at DESC LIMIT 1), false) AS dex_ok
+  FROM assets a`;
+function coverageOf(r) {
+  const id = Boolean(r.id_ok), nav = id && Boolean(r.nav_ok), dex = id && Boolean(r.dex_ok);
+  return {
+    coverage_level: !id ? "unverified" : nav ? "full" : dex ? "market" : "identity",
+    capabilities: { identity: id, corporate_actions: id, nav_history: nav, risk: nav, market_context: nav, dex_price: dex }
+  };
+}
+async function coverageMap(db2) {
+  const rows = (await db2.query(COVERAGE_SQL, [CHAIN_ID])).rows;
+  return new Map(rows.map((r) => [r.k, coverageOf(r)]));
+}
+
 // src/version.ts
 var PACKAGE_VERSION = "0.7.1";
 
@@ -11387,10 +11408,11 @@ async function callTool(db2, name, args, client) {
     switch (name) {
       case "list_assets": {
         const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
+        const cov = await coverageMap(db2);
         const rows = (await db2.query(
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
-        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        const body = { data: rows.slice(0, 200).map((r) => ({ ...r, coverage_level: cov.get(r.contract_address.toLowerCase())?.coverage_level ?? "unverified" })), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
         return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
@@ -11637,7 +11659,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
-- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified) and capabilities per token
 - GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex \u2014 live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
@@ -11793,7 +11815,11 @@ async function handle(db2, req, res) {
     }
     if (p === "/v1/assets") {
       const rows = await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
-      return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+      const cov = await coverageMap(db2);
+      const data = rows.rows.map((r) => ({ ...r, ...cov.get(String(r.contract_address).toLowerCase()) ?? { coverage_level: "unverified", capabilities: {} } }));
+      const levels = {};
+      for (const d of data) levels[d.coverage_level] = (levels[d.coverage_level] ?? 0) + 1;
+      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, DEX, corporate actions); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed" }));
     }
     const meta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");

@@ -12,6 +12,7 @@ import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
 import { overview, stats } from "./stats.ts";
 import { assetRisk } from "./risk.ts";
+import { coverageMap } from "./coverage.ts";
 import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
@@ -54,7 +55,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z — events added or changed since a timestamp (poll this)
-- GET /v1/assets — tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets — tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified) and capabilities per token
 - GET /v1/assets/{contract}/corporate-actions — one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context — US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex — live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
@@ -220,8 +221,12 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       return send(res, 200, ok(rows.map((r) => ({ ...r.payload, review: r.review })), { count: rows.length, snapshot_as_of: snap.as_of }));
     }
     if (p === "/v1/assets") {
-      const rows = await db.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
-      return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+      const rows = await db.query<Json>("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
+      const cov = await coverageMap(db as never);
+      const data = rows.rows.map((r) => ({ ...r, ...(cov.get(String(r.contract_address).toLowerCase()) ?? { coverage_level: "unverified", capabilities: {} }) }));
+      const levels: Record<string, number> = {};
+      for (const d of data) levels[d.coverage_level as string] = (levels[d.coverage_level as string] ?? 0) + 1;
+      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, DEX, corporate actions); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed" }));
     }
     const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }), undefined, "no-store"); // time-sensitive: never CDN-cached

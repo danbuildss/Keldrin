@@ -82,7 +82,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed; market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
       }
     },
     "/v1/assets/{contract}": {

@@ -2,6 +2,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { assetCorporateActions } from "./assetActions.ts";
 import { navHistory } from "./nav.ts";
 import { assetRisk } from "./risk.ts";
+import { coverageMap } from "./coverage.ts";
 import { marketContext } from "./marketContext.ts";
 import { liveDex } from "./dex.ts";
 import { marketNow } from "../lib/marketSession.ts";
@@ -61,10 +62,11 @@ async function callTool(db: PGlite, name: unknown, args: Record<string, unknown>
     switch (name) {
       case "list_assets": {
         const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
+        const cov = await coverageMap(db);
         const rows = (await db.query<{ symbol: string; contract_address: string; name: string; multiplier_wad: string; has_nav: boolean }>(
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol",
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
-        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        const body = { data: rows.slice(0, 200).map((r) => ({ ...r, coverage_level: cov.get(r.contract_address.toLowerCase())?.coverage_level ?? "unverified" })), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
         return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
