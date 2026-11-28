@@ -11,6 +11,7 @@ import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
 import { overview, stats } from "./stats.ts";
+import { assetRisk } from "./risk.ts";
 import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
@@ -66,6 +67,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats — transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md — 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
+- GET /v1/assets/{contract}/risk — NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since start and 90 days, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -150,7 +152,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -248,6 +250,13 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db, cm[1]) : await assetCorporateActions(db, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json), undefined, cm[2] === "market-context" ? "no-store" : undefined);
+    }
+    const rm = p.match(/^\/v1\/assets\/([^/]+)\/risk$/);
+    if (rm) {
+      if (!ADDR.test(rm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "NAV-based risk is not publicly enabled yet"));
+      const out = await assetRisk(db, rm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json));
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

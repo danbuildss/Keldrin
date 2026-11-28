@@ -67,7 +67,7 @@ curl "https://keldrin.vercel.app/v1/overview"
 ```
 
 ```bash
-# AI agents (remote MCP, 8 tools)
+# AI agents (remote MCP, 9 tools)
 claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp
 ```
 

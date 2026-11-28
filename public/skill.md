@@ -34,6 +34,7 @@ Docs: `https://keldrin.vercel.app/llms.txt` · contract: `https://keldrin.vercel
 
 - "When is the next dividend or split for NVDAc, and how will the token's multiplier change?" → `GET /v1/assets/{token}/corporate-actions`
 - "What was AAPLc's NAV every trading day last month, with proof?" → `GET /v1/assets/{token}/nav/history?interval=daily&from=YYYY-MM-DD`
+- "How volatile is NVDAc, and what was its worst drawdown?" → `GET /v1/assets/{token}/risk` (from official NAV closes; history, not a forecast)
 - "Is the NAV I see fresh, or is the market closed?" → `GET /v1/assets/{token}/market-context`
 - "What does the token trade at on Base right now, and how deep is the market?" → `GET /v1/assets/{token}/dex`
 - "Give me all of it for every stock in one call" → snapshot; "everything about one stock" → report.

@@ -1537,7 +1537,7 @@ var init_utils2 = __esm({
 // node_modules/@noble/hashes/esm/sha3.js
 function keccakP(s, rounds = 24) {
   const B = new Uint32Array(5 * 2);
-  for (let round = 24 - rounds; round < 24; round++) {
+  for (let round2 = 24 - rounds; round2 < 24; round2++) {
     for (let x = 0; x < 10; x++)
       B[x] = s[x] ^ s[x + 10] ^ s[x + 20] ^ s[x + 30] ^ s[x + 40];
     for (let x = 0; x < 10; x += 2) {
@@ -1570,8 +1570,8 @@ function keccakP(s, rounds = 24) {
       for (let x = 0; x < 10; x++)
         s[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
     }
-    s[0] ^= SHA3_IOTA_H[round];
-    s[1] ^= SHA3_IOTA_L[round];
+    s[0] ^= SHA3_IOTA_H[round2];
+    s[1] ^= SHA3_IOTA_L[round2];
   }
   B.fill(0);
 }
@@ -1590,10 +1590,10 @@ var init_sha3 = __esm({
     _7n = /* @__PURE__ */ BigInt(7);
     _256n = /* @__PURE__ */ BigInt(256);
     _0x71n = /* @__PURE__ */ BigInt(113);
-    for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+    for (let round2 = 0, R = _1n, x = 1, y = 0; round2 < 24; round2++) {
       [x, y] = [y, (2 * x + 3 * y) % 5];
       SHA3_PI.push(2 * (5 * y + x));
-      SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
+      SHA3_ROTL.push((round2 + 1) * (round2 + 2) / 2 % 64);
       let t = _0n;
       for (let j = 0; j < 7; j++) {
         R = (R << _1n ^ (R >> _7n) * _0x71n) % _256n;
@@ -4011,25 +4011,25 @@ var require_utils = __commonJS({
       let year = date.getFullYear();
       const isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      let ret = String(year).padStart(4, "0") + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0") + ":" + String(date.getSeconds()).padStart(2, "0") + "." + String(date.getMilliseconds()).padStart(3, "0");
+      let ret2 = String(year).padStart(4, "0") + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0") + ":" + String(date.getSeconds()).padStart(2, "0") + "." + String(date.getMilliseconds()).padStart(3, "0");
       if (offset < 0) {
-        ret += "-";
+        ret2 += "-";
         offset *= -1;
       } else {
-        ret += "+";
+        ret2 += "+";
       }
-      ret += String(Math.floor(offset / 60)).padStart(2, "0") + ":" + String(offset % 60).padStart(2, "0");
-      if (isBCYear) ret += " BC";
-      return ret;
+      ret2 += String(Math.floor(offset / 60)).padStart(2, "0") + ":" + String(offset % 60).padStart(2, "0");
+      if (isBCYear) ret2 += " BC";
+      return ret2;
     }
     function dateToStringUTC(date) {
       let year = date.getUTCFullYear();
       const isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      let ret = String(year).padStart(4, "0") + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0") + "T" + String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0") + ":" + String(date.getUTCSeconds()).padStart(2, "0") + "." + String(date.getUTCMilliseconds()).padStart(3, "0");
-      ret += "+00:00";
-      if (isBCYear) ret += " BC";
-      return ret;
+      let ret2 = String(year).padStart(4, "0") + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0") + "T" + String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0") + ":" + String(date.getUTCSeconds()).padStart(2, "0") + "." + String(date.getUTCMilliseconds()).padStart(3, "0");
+      ret2 += "+00:00";
+      if (isBCYear) ret2 += " BC";
+      return ret2;
     }
     function normalizeQueryConfig(config, values, callback) {
       config = typeof config === "string" ? { text: config } : cloneQueryConfig(config);
@@ -9842,6 +9842,65 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/assets/{contract}/risk": {
+      get: {
+        summary: "NAV-based risk for one token (verified feeds only)",
+        description: "Deterministic risk from official Chainlink total-return NAV daily closes (the same closes as /nav/history?interval=daily, provisional sessions excluded): 30- and 60-day annualized volatility (sample sd of daily log returns x sqrt(252)), max drawdown since start and over 90 closes with peak and trough round ids, and 1/5/20-day and since-start returns. A metric without enough history is null with the reason. Facts from history, not a forecast or advice. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Risk metrics",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Bad input",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "Unknown token (UNKNOWN_ASSET) or no NAV feed (NO_NAV_FEED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Not enabled (NAV_NOT_ENABLED) or feed not independently verified (NAV_NOT_VERIFIED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
@@ -10917,18 +10976,18 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
   const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail) : rev?.detail;
   if (!rev || rev.verdict !== "CONFIRMED") return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "feed_not_verified", staleness: { state: "unknown", threshold_s: null } } } };
   const p99 = detail?.stats?.p99_in_session_gap_s ?? null;
-  let round;
+  let round2;
   try {
-    round = await readRound(feed.feed_address);
+    round2 = await readRound(feed.feed_address);
   } catch (e2) {
     const reason = e2.message === "rpc_result_invalid" ? "rpc_result_invalid" : "rpc_unavailable";
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: reason, staleness: { state: "unknown", threshold_s: null } } } };
   }
-  if (BigInt(round.answer_raw) <= 0n || round.updated_unix <= 0 || round.updated_unix > nowSec + 60) {
+  if (BigInt(round2.answer_raw) <= 0n || round2.updated_unix <= 0 || round2.updated_unix > nowSec + 60) {
     cache2.delete(feed.feed_address);
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_result_invalid", staleness: { state: "unknown", threshold_s: null } } } };
   }
-  const id = BigInt(round.round_id);
+  const id = BigInt(round2.round_id);
   const livePhase = Number(id >> 64n);
   const reviewed = Array.isArray(detail?.covered) && detail.covered.some((c) => Number(c.phase) === livePhase);
   const ph = (await db2.query(
@@ -10936,14 +10995,14 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
     [CHAIN_ID, feed.feed_address, livePhase]
   )).rows[0];
   if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
-  const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  const st = classifyStaleness(nowSec, round2.updated_unix, p99);
   if (dex.price_usd && (st.state === "unexpectedly_stale" || st.state === "unknown")) {
     dex.nav_premium_pct = null;
     dex.premium_unavailable_reason = `nav_${st.state}`;
   } else if (dex.price_usd) {
-    const navNum = Number(formatNav(round.answer_raw, feed.decimals));
+    const navNum = Number(formatNav(round2.answer_raw, feed.decimals));
     dex.nav_premium_pct = Number(((Number(dex.price_usd) / navNum - 1) * 100).toFixed(4));
-    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round.updated_unix * 1e3).toISOString()}.`;
+    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round2.updated_unix * 1e3).toISOString()}.`;
     dex.premium_note = (market.session === "open" ? "DEX price vs the last published NAV during the regular session. " : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing. ") + when;
   }
   return {
@@ -10953,14 +11012,14 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
         ...base,
         feed: feed.feed_address,
         nav: {
-          round_id: round.round_id,
+          round_id: round2.round_id,
           phase_id: Number(id >> 64n),
-          answer_raw: round.answer_raw,
+          answer_raw: round2.answer_raw,
           decimals: feed.decimals,
-          nav: formatNav(round.answer_raw, feed.decimals),
-          updated_at: new Date(round.updated_unix * 1e3).toISOString(),
-          age_s: Math.max(0, nowSec - round.updated_unix),
-          read_at: round.read_at,
+          nav: formatNav(round2.answer_raw, feed.decimals),
+          updated_at: new Date(round2.updated_unix * 1e3).toISOString(),
+          age_s: Math.max(0, nowSec - round2.updated_unix),
+          read_at: round2.read_at,
           source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (reused for up to 30 s inside the server; responses are not CDN-cached)",
           label: "Last published total-return reference per token, not a live equity price. It already includes dividends and splits."
         },
@@ -11017,6 +11076,74 @@ async function assetCorporateActions(db2, contract) {
         current_multiplier_wad: asset.multiplier_wad,
         count: data.length,
         accounting_note: "The token's balance never changes for a dividend or split: the multiplier (WAD, 1e18) does. Shares per token = multiplier / 1e18. The Chainlink NAV is already total-return (it includes the multiplier): never apply the multiplier to the NAV again."
+      }
+    }
+  };
+}
+
+// src/api/risk.ts
+var RISK_METHOD = "risk-1";
+var sd = (r) => {
+  const m = r.reduce((a, b) => a + b, 0) / r.length;
+  return Math.sqrt(r.reduce((a, b) => a + (b - m) ** 2, 0) / (r.length - 1));
+};
+var round = (v, d = 4) => Math.round(v * 10 ** d) / 10 ** d;
+function vol(closes, window) {
+  const last = closes.slice(-(window + 1));
+  const r = [];
+  for (let i = 1; i < last.length; i++) r.push(Math.log(last[i].nav / last[i - 1].nav));
+  if (r.length < window) return { value_pct: null, returns_used: r.length, reason: `needs ${window} daily returns (${r.length} available)` };
+  return { value_pct: round(sd(r) * Math.sqrt(252) * 100, 2), returns_used: r.length, from: last[0].session_day, to: last[last.length - 1].session_day };
+}
+function drawdown(closes) {
+  if (closes.length < 2) return { value_pct: null, reason: "needs at least 2 closes" };
+  let peak = closes[0], worst = 0, at = { peak: closes[0], trough: closes[0] };
+  for (const c of closes) {
+    if (c.nav > peak.nav) peak = c;
+    const dd = c.nav / peak.nav - 1;
+    if (dd < worst) {
+      worst = dd;
+      at = { peak, trough: c };
+    }
+  }
+  return { value_pct: round(worst * 100, 2), peak: { session_day: at.peak.session_day, nav: at.peak.nav, round_id: at.peak.round_id }, trough: { session_day: at.trough.session_day, nav: at.trough.nav, round_id: at.trough.round_id }, from: closes[0].session_day, to: closes[closes.length - 1].session_day };
+}
+function ret(closes, n) {
+  if (closes.length <= n) return null;
+  const a = closes[closes.length - 1 - n], b = closes[closes.length - 1];
+  return { value_pct: round((b.nav / a.nav - 1) * 100, 2), from: a.session_day, to: b.session_day };
+}
+function riskFrom(closes) {
+  return {
+    volatility_30d_annualized: vol(closes, 30),
+    volatility_60d_annualized: vol(closes, 60),
+    max_drawdown_since_start: drawdown(closes),
+    max_drawdown_90d: drawdown(closes.slice(-90)),
+    return_1d: ret(closes, 1),
+    return_5d: ret(closes, 5),
+    return_20d: ret(closes, 20),
+    return_since_start: closes.length >= 2 ? { value_pct: round((closes[closes.length - 1].nav / closes[0].nav - 1) * 100, 2), from: closes[0].session_day, to: closes[closes.length - 1].session_day } : null
+  };
+}
+async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
+  const from = new Date(now.getTime() - 400 * 864e5).toISOString().slice(0, 10);
+  const h = await navHistory(db2, contract, new URLSearchParams({ interval: "daily", from, to: now.toISOString().slice(0, 10) }), now);
+  if (h.status !== 200) return h;
+  const b = h.body;
+  const used = b.data.filter((d) => !d.provisional && d.nav !== null).map((d) => ({ session_day: d.session_day, nav: Number(d.nav), round_id: d.round_id }));
+  const q = b.meta.quality ?? {};
+  return {
+    status: 200,
+    body: {
+      data: { token: b.meta.token, symbol: b.meta.symbol, as_of_close: used.length ? used[used.length - 1].session_day : null, closes_used: used.length, ...riskFrom(used) },
+      meta: {
+        method: RISK_METHOD,
+        method_note: "Daily log returns of official Chainlink total-return NAV closes (last official in-session round per NYSE trading day). Volatility = sample standard deviation x sqrt(252), in percent, over the last 30 or 60 returns. Drawdown = worst close vs the highest earlier close. Provisional (unfinished) sessions are excluded. A trading day without an official close joins the two neighbouring closes into one multi-day return (listed in missing_trading_days).",
+        semantics: "Total-return NAV: dividends and splits are already included. NAV-based risk, not DEX-price risk. Facts from history, not a forecast or advice.",
+        feed: b.meta.feed,
+        missing_trading_days: q.missing_trading_days ?? [],
+        verification: q.verification ?? null,
+        source: "Computed from GET /v1/assets/{contract}/nav/history?interval=daily; every close used carries its Chainlink round id there."
       }
     }
   };
@@ -11225,6 +11352,7 @@ var TOOLS = [
   { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
   { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since start and 90 days, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
@@ -11276,6 +11404,11 @@ async function callTool(db2, name, args, client) {
         if (typeof args.limit === "number") q.set("limit", String(args.limit));
         const out = await navHistory(db2, await resolveToken(db2, args.token), q);
         return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} ${b.meta.interval} NAV point(s) ${b.meta.from}..${b.meta.to}; verification ${b.meta.quality.verification.verdict}; missing trading days: ${(b.meta.quality.missing_trading_days ?? []).length}. Total-return NAV: do not apply the multiplier again.`);
+      }
+      case "get_risk": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const out = await assetRisk(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => `${b.data.symbol}: 30-day volatility ${b.data.volatility_30d_annualized.value_pct ?? "n/a"}% (annualized), max drawdown since start ${b.data.max_drawdown_since_start.value_pct ?? "n/a"}%, from ${b.data.closes_used} official closes to ${b.data.as_of_close}. NAV-based, not advice.`);
       }
       case "get_market_context": {
         if (!navOn) return toolResult(navOff, () => "");
@@ -11337,7 +11470,7 @@ async function handleMcp(db2, raw, client = "mcp") {
           protocolVersion: version3,
           capabilities: { tools: {} },
           serverInfo: { name: "keldrin", title: "keldrin", version: PACKAGE_VERSION },
-          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
+          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
         });
       }
       case "ping":
@@ -11517,6 +11650,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
+- GET /v1/assets/{contract}/risk \u2014 NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since start and 90 days, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
@@ -11594,7 +11728,7 @@ async function handle(db2, req, res) {
       return send(res, out.status, out.body, void 0, "no-store");
     }
     if (p === "/mcp") return send(res, 405, err3("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -11687,6 +11821,13 @@ async function handle(db2, req, res) {
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
+    }
+    const rm = p.match(/^\/v1\/assets\/([^/]+)\/risk$/);
+    if (rm) {
+      if (!ADDR3.test(rm[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "NAV-based risk is not publicly enabled yet"));
+      const out = await assetRisk(db2, rm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

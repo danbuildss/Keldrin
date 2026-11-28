@@ -47,6 +47,7 @@ const EPS = [
   { id: "market-context", label: "Market context: session, live NAV, freshness, DEX gap", path: (c) => `/v1/assets/${c}/market-context`, token: true },
   { id: "nav-daily", label: "NAV history: official daily closes with round ids", path: (c, f) => `/v1/assets/${c}/nav/history?interval=daily&from=${f}`, token: true, from: true },
   { id: "nav-round", label: "NAV history: every official round (paged)", path: (c) => `/v1/assets/${c}/nav/history?interval=round&limit=20`, token: true },
+  { id: "risk", label: "Risk: volatility, drawdown, returns from official NAV closes", path: (c) => `/v1/assets/${c}/risk`, token: true },
   { id: "dex", label: "DEX price, depth and verified pools", path: (c) => `/v1/assets/${c}/dex`, token: true },
   { id: "corporate-actions", label: "Corporate actions and multipliers", path: (c) => `/v1/assets/${c}/corporate-actions`, token: true },
   { id: "session", label: "US market session now", path: () => `/v1/market/session` },
