@@ -25,7 +25,7 @@ export function formatNav(answer: string, decimals: number): string {
 }
 
 /** Daily NAV close: the last round inside each NY trading day's regular session (09:30 to 16:00, or 13:00 on early closes). */
-export function dailyCloses(rows: NavRow[], from: string, to: string, nowSec = Math.floor(Date.now() / 1000), indexedUntilSec: number | null = null): { closes: { session_day: string; session_close: string; provisional: boolean; row: NavRow }[]; missing_trading_days: string[]; not_covered_days: string[]; not_yet_indexed_days: string[] } {
+export function dailyCloses(rows: NavRow[], from: string, to: string, nowSec = Math.floor(Date.now() / 1000), indexedUntilSec: number | null = null, coveredFromSec: number | null = null): { closes: { session_day: string; session_close: string; provisional: boolean; row: NavRow }[]; missing_trading_days: string[]; not_covered_days: string[]; not_yet_indexed_days: string[]; before_coverage_days: string[] } {
   const byDay = new Map<string, NavRow>();
   for (const r of rows) {
     const t = Number(r.updated_unix);
@@ -39,18 +39,24 @@ export function dailyCloses(rows: NavRow[], from: string, to: string, nowSec = M
   const missing_trading_days: string[] = [];
   const not_covered_days: string[] = [];
   const not_yet_indexed_days: string[] = [];
+  const before_coverage_days: string[] = [];
   for (const d of dateRange(from, to)) {
     const td = isTradingDay(d);
     if (td === null) not_covered_days.push(d);
     if (td !== true) continue;
     const r = byDay.get(d);
     // a session that has not closed yet gives a provisional value; a day still in the future is not missing
+    // a session that closed before the feed's first official round is before coverage, not missing
+    if (!r && coveredFromSec !== null && sessionClose(d) < coveredFromSec) {
+      before_coverage_days.push(d);
+      continue;
+    }
     if (r) closes.push({ session_day: d, session_close: new Date(sessionClose(d) * 1000).toISOString(), provisional: sessionClose(d) > nowSec, row: r });
     // a day whose session opened after the newest round Keldrin has reviewed is not "missing": it is not indexed yet
     else if (indexedUntilSec !== null && sessionOpen(d) > indexedUntilSec) not_yet_indexed_days.push(d);
     else if (sessionClose(d) <= nowSec) missing_trading_days.push(d);
   }
-  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days };
+  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days, before_coverage_days };
 }
 
 type Out = { status: number; body: unknown };
@@ -181,10 +187,11 @@ export async function navHistory(db: PGlite, contract: string, q: URLSearchParam
     meta.order = "updated_at, then round_id";
     return { status: 200, body: { data: page.map((r) => item(r, include === "all")), meta: { ...meta, count: page.length, quality } } };
   }
-  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1000), span.last ? Date.parse(span.last) / 1000 : null);
+  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1000), span.last ? Date.parse(span.last) / 1000 : null, span.first ? Date.parse(span.first) / 1000 : null);
   quality.missing_trading_days = d.missing_trading_days;
   quality.not_yet_indexed_days = d.not_yet_indexed_days;
   quality.not_covered_days = d.not_covered_days;
+  quality.before_coverage = d.before_coverage_days.length ? { trading_days: d.before_coverage_days.length, first: d.before_coverage_days[0], last: d.before_coverage_days[d.before_coverage_days.length - 1], note: "trading days before the feed's first official round; not missing data" } : null;
   meta.calendar_version = CALENDAR_VERSION;
   meta.daily_rule = "last official round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no official in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet; limit and cursor do not apply";
   return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row, false) })), meta: { ...meta, count: d.closes.length, quality } } };

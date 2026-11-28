@@ -10360,7 +10360,7 @@ function formatNav(answer, decimals) {
   const frac = digits.slice(digits.length - decimals).replace(/0+$/, "");
   return (neg ? "-" : "") + int + (frac ? "." + frac : "");
 }
-function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), indexedUntilSec = null) {
+function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), indexedUntilSec = null, coveredFromSec = null) {
   const byDay = /* @__PURE__ */ new Map();
   for (const r of rows) {
     const t = Number(r.updated_unix);
@@ -10373,16 +10373,21 @@ function dailyCloses(rows, from, to, nowSec = Math.floor(Date.now() / 1e3), inde
   const missing_trading_days = [];
   const not_covered_days = [];
   const not_yet_indexed_days = [];
+  const before_coverage_days = [];
   for (const d of dateRange(from, to)) {
     const td = isTradingDay(d);
     if (td === null) not_covered_days.push(d);
     if (td !== true) continue;
     const r = byDay.get(d);
+    if (!r && coveredFromSec !== null && sessionClose(d) < coveredFromSec) {
+      before_coverage_days.push(d);
+      continue;
+    }
     if (r) closes.push({ session_day: d, session_close: new Date(sessionClose(d) * 1e3).toISOString(), provisional: sessionClose(d) > nowSec, row: r });
     else if (indexedUntilSec !== null && sessionOpen(d) > indexedUntilSec) not_yet_indexed_days.push(d);
     else if (sessionClose(d) <= nowSec) missing_trading_days.push(d);
   }
-  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days };
+  return { closes, missing_trading_days, not_covered_days, not_yet_indexed_days, before_coverage_days };
 }
 var e = (status, code, message, hint) => ({ status, body: { error: { code, message, ...hint ? { hint } : {} } } });
 var DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -10523,10 +10528,11 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
     meta.order = "updated_at, then round_id";
     return { status: 200, body: { data: page.map((r) => item(r, include === "all")), meta: { ...meta, count: page.length, quality } } };
   }
-  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3), span.last ? Date.parse(span.last) / 1e3 : null);
+  const d = dailyCloses(rows, from, to, Math.floor(now.getTime() / 1e3), span.last ? Date.parse(span.last) / 1e3 : null, span.first ? Date.parse(span.first) / 1e3 : null);
   quality.missing_trading_days = d.missing_trading_days;
   quality.not_yet_indexed_days = d.not_yet_indexed_days;
   quality.not_covered_days = d.not_covered_days;
+  quality.before_coverage = d.before_coverage_days.length ? { trading_days: d.before_coverage_days.length, first: d.before_coverage_days[0], last: d.before_coverage_days[d.before_coverage_days.length - 1], note: "trading days before the feed's first official round; not missing data" } : null;
   meta.calendar_version = CALENDAR_VERSION;
   meta.daily_rule = "last official round inside each New York trading day's regular session (09:30 to 16:00, or 13:00 on early closes); weekends and NYSE holidays excluded; a day with no official in-session round is listed in quality.missing_trading_days; provisional=true while that session has not closed yet; limit and cursor do not apply";
   return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row, false) })), meta: { ...meta, count: d.closes.length, quality } } };
