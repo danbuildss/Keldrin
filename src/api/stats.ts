@@ -48,11 +48,11 @@ export async function stats(db: PGlite, rpc: Rpc = publicRpc): Promise<Out> {
   const [assets, feeds, rounds, records, calendar, pools, runs] = await Promise.all([
     one<{ n: number }>("SELECT count(*)::int AS n FROM assets"),
     one<{ n: number; confirmed: number }>("SELECT count(*)::int AS n, count(*) FILTER (WHERE v.verdict = 'CONFIRMED')::int AS confirmed FROM nav_feeds f LEFT JOIN LATERAL (SELECT verdict FROM nav_reviews r WHERE r.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) v ON true WHERE f.chain_id = $1", [CHAIN_ID]),
-    one<{ n: number; first: string | null; last: string | null }>("SELECT count(*)::int AS n, min(updated_at)::text AS first, max(updated_at)::text AS last FROM nav_rounds"),
+    one<{ n: number; first: string | null; last: string | null }>("SELECT count(*)::int AS n, to_char(min(updated_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS first, to_char(max(updated_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS last FROM nav_rounds"),
     one<{ n: number }>("SELECT count(*)::int AS n FROM confirmed_records"),
     one<{ n: number }>("SELECT count(DISTINCT entry_id)::int AS n FROM calendar_entries"),
     one<{ n: number; tokens: number }>("SELECT count(*)::int AS n, count(DISTINCT lower(token_address))::int AS tokens FROM dex_pools WHERE chain_id = $1", [CHAIN_ID]),
-    one<{ n: number; ok: number; last_at: string | null; last_outcome: string | null }>("SELECT count(*)::int AS n, count(*) FILTER (WHERE outcome = 'ok')::int AS ok, max(finished_at)::text AS last_at, (SELECT outcome FROM runs ORDER BY started_at DESC LIMIT 1) AS last_outcome FROM runs"),
+    one<{ n: number; ok: number; last_at: string | null; last_outcome: string | null }>("SELECT count(*)::int AS n, count(*) FILTER (WHERE outcome = 'ok')::int AS ok, to_char(max(finished_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS last_at, (SELECT outcome FROM runs ORDER BY started_at DESC LIMIT 1) AS last_outcome FROM runs"),
   ]);
   let payments: unknown = null;
   let payments_unavailable_reason: string | undefined;

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keldrin transparency · proof of intelligence</title>
+<meta name="description" content="What keldrin has collected and verified, read live from its records: tokens, Chainlink NAV rounds, confirmed corporate actions, verified pools, research runs and x402 payments counted onchain.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%230000FF' fill-rule='evenodd' d='M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<nav id="nav"></nav>
+<main class="wrap">
+<section class="rv"><span class="label">Transparency</span><h1>Proof of intelligence.</h1>
+<p class="lead">What keldrin has collected and verified, read live from its own records as this page loads. Small numbers are shown as they are: they are what make the large ones believable.</p></section>
+<section style="padding-top:0"><div class="grid g4" id="stats"><p class="skeleton">loading live records…</p></div><p class="note" id="asof" style="margin-top:12px"></p></section>
+<section style="padding-top:0"><div class="panel"><span class="label">x402 payments (counted onchain)</span><div id="pay" style="margin-top:10px" class="note">loading…</div></div></section>
+<section style="padding-top:0"><div class="grid g2">
+  <div class="panel"><span class="label">How keldrin verifies</span><ul class="note" style="margin:12px 0 0 18px;line-height:1.8">
+    <li>Corporate actions: each record is matched to the issuer's SEC filing and the onchain multiplier event, then re-checked by an independent verifier before it is served.</li>
+    <li>Chainlink NAV: every round is re-read with <span class="mono">getRoundData</span> through a second, independent RPC provider; only rounds the proxy officially served are used.</li>
+    <li>DEX pools: re-derived from the canonical factories (and the v4 pool id from its key); depth is capped by what each pool holds.</li>
+    <li>Live values (NAV, DEX price) are read onchain at request time; if a read fails, the answer says "unknown" with a reason, never a guess.</li></ul></div>
+  <div class="panel"><span class="label">Freshness and limits</span><ul class="note" style="margin:12px 0 0 18px;line-height:1.8">
+    <li>Staleness is judged in NYSE trading time against each feed's own verified update rhythm: fresh, expected_closed, unexpectedly_stale or unknown.</li>
+    <li>Research runs every 8 hours on GitHub Actions (GitHub may delay a run).</li>
+    <li>NAV history starts at each feed's first official round (August 2026; ANTc November 2026).</li>
+    <li>The NAV is Chainlink's published reference, not a live equity price. Facts with provenance, not advice.</li></ul></div>
+</div></section>
+<section style="padding-top:0"><div class="panel"><span class="label">Check it yourself</span><p class="note" style="margin-top:10px;line-height:1.7"><span class="mono">npx keldrin verify-nav NVDAc</span> re-reads served NAV rounds onchain · <span class="mono">npx keldrin verify-dex NVDAc</span> re-reads the main pool at the served block · raw counts: <a href="/v1/stats">/v1/stats</a> · <a href="/health">/health</a> · <a href="/playground">playground</a></p></div></section>
+</main>
+<footer id="foot"></footer>
+<script type="module">
+import { $, esc, getJson, nav, ago, basescan, short } from "/site.js";
+nav("Transparency");
+const [s, h] = await Promise.all([getJson("/v1/stats"), getJson("/health")]);
+const n = (v) => (typeof v === "number" ? v.toLocaleString() : "—");
+if (!s.ok) {
+  $("#stats").innerHTML = `<p class="note">Live records are unavailable right now (${esc(s.body?.error?.code || s.status)}).</p>`;
+} else {
+  const d = s.body.data;
+  const card = (v, label, sub) => `<div class="panel stat"><b>${v}</b><span>${esc(label)}</span><small>${sub}</small></div>`;
+  $("#stats").innerHTML = [
+    card(n(d.assets_tracked), "tokens tracked", "Coinbase tokenized stocks on Base, identity checked onchain"),
+    card(`${n(d.nav_feeds.independently_confirmed)}/${n(d.nav_feeds.total)}`, "NAV feeds verified", "Chainlink feeds with a CONFIRMED independent review"),
+    card(n(d.nav_rounds_indexed.count), "NAV rounds indexed", d.nav_rounds_indexed.first ? `from ${esc(d.nav_rounds_indexed.first.slice(0, 10))} to ${esc((d.nav_rounds_indexed.last || "").slice(0, 10))}` : ""),
+    card(n(d.corporate_action_records_confirmed), "confirmed corporate actions", `plus ${n(d.calendar_entries)} announced calendar entries`),
+    card(n(d.dex_pools_verified.count), "DEX pools verified", `across ${n(d.dex_pools_verified.tokens)} tokens`),
+    card(`${n(d.research_runs.ok)}/${n(d.research_runs.total)}`, "research runs ok", d.research_runs.last_finished_at ? `last ${esc(ago(d.research_runs.last_finished_at))} · ${esc(d.research_runs.last_outcome || "")}` : ""),
+    card(d.x402_payments ? n(d.x402_payments.external_paying_wallets) : "—", "external paying wallets", "wallets other than keldrin's own that paid for an answer"),
+    card(n(d.confirmed_external_integrations.length), "confirmed integrations", d.confirmed_external_integrations.length ? d.confirmed_external_integrations.map((i) => esc(i.name)).join(", ") : "none confirmed yet (one team testing)"),
+  ].join("");
+  $("#asof").textContent = `Read ${s.body.meta?.as_of ? new Date(s.body.meta.as_of).toUTCString() : "now"} · ${s.body.meta?.note || ""}`;
+  const p = d.x402_payments;
+  $("#pay").innerHTML = p
+    ? `<b>${n(p.payments)}</b> payment(s) of $0.05 USDC on Base, from <b>${n(p.paying_wallets)}</b> wallet(s), <b>${n(p.external_paying_wallets)}</b> external. ${p.transactions.map((t) => `<a class="mono" href="${basescan("tx", esc(t))}" target="_blank" rel="noopener">${esc(short(t))} ↗</a>`).join(" · ")}<br><span class="note">Payments by keldrin's own wallet are tests, not adoption. Counted up to block ${esc(p.to_block)}.</span>`
+    : `Unavailable right now: ${esc(d.x402_payments_unavailable_reason || "onchain read failed")}. Nothing is shown rather than a guess.`;
+}
+</script>
+</body>
+</html>

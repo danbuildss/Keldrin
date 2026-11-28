@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keldrin playground · try the API</title>
+<meta name="description" content="Run keldrin's free API endpoints from your browser: real responses, status, timing, and copy-paste cURL, TypeScript and Python.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%230000FF' fill-rule='evenodd' d='M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<nav id="nav"></nav>
+<main class="wrap">
+<section class="rv"><span class="label">API playground</span><h1>Try the API. No key.</h1>
+<p class="lead">Pick an endpoint, run it, and see exactly what your app or agent would get: the real response, status and timing, plus code to copy. Requests go from your browser straight to keldrin's free routes.</p></section>
+<section class="panel" style="padding-top:18px">
+  <form id="f" style="display:grid;gap:10px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="ep" style="flex:2;min-width:220px"></select>
+      <select id="tok" style="flex:1;min-width:120px"></select>
+      <input id="from" type="date" style="flex:1;min-width:140px" title="from (NAV history)">
+      <button class="btn primary" id="run">Run ▶</button>
+    </div>
+    <p class="note" id="desc"></p>
+  </form>
+</section>
+<section style="padding-top:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="mono" id="meta" style="font-size:12px">—</span><button class="btn" id="copyj" type="button">Copy JSON</button></div>
+  <pre class="json" id="out" style="margin-top:10px">Run a request to see the live response.</pre>
+</section>
+<section style="padding-top:0">
+  <div class="tabs" id="langs"><button class="on" data-l="curl">cURL</button><button data-l="ts">TypeScript</button><button data-l="py">Python</button></div>
+  <pre class="json" id="code" style="max-height:240px"></pre>
+  <div style="margin-top:8px"><button class="btn" id="copyc" type="button">Copy code</button></div>
+  <p class="note" style="margin-top:14px">Limits: free and keyless; 300 requests per minute per IP. The one-call snapshot and report (<span class="mono">/v1/snapshot</span>, <span class="mono">/v1/report</span>) give 3 free answers a day, then $0.05 USDC via x402, so they are not run here. MCP: <span class="mono">claude mcp add --transport http keldrin https://keldrin.vercel.app/mcp</span> · CLI: <span class="mono">npx keldrin</span> · full guide: <a href="/start.md">/start.md</a></p>
+</section>
+</main>
+<footer id="foot"></footer>
+<script type="module">
+import { $, esc, getJson, nav } from "/site.js";
+nav("Playground");
+const BASE = location.origin;
+// Allowlist: only keldrin's own free, read-only routes. No server-side proxy, so no other host can be reached.
+const EPS = [
+  { id: "market-context", label: "Market context: session, live NAV, freshness, DEX gap", path: (c) => `/v1/assets/${c}/market-context`, token: true },
+  { id: "nav-daily", label: "NAV history: official daily closes with round ids", path: (c, f) => `/v1/assets/${c}/nav/history?interval=daily&from=${f}`, token: true, from: true },
+  { id: "nav-round", label: "NAV history: every official round (paged)", path: (c) => `/v1/assets/${c}/nav/history?interval=round&limit=20`, token: true },
+  { id: "dex", label: "DEX price, depth and verified pools", path: (c) => `/v1/assets/${c}/dex`, token: true },
+  { id: "corporate-actions", label: "Corporate actions and multipliers", path: (c) => `/v1/assets/${c}/corporate-actions`, token: true },
+  { id: "session", label: "US market session now", path: () => `/v1/market/session` },
+  { id: "overview", label: "Overview: every verified stock (cached up to 5 min)", path: () => `/v1/overview` },
+  { id: "events", label: "Corporate-action events (all tokens)", path: () => `/v1/events` },
+  { id: "assets", label: "Tracked tokens (435)", path: () => `/v1/assets` },
+  { id: "stats", label: "Transparency counts", path: () => `/v1/stats` },
+  { id: "mcp", label: "MCP: list tools (JSON-RPC POST)", path: () => `/mcp`, post: { jsonrpc: "2.0", id: 1, method: "tools/list" } },
+];
+$("#ep").innerHTML = EPS.map((e) => `<option value="${e.id}">${esc(e.label)}</option>`).join("");
+const d30 = new Date(Date.now() - 30 * 86400e3).toISOString().slice(0, 10);
+$("#from").value = d30;
+const qs = new URLSearchParams(location.search);
+let tokens = [];
+const assets = await getJson("/v1/overview");
+if (assets.ok) tokens = assets.body.data.stocks.map((s) => ({ sym: s.symbol, addr: s.token }));
+$("#tok").innerHTML = tokens.map((t) => `<option value="${esc(t.addr)}">${esc(t.sym)}</option>`).join("");
+if (qs.get("endpoint") && EPS.some((e) => e.id === qs.get("endpoint"))) $("#ep").value = qs.get("endpoint");
+const wanted = tokens.find((t) => t.sym === qs.get("token")) || tokens.find((t) => t.sym === "NVDAc");
+if (wanted) $("#tok").value = wanted.addr;
+let lang = "curl", last = { url: "", post: null }, lastJson = "";
+const cur = () => EPS.find((e) => e.id === $("#ep").value);
+function code() {
+  const { url, post } = last;
+  if (!url) return "";
+  if (lang === "curl") return post ? `curl -X POST "${url}" \\\n  -H "content-type: application/json" \\\n  -d '${JSON.stringify(post)}'` : `curl "${url}"`;
+  if (lang === "ts") return post ? `const r = await fetch("${url}", {\n  method: "POST",\n  headers: { "content-type": "application/json" },\n  body: JSON.stringify(${JSON.stringify(post)}),\n});\nconst data = await r.json();` : `const r = await fetch("${url}");\nif (!r.ok) throw new Error(\`keldrin \${r.status}\`);\nconst data = await r.json();\nconsole.log(data);`;
+  return post ? `import requests\nr = requests.post("${url}", json=${JSON.stringify(post)}, timeout=30)\nprint(r.json())` : `import requests\nr = requests.get("${url}", timeout=30)\nr.raise_for_status()\nprint(r.json())`;
+}
+function sync() {
+  const e = cur();
+  $("#tok").style.display = e.token ? "" : "none";
+  $("#from").style.display = e.from ? "" : "none";
+  const path = e.path($("#tok").value, $("#from").value);
+  last = { url: BASE + path, post: e.post || null };
+  $("#desc").innerHTML = `<span class="mono">${e.post ? "POST" : "GET"} ${esc(path)}</span>`;
+  $("#code").textContent = code();
+}
+["ep", "tok", "from"].forEach((id) => $("#" + id).addEventListener("change", sync));
+$("#langs").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (!b) return; lang = b.dataset.l; $("#langs").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); $("#code").textContent = code(); });
+$("#f").addEventListener("submit", async (ev) => {
+  ev.preventDefault(); sync();
+  $("#run").disabled = true; $("#out").textContent = "running…";
+  try {
+    const r = await getJson(last.url, last.post ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(last.post) } : undefined);
+    lastJson = typeof r.body === "string" ? r.body : JSON.stringify(r.body, null, 2);
+    $("#meta").innerHTML = `<b style="color:${r.ok ? "var(--good)" : "var(--bad)"}">${r.status}</b> · ${r.ms} ms · live`;
+    $("#out").textContent = lastJson.length > 60000 ? lastJson.slice(0, 60000) + "\n… (truncated in the page; the API returns the full answer)" : lastJson;
+  } catch (e) { $("#out").textContent = "request failed: " + e.message; }
+  $("#run").disabled = false;
+});
+const copy = (t) => navigator.clipboard?.writeText(t);
+$("#copyj").addEventListener("click", () => copy(lastJson));
+$("#copyc").addEventListener("click", () => copy($("#code").textContent));
+sync();
+if (qs.get("endpoint")) $("#f").requestSubmit();
+</script>
+</body>
+</html>
