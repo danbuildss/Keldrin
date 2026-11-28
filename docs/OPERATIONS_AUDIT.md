@@ -6,7 +6,7 @@ What actually runs, with evidence. Nothing here is projected or assumed.
 
 | Worker | Where | Schedule | Evidence |
 |---|---|---|---|
-| Research run: discover (identity, multipliers) → reconcile + calendar → NAV index + independent NAV verify → DEX pool index + independent pool verify → write to Supabase | `.github/workflows/research.yml` (GitHub Actions, keldrin_writer role) | cron `23 1,7,13,19 * * *` UTC (GitHub may delay; run #7 started 22:04 UTC) | Runs #3–#7 succeeded (2026-11-27): 9, 12, 13, 18 and 18 min. #1 skipped (switch saved as a secret), #2 failed (missing RPC key), both fixed. Run #7 was the first scheduled one. |
+| Research run: discover (identity, multipliers) → reconcile + calendar → NAV index + independent NAV verify → DEX pool index + independent pool verify → write to Supabase | `.github/workflows/research.yml` (GitHub Actions, keldrin_writer role) | cron `23 2,10,18 * * *` UTC since 2026-11-28 (was every 6 h; GitHub may delay; run #7 started 22:04 UTC) | Runs #3–#7 succeeded (2026-11-27): 9, 12, 13, 18 and 18 min. #1 skipped (switch saved as a secret), #2 failed (missing RPC key), both fixed. Run #7 was the first scheduled one. |
 | Live reads at request time (NAV latestRoundData, DEX multicall at one block) | Vercel function (keldrin_reader role) | per request | Outside checks on production (BACKEND_PROOF). |
 | Independent verifiers (NAV rounds via getRoundData on a second provider; pools re-derived from factories) | inside the research run | every run | 13/13 NAV feeds and 13/13 pool sets CONFIRMED. |
 | Status check (site, API freshness, MCP, guide, live chain read, x402 terms) | `.github/workflows/status.yml` (added in PR #23) | every 6 h | Ran from this session 2026-11-27: all live parts pass; the 3 not-yet-deployed parts fail as expected. Not yet run on GitHub. |
@@ -26,7 +26,7 @@ no self-modification of safety policy).
 
 | Item | What we know | Unknown / to check |
 |---|---|---|
-| GitHub Actions | Research run ≈ 18 min × 4/day ≈ 2,160 min/month; status check ≈ 1 min × 4/day ≈ 120; CI per PR ≈ 1–2 min. Private-repo free allowance is 2,000 min/month on GitHub Free (3,000 on Pro). | The founder's GitHub plan; actual billed minutes (GitHub → Settings → Billing). If over, run research every 8–12 h. |
+| GitHub Actions | Founder is on GitHub Free (2,000 private-repo min/month). Research ≈ 18 min × 3/day ≈ 1,620 min/month (moved from 4/day on 2026-11-28); status check ≈ 1 min × 4/day ≈ 120; CI ≈ 1–2 min per PR. Total ≈ 1,800. | Actual billed minutes (GitHub → Settings → Billing). If still over: every 12 h, or a shorter run. |
 | Vercel | Founder said "Vercel Pro". | Usage-based extras (function time, bandwidth) on the dashboard. |
 | Supabase | Project in use; free-tier usage reported earlier. | Plan and usage on the dashboard. |
 | Alchemy (indexer RPC) | Free-tier key. | Compute units used per month. |

@@ -2,7 +2,7 @@
 
 Legend: ✅ live now · 🛠 planned (docs/PLAN_DEVELOPER_RELEASE.md), not built yet.
 
-- ✅ Research runs every 6 hours (01:23, 07:23, 13:23, 19:23 UTC) on GitHub Actions; GitHub can delay or skip runs. `/health` shows the last run's time and outcome.
+- ✅ Research runs every 8 hours (02:23, 10:23, 18:23 UTC) on GitHub Actions (GitHub Free minutes); GitHub can delay or skip runs. `/health` shows the last run's time and outcome.
 - ✅ Every event has `updated_at`; responses carry `meta.as_of`.
 - 🛠 NAV history: indexed in each run (up to ~6 h behind for the newest rounds).
 - 🛠 Market context: the latest NAV is read live at request time (cached ≤ 30 s), with `age_s` and `nav_staleness`:

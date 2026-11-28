@@ -56,8 +56,11 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T037 | P0 | DEX price + depth + NAV gap (Phase 8) | BUILT + independently reviewed (not deployed) | BACKEND_PROOF Phase 8 |
 | T038 | P0 | Developer testing package (docs/developers/*, real examples) | BUILT (examples from the local verified store; re-capture from production after deploy) | docs/PLAN_DEVELOPER_RELEASE.md |
 | T039 | P1 (proposed) | Edge rate limit (Vercel Firewall) + documented limits | PROPOSED | Founder sets the rule |
-| T041 | P0 | Remote MCP server /mcp (Phase 9) | BUILT (not deployed) | BACKEND_PROOF Phase 9 |
+| T041 | P0 | Remote MCP server /mcp (Phase 9) | LIVE: 8 tools, externally tested 2026-11-28 | BACKEND_PROOF Phase 9 |
 | T042 | P0 | CLI npx keldrin (Phase 10) | DONE: keldrin@0.6.0 published by the founder 2026-11-27 | npm/README.md |
-| T043 | P0 | x402 paid API (Phase 11) | LIVE on Bankr (snapshot, report, $0.05); 3 free tries on Keldrin's API built, awaiting merge | bankr/README.md |
+| T043 | P0 | x402 paid API (Phase 11) | LIVE: Bankr snapshot/report $0.05, origin forwards, 3 free tries; paid tx 0x5c3665fc…ab05 | bankr/README.md |
 | T044 | P1 | Open-source the product: new public repo with code, tests, developer docs and a license; this repo stays private | DEFERRED by the founder (2026-11-27): build and prove the product first | Founder, 2026-11-27 |
+| T045 | P0 | Phase 13 launch readiness | IN PROGRESS: agent guide, review fixes, external tests 30/30, paid tx, MAXXAGENT package, listings prep, ops audit, launch report done; founder actions open (docs/LAUNCH_REPORT.md §9) | docs/LAUNCH_REPORT.md |
+| T046 | P1 | Bankr snapshot 1.0.1 redeploy | OPEN (founder; one filter line) | bankr/x402/keldrin-snapshot |
+| T047 | P1 | Publish CLI 0.7.0 | OPEN (founder; npm token + publish button) | npm/ |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |

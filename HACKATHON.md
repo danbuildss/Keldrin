@@ -15,3 +15,5 @@ Rechecked 2026-11-27 (base.org/stocksmaxxing and /rules, HTTP 200):
 - Submit a Loom on X tagging @buildonbase plus the form by 11:59 PM UTC on Dec 12.
 - Testnet submissions are not judged less favourably.
 - Judging criteria are on the Quest Page, weighted equally unless stated; specific criteria not yet extracted.
+
+Readiness 2026-11-28 (rules re-read, HTTP 200): requirements are a public X post with a video demo tagging @buildonbase, the official form, original work with the form describing what was built during the Quest Period, and no implied relationship with or endorsement by Base, partners, issuers or referenced companies. Demo-ready: live API with proof, MCP, CLI verify-nav/verify-dex, real x402 payment on Base (tx 0x5c3665fc952fb619bd869e4641ad391e30e2396281ea7a458596006bd7caab05; founder's own test, not adoption). State honestly: 0 external payers, no confirmed external integration yet (MAXXAGENT agreed to test), AI skills not running. See docs/LAUNCH_REPORT.md section 10.
