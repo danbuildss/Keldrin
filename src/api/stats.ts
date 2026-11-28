@@ -29,7 +29,9 @@ export function resetPaymentCursor() {
 
 export async function countPayments(rpc: Rpc = publicRpc): Promise<Payments> {
   const head = BigInt(await rpc("eth_blockNumber", []));
-  const start = cursor && cursor.to < head ? cursor.to + 1n : cursor ? head + 1n : PAYMENTS_FROM_BLOCK;
+  // plain if/else, not a ternary: Vercel's build-time analyser fails on BigInt arithmetic inside conditional expressions
+  let start = PAYMENTS_FROM_BLOCK;
+  if (cursor) start = BigInt(Number(cursor.to) + 1); // nothing is scanned when the head has not moved
   type Log = { transactionHash: string; topics: string[]; data: string; address?: string };
   // 1) forwards from Bankr's router to the payout wallet (few), 2) each forward's receipt: the buyer's 50000 transfer
   const forwards: Log[] = [];
@@ -48,7 +50,9 @@ export async function countPayments(rpc: Rpc = publicRpc): Promise<Payments> {
       paidTxs.push(tx);
     }
   }
-  cursor = { to: head > (cursor?.to ?? 0n) ? head : cursor!.to, txs: paidTxs, payers };
+  let to = head;
+  if (cursor && cursor.to > head) to = cursor.to;
+  cursor = { to, txs: paidTxs, payers };
   const wallets = new Set(payers);
   return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
 }

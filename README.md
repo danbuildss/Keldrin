@@ -148,4 +148,4 @@ Governance for contributors and agents working in this repository: [CLAUDE.md](C
 
 ## License
 
-Private repository for now; an open-source release of the code is planned (TASKS T044). keldrin, built by SOMEHOW.
+Private repository for now; an open-source release of the code is planned (TASKS T044). keldrin, built by [SOMEHOW](https://somehowinternet.app/).

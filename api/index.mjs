@@ -11395,7 +11395,8 @@ var pad2 = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
 var cursor = null;
 async function countPayments(rpc = publicRpc) {
   const head = BigInt(await rpc("eth_blockNumber", []));
-  const start = cursor && cursor.to < head ? cursor.to + 1n : cursor ? head + 1n : PAYMENTS_FROM_BLOCK;
+  let start = PAYMENTS_FROM_BLOCK;
+  if (cursor) start = BigInt(Number(cursor.to) + 1);
   const forwards = [];
   for (let a = start; a <= head; a += 10000n) {
     const b = a + 9999n < head ? a + 9999n : head;
@@ -11412,7 +11413,9 @@ async function countPayments(rpc = publicRpc) {
       paidTxs.push(tx);
     }
   }
-  cursor = { to: head > (cursor?.to ?? 0n) ? head : cursor.to, txs: paidTxs, payers };
+  let to = head;
+  if (cursor && cursor.to > head) to = cursor.to;
+  cursor = { to, txs: paidTxs, payers };
   const wallets = new Set(payers);
   return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
 }

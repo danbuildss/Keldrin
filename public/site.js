@@ -21,5 +21,5 @@ export function stalePill(state) {
 export function nav(active) {
   const items = [["/explorer", "Explorer"], ["/playground", "Playground"], ["/transparency", "Transparency"], ["/start.md", "Docs", "hide-sm"], ["/#pricing", "Pricing", "hide-sm"]];
   document.querySelector("#nav").innerHTML = `<div class="wrap"><a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z"/></svg>keldrin</a><div class="links">${items.map(([h, t, c]) => `<a href="${h}" class="${c || ""} ${active === t ? "on" : ""}">${t}</a>`).join("")}</div></div>`;
-  document.querySelector("#foot").innerHTML = `<div class="wrap"><span>keldrin, built by SOMEHOW</span><span>Facts with provenance, not investment advice. Not affiliated with Base, Coinbase or Chainlink.</span></div>`;
+  document.querySelector("#foot").innerHTML = `<div class="wrap"><span>keldrin, built by <a href="https://somehowinternet.app/" target="_blank" rel="noopener">SOMEHOW</a></span><span>Facts with provenance, not investment advice. Not affiliated with Base, Coinbase or Chainlink.</span></div>`;
 }
