@@ -22,7 +22,7 @@ async function t(name, path, check, init) {
 const j = (o) => JSON.stringify(o);
 const mcp = (body) => ({ method: "POST", headers: { "content-type": "application/json" }, body: j(body) });
 
-await t("website", "/", (r, b) => [r.status === 200 && String(b).includes("keldrin, built by SOMEHOW"), r.headers.get("content-security-policy") ? "CSP set" : "no CSP"]);
+await t("website", "/", (r, b) => [r.status === 200 && /keldrin, built by (<a [^>]*>)?SOMEHOW/.test(String(b)), r.headers.get("content-security-policy") ? "CSP set" : "no CSP"]);
 await t("agent guide", "/skill.md", (r, b) => [r.status === 200 && String(b).includes("50000"), r.headers.get("content-type")]);
 await t("agent guide (upper case)", "/SKILL.md", (r) => [r.status === 200, ""]);
 await t("developer quick start", "/start.md", (r, b) => [r.status === 200 && String(b).includes("0x04689a41629776563E6822F76f2e57D148d28513"), ""]);
