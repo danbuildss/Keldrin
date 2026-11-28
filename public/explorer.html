@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keldrin explorer · tokenized stocks on Base</title>
+<meta name="description" content="Explore every tokenized stock on Base that keldrin verifies: Chainlink NAV history with round ids, DEX price and gap, freshness, corporate actions, each with its proof.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%230000FF' fill-rule='evenodd' d='M3 4h26l-5 24H8L3 4zm11 6v12h4V10h-4z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<nav id="nav"></nav>
+<main class="wrap" id="main"><section><p class="skeleton">loading live data…</p></section></main>
+<footer id="foot"></footer>
+<script type="module">
+import { $, esc, short, basescan, getJson, money, pct, ago, stalePill, nav } from "/site.js";
+nav("Explorer");
+const main = $("#main");
+const token = new URLSearchParams(location.search).get("token");
+
+// ── list ────────────────────────────────────────────────────────────────
+async function list() {
+  const [ov, assets] = await Promise.all([getJson("/v1/overview"), getJson("/v1/assets")]);
+  if (!ov.ok) { main.innerHTML = `<section><p class="note">The live overview is unavailable right now (${esc(ov.body?.error?.code || ov.status)}). Try again in a minute.</p></section>`; return; }
+  const d = ov.body.data, m = d.market;
+  const rows = d.stocks.map((s) => `<tr class="click" data-t="${esc(s.symbol)}">
+    <td><b>${esc(s.symbol)}</b><br><span class="muted mono" style="font-size:11px">${esc(short(s.token))}</span></td>
+    <td>${s.nav ? money(s.nav.nav) : `<span class="muted">${esc(s.nav_unavailable_reason || "unknown")}</span>`}</td>
+    <td>${s.dex?.price_usd ? money(s.dex.price_usd) + (s.dex.thin_market ? ' <span class="pill warn">thin</span>' : "") : `<span class="muted">${esc(s.dex?.unavailable_reason || "none")}</span>`}</td>
+    <td>${typeof s.dex?.nav_premium_pct === "number" ? pct(s.dex.nav_premium_pct) : `<span class="muted">${esc(s.dex?.premium_unavailable_reason || "—")}</span>`}</td>
+    <td>${stalePill(s.staleness?.state)}</td>
+    <td>${s.next_corporate_action ? esc(s.next_corporate_action.event_type) + " " + esc(s.next_corporate_action.expected_adjustment_date || "") : '<span class="muted">—</span>'}</td></tr>`).join("");
+  main.innerHTML = `<section class="rv"><span class="label">Explorer</span><h1>Every tokenized stock we verify.</h1>
+    <p class="lead">Chainlink NAV, DEX price, the gap between them, freshness and the next corporate action, for each stock on Base with a verified NAV feed. Click a stock for its history and proof.</p>
+    <p class="note" style="margin-top:12px">US market: <b>${esc(m.session)}</b>${m.next_open ? ` · next open ${esc(m.next_open)}` : ""} · ${esc(ov.body.meta?.freshness || "")}</p></section>
+    <section style="padding-top:0"><div class="scroll"><table><thead><tr><th>Stock</th><th>NAV</th><th>DEX</th><th>Gap vs NAV</th><th>Freshness</th><th>Next action</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="note" style="margin-top:10px">${d.count} stocks · NAV = Chainlink's last published total-return reference, not a live equity price. Gap withheld when the NAV is stale.</p></section>
+    <section class="panel"><span class="label">All ${assets.ok ? assets.body.data.length : ""} tracked tokens</span><p class="note" style="margin:8px 0 12px">Corporate actions (dividends, splits, multipliers) are verified for every tracked token, not only the 13 above.</p>
+    <form id="find" style="display:flex;gap:8px;flex-wrap:wrap"><input id="q" placeholder="symbol (e.g. AEOc) or 0x address" style="flex:1" list="syms"><datalist id="syms">${assets.ok ? assets.body.data.map((a) => `<option value="${esc(a.symbol)}">`).join("") : ""}</datalist><button class="btn primary">Open</button></form></section>`;
+  main.querySelectorAll("tr.click").forEach((tr) => tr.addEventListener("click", () => (location.href = "/explorer?token=" + encodeURIComponent(tr.dataset.t))));
+  $("#find").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#q").value.trim(); if (q) location.href = "/explorer?token=" + encodeURIComponent(q); });
+}
+
+// ── one stock ───────────────────────────────────────────────────────────
+function risk(closes) {
+  const out = { vol30: null, n: 0, dd: null };
+  const last = closes.slice(-31);
+  if (last.length >= 21) {
+    const r = []; for (let i = 1; i < last.length; i++) r.push(Math.log(last[i] / last[i - 1]));
+    const mean = r.reduce((a, b) => a + b, 0) / r.length;
+    const sd = Math.sqrt(r.reduce((a, b) => a + (b - mean) ** 2, 0) / (r.length - 1));
+    out.vol30 = sd * Math.sqrt(252) * 100; out.n = r.length;
+  }
+  if (closes.length >= 2) { let peak = closes[0], dd = 0; for (const c of closes) { peak = Math.max(peak, c); dd = Math.min(dd, c / peak - 1); } out.dd = dd * 100; }
+  return out;
+}
+function chart(points) {
+  if (points.length < 2) return '<p class="note">Not enough official closes for a chart.</p>';
+  const w = 800, h = 220, p = 24, ys = points.map((x) => x.v), min = Math.min(...ys), max = Math.max(...ys), span = max - min || 1;
+  const xy = points.map((x, i) => `${(p + (i / (points.length - 1)) * (w - 2 * p)).toFixed(1)},${(h - p - ((x.v - min) / span) * (h - 2 * p)).toFixed(1)}`).join(" ");
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="NAV official daily closes"><polyline fill="none" stroke="#0000FF" stroke-width="2" points="${xy}"/><text x="${p}" y="14" font-size="11" fill="#787878" font-family="JetBrains Mono">${money(max)}</text><text x="${p}" y="${h - 6}" font-size="11" fill="#787878" font-family="JetBrains Mono">${money(min)} · ${esc(points[0].d)} → ${esc(points[points.length - 1].d)}</text></svg>`;
+}
+async function stock(q) {
+  const assets = await getJson("/v1/assets");
+  const a = assets.ok ? assets.body.data.find((x) => x.symbol === q || x.contract_address.toLowerCase() === q.toLowerCase()) : null;
+  if (!a) { main.innerHTML = `<section><a href="/explorer">← Explorer</a><p class="lead">No tracked token "${esc(q)}".</p></section>`; return; }
+  const c = a.contract_address;
+  const [mc, hist, ca, dex] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`)]);
+  const ctx = mc.ok ? mc.body.data : null, hasNav = hist.ok;
+  const closes = hasNav ? hist.body.data.map((x) => ({ d: x.session_day, v: Number(x.nav) })) : [];
+  const actions = ca.ok ? ca.body.data : [];
+  const r = risk(closes.map((x) => x.v));
+  const head = `<section class="rv"><a href="/explorer" class="note">← Explorer</a><span class="label" style="display:flex;margin-top:12px">${esc(a.symbol)} · ${esc(a.name || "")}</span>
+    <h1>${ctx?.nav ? money(ctx.nav.nav) : esc(a.symbol)}</h1>
+    <p class="lead">${ctx?.nav ? `Chainlink NAV, round ${esc(ctx.nav.round_id)}, ${Math.round(ctx.nav.age_s / 60)} min old · ${stalePill(ctx.staleness?.state)} · market ${esc(ctx.market?.session)}` : `No verified Chainlink NAV feed for this token: corporate actions only. ${ctx ? "Market " + esc(ctx.market?.session) : ""}`}</p></section>`;
+  let navBlock = "";
+  if (hasNav) {
+    const ranges = { "30D": 30, "90D": 90, ALL: 100000 };
+    navBlock = `<section class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span class="label">NAV · official daily closes</span><div class="tabs" id="rng">${Object.keys(ranges).map((k, i) => `<button data-n="${ranges[k]}" class="${i === 2 ? "on" : ""}">${k}</button>`).join("")}</div></div><div id="ch">${chart(closes)}</div>
+      <div class="grid g4" style="margin-top:14px">
+      <div class="stat"><b>${ctx?.dex?.price_usd ? money(ctx.dex.price_usd) : "—"}</b><span>DEX price</span><small>${ctx?.dex?.price_usd ? esc(ctx.dex.venue) + (ctx.dex.thin_market ? " · thin market" : "") : esc(ctx?.dex?.unavailable_reason || "no usable pool")}</small></div>
+      <div class="stat"><b>${typeof ctx?.dex?.nav_premium_pct === "number" ? pct(ctx.dex.nav_premium_pct) : "—"}</b><span>Gap vs NAV</span><small>${esc(ctx?.dex?.premium_note || ctx?.dex?.premium_unavailable_reason || "")}</small></div>
+      <div class="stat"><b>${r.vol30 === null ? "—" : r.vol30.toFixed(1) + "%"}</b><span>30-day volatility</span><small>${r.vol30 === null ? "too few official closes" : `annualised, from ${r.n} daily returns of official closes`}</small></div>
+      <div class="stat"><b>${r.dd === null ? "—" : r.dd.toFixed(2) + "%"}</b><span>Max drawdown</span><small>over all ${closes.length} official closes since ${esc(closes[0]?.d || "")}</small></div></div>
+      <p class="note" style="margin-top:12px">Total-return NAV: dividends and splits are already included. ${hist.body.meta.quality.missing_trading_days?.length ? hist.body.meta.quality.missing_trading_days.length + " trading day(s) without an official round (listed in the API, never filled)." : "No missing trading days in this range."}</p></section>`;
+  }
+  const actRows = actions.map((e) => {
+    const tx = Array.isArray(e.onchain_tx) ? e.onchain_tx[0] : e.onchain_tx;
+    const applied = !!e.adjusted_at;
+    return `<tr><td><span class="pill ${applied ? "good" : "blue"}">${esc(e.status)}</span></td><td>${esc(e.event_type)}</td><td class="mono">${esc((e.adjusted_at || e.expected_adjustment_date || "").slice(0, 10))}</td><td>${e.per_share ? "$" + esc(e.per_share) : "—"}</td><td class="mono" style="font-size:11px">${e.multiplier_before_wad && e.multiplier_after_wad ? (Number(e.multiplier_before_wad) / 1e18).toFixed(6) + " → " + (Number(e.multiplier_after_wad) / 1e18).toFixed(6) : "—"}</td><td>${e.sec_filing_url ? `<a href="${esc(e.sec_filing_url)}" target="_blank" rel="noopener">SEC ↗</a>` : ""} ${tx ? `<a href="${basescan("tx", esc(tx))}" target="_blank" rel="noopener">tx ↗</a>` : ""}</td></tr>`;
+  }).join("");
+  const actBlock = `<section><span class="label">Corporate actions</span><div class="scroll" style="margin-top:10px">${actions.length ? `<table><thead><tr><th>Status</th><th>Type</th><th>Date</th><th>Per share</th><th>Multiplier</th><th>Evidence</th></tr></thead><tbody>${actRows}</tbody></table>` : '<p class="note">No verified corporate actions recorded for this token yet.</p>'}</div><p class="note" style="margin-top:8px">Applied changes have an onchain transaction; announced ones are expected, not applied. Shares per token = multiplier.</p></section>`;
+  const dd = dex.ok ? dex.body.data : null;
+  const proof = `<section class="panel"><span class="label">Proof</span><div class="grid g2" style="margin-top:12px;font-size:13px">
+    ${hasNav ? `<div>NAV feed <a class="mono" href="${basescan("address", esc(hist.body.meta.feed))}" target="_blank" rel="noopener">${esc(short(hist.body.meta.feed))} ↗</a><br><span class="note">every point carries its round id: re-read it with getRoundData, or <span class="mono">npx keldrin verify-nav ${esc(a.symbol)}</span></span></div>` : ""}
+    ${dd?.main ? `<div>Main pool <a class="mono" href="${basescan("address", esc(dd.main.pool.length === 42 ? dd.main.pool : c))}" target="_blank" rel="noopener">${esc(short(dd.main.pool))} ↗</a> at block <span class="mono">${esc(dd.block)}</span><br><span class="note">${dd.pools_total} verified pools · <span class="mono">npx keldrin verify-dex ${esc(a.symbol)}</span></span></div>` : `<div class="note">DEX: ${esc(dd?.unavailable_reason || "no usable pool")}</div>`}
+    <div>Token <a class="mono" href="${basescan("token", esc(c))}" target="_blank" rel="noopener">${esc(short(c))} ↗</a> · multiplier <span class="mono">${(Number(a.multiplier_wad) / 1e18).toFixed(6)}</span></div>
+    <div><a class="btn" href="/playground?endpoint=market-context&token=${encodeURIComponent(a.symbol)}">See these as API calls →</a></div></div></section>`;
+  main.innerHTML = head + navBlock + actBlock + proof;
+  if (hasNav) $("#rng").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    $("#rng").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    const pts = closes.slice(-Number(b.dataset.n));
+    $("#ch").innerHTML = chart(pts);
+  });
+}
+(token ? stock(token) : list()).catch((e) => (main.innerHTML = `<section><p class="note">Could not load live data right now. ${esc(e.message)}</p></section>`));
+</script>
+</body>
+</html>

@@ -55,3 +55,13 @@ test("feedback: validated, stored with a hashed client (no IP), honeypot ignored
     await db.close();
   }
 });
+
+test("product pages: no hard-coded financial figures; every number comes from the API at load time", () => {
+  for (const f of ["explorer", "playground", "transparency"]) {
+    const page = readFileSync(new URL(`../public/${f}.html`, import.meta.url), "utf8");
+    const body = page.replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "").replace(/\$0\.05 USDC/g, "PRICE");
+    assert.doesNotMatch(body, /\$\s?\d/, `${f}: a dollar figure is hard-coded`);
+    assert.doesNotMatch(body, /\b\d{2,3},\d{3}\b/, `${f}: a count is hard-coded`);
+    assert.match(page, /keldrin, built by SOMEHOW|nav\(/, `${f}: shared nav/footer`);
+  }
+});

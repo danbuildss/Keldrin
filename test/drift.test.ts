@@ -64,3 +64,12 @@ test("server.json fits the MCP Registry schema limits (description and title at 
   assert.match(s.name, /^io\.github\.danbuildss\/[a-zA-Z0-9._-]+$/);
   assert.equal(s.remotes[0].url, "https://keldrin.vercel.app/mcp");
 });
+
+test("the Bankr skill package matches the live guide and Bankr's catalog rules", () => {
+  assert.equal(read("integrations/bankr/skill/keldrin/SKILL.md"), skill, "SKILL.md must be an exact copy of public/skill.md");
+  const cat = JSON.parse(read("integrations/bankr/skill/keldrin/catalog.json"));
+  assert.equal(cat.schemaVersion, 1);
+  assert.equal(cat.slug, "keldrin", "slug must equal the folder name");
+  assert.equal(cat.install.repoPath, "keldrin");
+  assert.match(skill, /^---\nname: keldrin\ndescription: /, "name + description frontmatter");
+});
