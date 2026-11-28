@@ -1,5 +1,5 @@
 // keldrin paying wallets (Phase 13), counted onchain from USDC transfers. Read-only.
-//   node scripts/payers.ts [--from=<block>] [--exclude=0xabc,0xdef]
+//   node scripts/payers.ts [--from=<block>] [--exclude=0xabc,0xdef] [--tx]   (--tx lists each payment's transaction)
 // A keldrin x402 payment is a $0.05 USDC (50000) transfer from the buyer to Bankr's fee router, which forwards to the
 // payout wallet in the same transaction. Breakra shares the payout wallet at $0.02, so keldrin payments are told apart
 // by the 50000 amount AND a router → payout transfer in the same transaction. A wallet is never a person; the owner's
@@ -43,6 +43,7 @@ for (const l of toRouter) {
   const ts = Number(BigInt((await rpc("eth_getBlockByNumber", [l.blockNumber, false])).timestamp));
   const w = byWallet.get(payer) ?? { calls: 0, days: new Set<string>() };
   w.calls++;
+  if (process.argv.includes("--tx")) console.log(`  payment ${l.transactionHash} block ${BigInt(l.blockNumber)} ${new Date(ts * 1000).toISOString()} from ${payer}`);
   w.days.add(new Date(ts * 1000).toISOString().slice(0, 10));
   byWallet.set(payer, w);
 }

@@ -78,3 +78,7 @@
 ## Phase 12 (approved 2026-11-27): website
 - Built: public/index.html (keystone logo, lowercase wordmark, Base colours, halftone/flow/count/marquee/reveal animations with reduced-motion support, live numbers from /health, /mcp and one market-context call; never the metered snapshot), POST /v1/feedback (validated, honeypot, 5 per client per day, stored only through feedback_submit; IP never stored). API index also at /v1.
 - LIVE: site at keldrin.vercel.app (PR #21); feedback storage approved, applied and checked. The founder reads submissions in Supabase → Table Editor → schema keldrin → feedback. Next: Phase 13 (launch).
+
+## Phase 13 (approved 2026-11-27, expanded scope 2026-11-28): launch readiness, IN PROGRESS
+- Done: /skill.md and /start.md; x402 forwards on our origin + OpenAPI paid paths; MCP/CLI snapshot+report (never auto-pay); status checks; payer counter; independent launch review (10 findings fixed or accepted); NAV before_coverage fix; MCP Registry description fix; external tests 30/30 + CLI; real paid x402 tx 0x5c3665fc…ab05; MAXXAGENT package; listings research; operations audit; launch report (docs/LAUNCH_REPORT.md); research schedule every 8 h (GitHub Free).
+- Not complete until the founder actions in LAUNCH_REPORT §9 are done (rate-limit rule, Bankr redeploy, CLI 0.7.0, MAXXAGENT message, listings, hackathon submission).
