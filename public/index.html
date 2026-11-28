@@ -38,9 +38,10 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 /* hero */
 .hero{padding:72px 0 56px}
 .hero .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:end}
-.hero h1{font-size:clamp(48px,8vw,104px);line-height:.95;letter-spacing:-.045em;font-weight:600;margin-top:22px}
+.hero h1{font-size:clamp(40px,6vw,92px);line-height:.95;letter-spacing:-.045em;font-weight:600;margin-top:22px}
 .hero h1 .w{display:inline-block;opacity:0;transform:translateY(40px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards}
 .hero h1 em{font-style:normal;color:var(--blue)}
+.hero h1 .ln{display:block;white-space:nowrap}
 .hero p{font-size:15px;line-height:1.55;color:#333;max-width:340px}
 .hero .cta{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
 .status{font-family:var(--mono);font-size:11px;color:var(--mute);margin-bottom:18px;display:flex;align-items:center;gap:8px}
@@ -181,7 +182,7 @@ form.fb small{font-size:11px;color:var(--mute);line-height:1.45}
 <header class="hero"><div class="wrap grid">
   <div>
     <span class="label">The verified record for tokenized stocks on Base</span>
-    <h1><span class="w" style="animation-delay:.05s">Intelligence</span> <span class="w" style="animation-delay:.15s">for</span><br><span class="w" style="animation-delay:.25s">programmable</span><br><em class="w" style="animation-delay:.35s">equities.</em></h1>
+    <h1><span class="ln"><span class="w" style="animation-delay:.05s">Intelligence</span> <span class="w" style="animation-delay:.15s">for</span></span><span class="ln"><span class="w" style="animation-delay:.25s">programmable</span></span><span class="ln"><em class="w" style="animation-delay:.35s">equities.</em></span></h1>
   </div>
   <div>
     <div class="status"><span class="pulse"></span><span id="st-run">checking live status…</span></div>

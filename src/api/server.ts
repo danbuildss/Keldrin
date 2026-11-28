@@ -62,7 +62,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/snapshot — every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> — everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= — x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
-- GET /v1/overview — every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, CDN-cached, up to about 10 min old; the paid snapshot is live)
+- GET /v1/overview — every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, CDN-cached and refreshed in the background, normally a few minutes old and at most about 30 min; the paid snapshot is live)
 - GET /v1/stats — transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md — 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
@@ -176,7 +176,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/v1/overview") {
       const out = await overview(db);
-      return send(res, out.status, out.status === 200 ? withMeta(out.body as Json) : (out.body as Json), undefined, out.status === 200 ? "public, max-age=60, s-maxage=300, stale-while-revalidate=300" : "no-store");
+      return send(res, out.status, out.status === 200 ? withMeta(out.body as Json) : (out.body as Json), undefined, out.status === 200 ? "public, max-age=60, s-maxage=120, stale-while-revalidate=1800" : "no-store"); // served instantly from the CDN; refreshed in the background
     }
     if (p === "/health") {
       try {

@@ -5,7 +5,7 @@ import { snapshot } from "./trial.ts";
 
 // Public product experience (approved 2026-11-28).
 //  - GET /v1/stats     Transparency: counts read from real tables, plus keldrin's x402 payments counted onchain.
-//  - GET /v1/overview  Explorer list: the snapshot's fields for every verified stock, free, CDN-cached, up to about 10 min old.
+//  - GET /v1/overview  Explorer list: the snapshot's fields for every verified stock, free, CDN-cached and refreshed in the background (at most about 30 min old).
 //                      The paid snapshot (x402) is the live, at-request version.
 // Nothing here is typed by hand except the list of confirmed external integrations (currently none).
 
@@ -105,10 +105,10 @@ export async function stats(db: PGlite, rpc: Rpc = publicRpc): Promise<Out> {
   };
 }
 
-/** Free Explorer list: the snapshot without the free-try counter, cached at the CDN, up to about 10 minutes old. */
+/** Free Explorer list: the snapshot without the free-try counter, cached at the CDN, at most about 30 minutes old. */
 export async function overview(db: PGlite): Promise<Out> {
   const s = await snapshot(db);
   if (s.status !== 200) return s;
   const b = s.body as { data: unknown; meta?: Record<string, unknown> };
-  return { status: 200, body: { data: b.data, meta: { ...(b.meta ?? {}), freshness: "cached at the CDN, up to about 10 minutes old (market session included); the paid snapshot (x402) and the per-stock routes are read live" } } };
+  return { status: 200, body: { data: b.data, meta: { ...(b.meta ?? {}), freshness: "cached at the CDN and refreshed in the background: normally a few minutes old, at most about 30 minutes (market session included); the paid snapshot (x402) and the per-stock routes are read live" } } };
 }

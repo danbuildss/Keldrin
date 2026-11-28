@@ -33,3 +33,8 @@ This remains a hypothesis until builders confirm the need (T013). Not compared y
 | Who | Offers | Overlap | Keldrin's difference |
 |---|---|---|---|
 | Proof of Stock (proofofstock.xyz, MIT repo) | Authenticity vs issuer registries (Base + Robinhood), impostor/deny lists, live NAV/DEX premium (onchain DEX reads, 15-min forward series since ~Nov 8), market session, freshness, daily anchoring, MCP (11 tools), x402 passes | Market session; NAV/DEX premium | Not found in their public code: Chainlink round history with ids, NAV backfill, dividend/split and multiplier history, volatility/drawdown, earnings, B20 policy monitoring, research. Complementary rather than head-on. |
+
+## Re-check 2026-11-28 (live: BStocks OpenAPI 1.0.0 + llms.txt; Proof of Stock llms.txt v0.9.0)
+- BStocks now lists 24h volume, supply, candle history ($0.10 x402) and wallet portfolios. Still no corporate-action/dividend/split/filing endpoint.
+- Proof of Stock covers Base and Robinhood Chain authenticity, with strong verification (list hashes, receipts, factory checks, external kill switch); $0.01 x402 passes.
+- Pegproof, StocksOnChain, RWA.xyz, Allium: not reachable from the session network; not checked. See docs/research/ONCHAIN_EQUITY_INTELLIGENCE.md.

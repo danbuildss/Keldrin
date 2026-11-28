@@ -12,10 +12,10 @@
 </head>
 <body>
 <nav id="nav"></nav>
-<main class="wrap" id="main"><section><p class="skeleton">loading live data…</p></section></main>
+<main class="wrap" id="main"><section><span class="label">Explorer</span><p class="skeleton" style="margin:14px 0">reading live NAV and DEX prices from Base…</p><table><tbody><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr class="skel"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table></section></main>
 <footer id="foot"></footer>
 <script type="module">
-import { $, esc, short, basescan, getJson, money, pct, ago, stalePill, nav } from "/site.js";
+import { $, esc, short, basescan, getJson, money, pct, ago, stalePill, nav, badge } from "/site.js";
 nav("Explorer");
 const main = $("#main");
 const token = new URLSearchParams(location.search).get("token");
@@ -27,7 +27,7 @@ async function list() {
   if (!ov.ok) { main.innerHTML = `<section><p class="note">The live overview is unavailable right now (${esc(ov.body?.error?.code || ov.status)}). Try again in a minute.</p></section>`; return; }
   const d = ov.body.data, m = d.market;
   const rows = d.stocks.map((s) => `<tr class="click" tabindex="0" data-t="${esc(s.symbol)}">
-    <td><b>${esc(s.symbol)}</b><br><span class="muted mono" style="font-size:11px">${esc(short(s.token))}</span></td>
+    <td><div class="sym">${badge(s.symbol)}<div><b>${esc(s.symbol)}</b><br><span class="muted mono" style="font-size:11px">${esc(short(s.token))}</span></div></div></td>
     <td>${s.nav ? money(s.nav.nav) : `<span class="muted">${esc(s.nav_unavailable_reason || "unknown")}</span>`}</td>
     <td>${s.dex?.price_usd ? money(s.dex.price_usd) + (s.dex.thin_market ? ' <span class="pill warn">thin</span>' : "") : `<span class="muted">${esc(s.dex?.unavailable_reason || "none")}</span>`}</td>
     <td>${typeof s.dex?.nav_premium_pct === "number" ? pct(s.dex.nav_premium_pct) : `<span class="muted">${esc(s.dex?.premium_unavailable_reason || "—")}</span>`}</td>
@@ -37,7 +37,7 @@ async function list() {
     <p class="lead">Chainlink NAV, DEX price, the gap between them, freshness and the next corporate action, for each stock on Base with a verified NAV feed. Click a stock for its history and proof.</p>
     <p class="note" style="margin-top:12px">US market: <b>${esc(m.session)}</b>${m.next_open ? ` · next open ${esc(m.next_open)}` : ""} · ${esc(ov.body.meta?.freshness || "")}</p></section>
     <section style="padding-top:0"><div class="scroll"><table><thead><tr><th>Stock</th><th>NAV</th><th>DEX</th><th>Gap vs NAV</th><th>Freshness</th><th>Next action</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="note" style="margin-top:10px">${d.count} stocks · NAV = Chainlink's last published total-return reference, not a live equity price. Gap withheld when the NAV is stale.</p></section>
+    <p class="note" style="margin-top:10px">${d.count} stocks · NAV = Chainlink's last published total-return reference, not a live equity price. Gap withheld when the NAV is stale. Company logos are trademarks of their owners, shown only to identify the company; keldrin is not affiliated with them.</p></section>
     <section class="panel"><span class="label">All ${assets.ok ? assets.body.data.length : ""} tracked tokens</span><p class="note" style="margin:8px 0 12px">Corporate actions (dividends, splits, multipliers) are verified for every tracked token, not only the ${d.count} above.</p>
     <form id="find" style="display:flex;gap:8px;flex-wrap:wrap"><input id="q" placeholder="symbol (e.g. AEOc) or 0x address" style="flex:1" list="syms"><datalist id="syms">${assets.ok ? assets.body.data.map((a) => `<option value="${esc(a.symbol)}">`).join("") : ""}</datalist><button class="btn primary">Open</button></form></section>`;
   main.querySelectorAll("tr.click").forEach((tr) => {
@@ -77,7 +77,7 @@ async function stock(q) {
   const closes = hasNav ? hist.body.data.map((x) => ({ d: x.session_day, v: Number(x.nav) })) : [];
   const actions = ca.ok ? ca.body.data : [];
   const r = risk(hist.body.data.filter((x) => !x.provisional).map((x) => Number(x.nav))); // provisional (unfinished) days are not used for risk
-  const head = `<section class="rv"><a href="/explorer" class="note">← Explorer</a><span class="label" style="display:flex;margin-top:12px">${esc(a.symbol)} · ${esc(a.name || "")}</span>
+  const head = `<section class="rv"><a href="/explorer" class="note">← Explorer</a><div class="sym" style="margin-top:14px">${badge(a.symbol, 44)}<span class="label">${esc(a.symbol)} · ${esc(a.name || "")}</span></div>
     <h1>${ctx?.nav ? money(ctx.nav.nav) : esc(a.symbol)}</h1>
     <p class="lead">${ctx?.nav ? `Chainlink NAV, round ${esc(ctx.nav.round_id)}, ${Math.round(ctx.nav.age_s / 60)} min old · ${stalePill(ctx.staleness?.state)} · market ${esc(ctx.market?.session)}` : `No verified Chainlink NAV feed for this token: corporate actions only. ${ctx ? "Market " + esc(ctx.market?.session) : ""}`}</p></section>`;
   let navBlock = "";
