@@ -1,4 +1,26 @@
-# Status | 2026-11-27 (Phase 3 done: production API live at https://keldrin.vercel.app)
+# Status | 2026-11-28 (roadmap approved; Phase 1 "launch ready" in progress)
+
+**Current state.** Live at https://keldrin.vercel.app:
+- REST API, remote MCP (9 tools), CLI 0.7.1 on npm, and the MCP Registry listing (0.7.1, active).
+- x402 snapshot and report on Bankr ($0.05; 3 payments onchain, all keldrin's own tests).
+- Website: Explorer (company logos), Playground and Transparency.
+- Positioning locked (POSITIONING.md); roadmap approved (ROADMAP.md).
+- No confirmed users, integrations or revenue. MAXXAGENT agreed to test. BankrBot/skills PR #879 is open.
+
+**Phase 1 (ROADMAP.md), built on branch claude/awesome-brahmagupta-9y3hiy, awaiting review and merge:**
+- risk endpoint (1.2);
+- coverage levels (1.3);
+- payment count stored by the robot (1.4; migration applied to Supabase);
+- privacy and terms page (1.1; text needs the founder's approval).
+
+**Open:**
+- verifier login (1.5, founder creates it);
+- independent review and external tests (1.8);
+- listings (1.9);
+- hackathon (Phase 2, deadline 2026-12-12).
+
+---
+## History: 2026-11-27 (Phase 3 done: production API live)
 
 **Phase 2 gate passed** (BACKEND_PROOF.md). The read-only API is live in production (founder decision 2026-11-27). No confirmed users, integrations or revenue.
 

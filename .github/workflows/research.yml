@@ -64,8 +64,18 @@ jobs:
           BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+      - name: Count keldrin's x402 payments onchain (incremental)
+        # independent of the research data: runs even if an earlier step failed, and fails the job visibly if it fails
+        if: ${{ !cancelled() }}
+        run: node src/cli.ts payments-index --db=pg
+        env:
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
+          DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       # The run's evidence files are a private artifact for review; nothing is committed or published.
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: keldrin-records-${{ github.run_id }}
           path: |

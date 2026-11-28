@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <nav id="nav"></nav>
@@ -38,7 +39,7 @@ async function list() {
     <p class="note" style="margin-top:12px">US market: <b>${esc(m.session)}</b>${m.next_open ? ` · next open ${esc(m.next_open)}` : ""} · ${esc(ov.body.meta?.freshness || "")}</p></section>
     <section style="padding-top:0"><div class="scroll"><table><thead><tr><th>Stock</th><th>NAV</th><th>DEX</th><th>Gap vs NAV</th><th>Freshness</th><th>Next action</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="note" style="margin-top:10px">${d.count} stocks · NAV = Chainlink's last published total-return reference, not a live equity price. Gap withheld when the NAV is stale. Company logos are trademarks of their owners, shown only to identify the company; keldrin is not affiliated with them.</p></section>
-    <section class="panel"><span class="label">All ${assets.ok ? assets.body.data.length : ""} tracked tokens</span><p class="note" style="margin:8px 0 12px">Corporate actions (dividends, splits, multipliers) are verified for every tracked token, not only the ${d.count} above.</p>
+    <section class="panel"><span class="label">All ${assets.ok ? assets.body.data.length : ""} tracked tokens</span>${assets.ok && assets.body.meta?.coverage_levels ? `<p class="note" style="margin-top:8px">Coverage: ${Object.entries(assets.body.meta.coverage_levels).map(([k, v]) => `<span class="pill ${k === "full" ? "good" : k === "market" ? "blue" : ""}">${esc(k)} ${Number(v)}</span>`).join(" ")} · full = verified NAV, risk, market context and corporate actions (DEX price where verified pools exist); market = verified DEX pools without a verified NAV; identity = identity and corporate actions</p>` : ""}<p class="note" style="margin:8px 0 12px">Corporate actions (dividends, splits, multipliers) are verified for every tracked token, not only the ${d.count} above.</p>
     <form id="find" style="display:flex;gap:8px;flex-wrap:wrap"><input id="q" placeholder="symbol (e.g. AEOc) or 0x address" style="flex:1" list="syms"><datalist id="syms">${assets.ok ? assets.body.data.map((a) => `<option value="${esc(a.symbol)}">`).join("") : ""}</datalist><button class="btn primary">Open</button></form></section>`;
   main.querySelectorAll("tr.click").forEach((tr) => {
     const open = () => (location.href = "/explorer?token=" + encodeURIComponent(tr.dataset.t));
@@ -49,18 +50,6 @@ async function list() {
 }
 
 // ── one stock ───────────────────────────────────────────────────────────
-function risk(closes) {
-  const out = { vol30: null, n: 0, dd: null };
-  const last = closes.slice(-31);
-  if (last.length >= 21) {
-    const r = []; for (let i = 1; i < last.length; i++) r.push(Math.log(last[i] / last[i - 1]));
-    const mean = r.reduce((a, b) => a + b, 0) / r.length;
-    const sd = Math.sqrt(r.reduce((a, b) => a + (b - mean) ** 2, 0) / (r.length - 1));
-    out.vol30 = sd * Math.sqrt(252) * 100; out.n = r.length;
-  }
-  if (closes.length >= 2) { let peak = closes[0], dd = 0; for (const c of closes) { peak = Math.max(peak, c); dd = Math.min(dd, c / peak - 1); } out.dd = dd * 100; }
-  return out;
-}
 function chart(points) {
   if (points.length < 2) return '<p class="note">Not enough official closes for a chart.</p>';
   const w = 800, h = 220, p = 24, ys = points.map((x) => x.v), min = Math.min(...ys), max = Math.max(...ys), span = max - min || 1;
@@ -72,12 +61,14 @@ async function stock(q) {
   const a = assets.ok ? assets.body.data.find((x) => x.symbol === q || x.contract_address.toLowerCase() === q.toLowerCase()) : null;
   if (!a) { main.innerHTML = `<section><a href="/explorer">← Explorer</a><p class="lead">No tracked token "${esc(q)}".</p></section>`; return; }
   const c = a.contract_address;
-  const [mc, hist, ca, dex] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`)]);
+  const [mc, hist, ca, dex, rk] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`), getJson(`/v1/assets/${c}/risk`)]);
   const ctx = mc.ok ? mc.body.data : null, hasNav = hist.ok;
   const closes = hasNav ? hist.body.data.map((x) => ({ d: x.session_day, v: Number(x.nav) })) : [];
   const actions = ca.ok ? ca.body.data : [];
-  const r = risk(hist.body.data.filter((x) => !x.provisional).map((x) => Number(x.nav))); // provisional (unfinished) days are not used for risk
-  const head = `<section class="rv"><a href="/explorer" class="note">← Explorer</a><div class="sym" style="margin-top:14px">${badge(a.symbol, 44)}<span class="label">${esc(a.symbol)} · ${esc(a.name || "")}</span></div>
+  // risk comes from the API (GET /v1/assets/{c}/risk), the same numbers agents get
+  const rd = rk.ok ? rk.body.data : null;
+  const v30 = rd?.volatility_30d_annualized, mdd = rd?.max_drawdown_since_start;
+  const head = `<section class="rv"><a href="/explorer" class="note">← Explorer</a><div class="sym" style="margin-top:14px">${badge(a.symbol, 44)}<span class="label">${esc(a.symbol)} · ${esc(a.name || "")}</span>${a.coverage_level ? `<span class="pill ${a.coverage_level === "full" ? "good" : a.coverage_level === "market" ? "blue" : ""}" title="what keldrin has verified for this token">coverage: ${esc(a.coverage_level)}</span>` : ""}</div>
     <h1>${ctx?.nav ? money(ctx.nav.nav) : esc(a.symbol)}</h1>
     <p class="lead">${ctx?.nav ? `Chainlink NAV, round ${esc(ctx.nav.round_id)}, ${Math.round(ctx.nav.age_s / 60)} min old · ${stalePill(ctx.staleness?.state)} · market ${esc(ctx.market?.session)}` : `No verified Chainlink NAV feed for this token: corporate actions only. ${ctx ? "Market " + esc(ctx.market?.session) : ""}`}</p></section>`;
   let navBlock = "";
@@ -87,8 +78,8 @@ async function stock(q) {
       <div class="grid g4" style="margin-top:14px">
       <div class="stat"><b>${ctx?.dex?.price_usd ? money(ctx.dex.price_usd) : "—"}</b><span>DEX price</span><small>${ctx?.dex?.price_usd ? esc(ctx.dex.venue) + (ctx.dex.thin_market ? " · thin market" : "") : esc(ctx?.dex?.unavailable_reason || "no usable pool")}</small></div>
       <div class="stat"><b>${typeof ctx?.dex?.nav_premium_pct === "number" ? pct(ctx.dex.nav_premium_pct) : "—"}</b><span>Gap vs NAV</span><small>${esc(ctx?.dex?.premium_note || ctx?.dex?.premium_unavailable_reason || "")}</small></div>
-      <div class="stat"><b>${r.vol30 === null ? "—" : r.vol30.toFixed(1) + "%"}</b><span>30-day volatility</span><small>${r.vol30 === null ? "too few official closes" : `annualised, from the last ${r.n} returns between official closes (provisional days left out)`}</small></div>
-      <div class="stat"><b>${r.dd === null ? "—" : r.dd.toFixed(2) + "%"}</b><span>Max drawdown</span><small>over all ${closes.length} official closes since ${esc(closes[0]?.d || "")}</small></div></div>
+      <div class="stat"><b>${typeof v30?.value_pct === "number" ? v30.value_pct.toFixed(1) + "%" : "—"}</b><span>30-day volatility</span><small>${typeof v30?.value_pct === "number" ? `annualised, from the last ${v30.returns_used} returns between official closes` : esc(v30?.reason || (rk.ok ? "" : "risk unavailable right now"))}</small></div>
+      <div class="stat"><b>${typeof mdd?.value_pct === "number" ? mdd.value_pct.toFixed(2) + "%" : "—"}</b><span>Max drawdown</span><small>${typeof mdd?.value_pct === "number" ? `${mdd.peak ? esc(mdd.peak.session_day) + " → " + esc(mdd.trough.session_day) + ", " : ""}from ${rd.closes_used} official closes${rd.stale ? " · <b>stale: the newest close is " + Number(rd.trading_days_since_last_close) + " trading days old</b>" : ""} · <a href="/v1/assets/${esc(c)}/risk">API</a>` : esc(mdd?.reason || "")}</small></div></div>
       <p class="note" style="margin-top:12px">Total-return NAV: dividends and splits are already included. ${hist.body.meta.quality.missing_trading_days?.length ? hist.body.meta.quality.missing_trading_days.length + " trading day(s) without an official round (listed in the API, never filled)." : "No missing trading days in this range."}</p></section>`;
   }
   const actRows = actions.map((e) => {

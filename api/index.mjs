@@ -1537,7 +1537,7 @@ var init_utils2 = __esm({
 // node_modules/@noble/hashes/esm/sha3.js
 function keccakP(s, rounds = 24) {
   const B = new Uint32Array(5 * 2);
-  for (let round = 24 - rounds; round < 24; round++) {
+  for (let round2 = 24 - rounds; round2 < 24; round2++) {
     for (let x = 0; x < 10; x++)
       B[x] = s[x] ^ s[x + 10] ^ s[x + 20] ^ s[x + 30] ^ s[x + 40];
     for (let x = 0; x < 10; x += 2) {
@@ -1570,8 +1570,8 @@ function keccakP(s, rounds = 24) {
       for (let x = 0; x < 10; x++)
         s[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
     }
-    s[0] ^= SHA3_IOTA_H[round];
-    s[1] ^= SHA3_IOTA_L[round];
+    s[0] ^= SHA3_IOTA_H[round2];
+    s[1] ^= SHA3_IOTA_L[round2];
   }
   B.fill(0);
 }
@@ -1590,10 +1590,10 @@ var init_sha3 = __esm({
     _7n = /* @__PURE__ */ BigInt(7);
     _256n = /* @__PURE__ */ BigInt(256);
     _0x71n = /* @__PURE__ */ BigInt(113);
-    for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+    for (let round2 = 0, R = _1n, x = 1, y = 0; round2 < 24; round2++) {
       [x, y] = [y, (2 * x + 3 * y) % 5];
       SHA3_PI.push(2 * (5 * y + x));
-      SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
+      SHA3_ROTL.push((round2 + 1) * (round2 + 2) / 2 % 64);
       let t = _0n;
       for (let j = 0; j < 7; j++) {
         R = (R << _1n ^ (R >> _7n) * _0x71n) % _256n;
@@ -2480,12 +2480,12 @@ var init_cursor = __esm({
 
 // node_modules/viem/_esm/utils/cursor.js
 function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
-  const cursor2 = Object.create(staticCursor);
-  cursor2.bytes = bytes;
-  cursor2.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  cursor2.positionReadCount = /* @__PURE__ */ new Map();
-  cursor2.recursiveReadLimit = recursiveReadLimit;
-  return cursor2;
+  const cursor = Object.create(staticCursor);
+  cursor.bytes = bytes;
+  cursor.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  cursor.positionReadCount = /* @__PURE__ */ new Map();
+  cursor.recursiveReadLimit = recursiveReadLimit;
+  return cursor;
 }
 var staticCursor;
 var init_cursor2 = __esm({
@@ -2696,7 +2696,7 @@ var init_fromBytes = __esm({
 // node_modules/viem/_esm/utils/abi/decodeAbiParameters.js
 function decodeAbiParameters(params, data) {
   const bytes = typeof data === "string" ? hexToBytes(data) : data;
-  const cursor2 = createCursor(bytes);
+  const cursor = createCursor(bytes);
   if (size(bytes) === 0 && params.length > 0)
     throw new AbiDecodingZeroDataError();
   if (size(data) && size(data) < 32)
@@ -2709,8 +2709,8 @@ function decodeAbiParameters(params, data) {
   const values = [];
   for (let i = 0; i < params.length; ++i) {
     const param = params[i];
-    cursor2.setPosition(consumed);
-    const [data2, consumed_] = decodeParameter(cursor2, param, {
+    cursor.setPosition(consumed);
+    const [data2, consumed_] = decodeParameter(cursor, param, {
       staticPosition: 0
     });
     consumed += consumed_;
@@ -2718,71 +2718,71 @@ function decodeAbiParameters(params, data) {
   }
   return values;
 }
-function decodeParameter(cursor2, param, { staticPosition }) {
+function decodeParameter(cursor, param, { staticPosition }) {
   const arrayComponents = getArrayComponents(param.type);
   if (arrayComponents) {
     const [length, type] = arrayComponents;
-    return decodeArray(cursor2, { ...param, type }, { length, staticPosition });
+    return decodeArray(cursor, { ...param, type }, { length, staticPosition });
   }
   if (param.type === "tuple")
-    return decodeTuple(cursor2, param, { staticPosition });
+    return decodeTuple(cursor, param, { staticPosition });
   if (param.type === "address")
-    return decodeAddress(cursor2);
+    return decodeAddress(cursor);
   if (param.type === "bool")
-    return decodeBool(cursor2);
+    return decodeBool(cursor);
   if (param.type.startsWith("bytes"))
-    return decodeBytes(cursor2, param, { staticPosition });
+    return decodeBytes(cursor, param, { staticPosition });
   if (param.type.startsWith("uint") || param.type.startsWith("int"))
-    return decodeNumber(cursor2, param);
+    return decodeNumber(cursor, param);
   if (param.type === "string")
-    return decodeString(cursor2, { staticPosition });
+    return decodeString(cursor, { staticPosition });
   throw new InvalidAbiDecodingTypeError(param.type, {
     docsPath: "/docs/contract/decodeAbiParameters"
   });
 }
-function decodeAddress(cursor2) {
-  const value = cursor2.readBytes(32);
+function decodeAddress(cursor) {
+  const value = cursor.readBytes(32);
   return [checksumAddress(bytesToHex(sliceBytes(value, -20))), 32];
 }
-function decodeArray(cursor2, param, { length, staticPosition }) {
+function decodeArray(cursor, param, { length, staticPosition }) {
   if (!length) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const startOfData = start + sizeOfLength;
-    cursor2.setPosition(start);
-    const length2 = bytesToNumber(cursor2.readBytes(sizeOfLength));
+    cursor.setPosition(start);
+    const length2 = bytesToNumber(cursor.readBytes(sizeOfLength));
     const dynamicChild = hasDynamicChild(param);
     let consumed2 = 0;
     const value2 = [];
     for (let i = 0; i < length2; ++i) {
-      cursor2.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
-      const [data, consumed_] = decodeParameter(cursor2, param, {
+      cursor.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
+      const [data, consumed_] = decodeParameter(cursor, param, {
         staticPosition: startOfData
       });
       consumed2 += consumed_;
       value2.push(data);
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const value2 = [];
     for (let i = 0; i < length; ++i) {
-      cursor2.setPosition(start + i * 32);
-      const [data] = decodeParameter(cursor2, param, {
+      cursor.setPosition(start + i * 32);
+      const [data] = decodeParameter(cursor, param, {
         staticPosition: start
       });
       value2.push(data);
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   let consumed = 0;
   const value = [];
   for (let i = 0; i < length; ++i) {
-    const [data, consumed_] = decodeParameter(cursor2, param, {
+    const [data, consumed_] = decodeParameter(cursor, param, {
       staticPosition: staticPosition + consumed
     });
     consumed += consumed_;
@@ -2790,57 +2790,57 @@ function decodeArray(cursor2, param, { length, staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeBool(cursor2) {
-  return [bytesToBool(cursor2.readBytes(32), { size: 32 }), 32];
+function decodeBool(cursor) {
+  return [bytesToBool(cursor.readBytes(32), { size: 32 }), 32];
 }
-function decodeBytes(cursor2, param, { staticPosition }) {
+function decodeBytes(cursor, param, { staticPosition }) {
   const [_, size2] = param.type.split("bytes");
   if (!size2) {
-    const offset = bytesToNumber(cursor2.readBytes(32));
-    cursor2.setPosition(staticPosition + offset);
-    const length = bytesToNumber(cursor2.readBytes(32));
+    const offset = bytesToNumber(cursor.readBytes(32));
+    cursor.setPosition(staticPosition + offset);
+    const length = bytesToNumber(cursor.readBytes(32));
     if (length === 0) {
-      cursor2.setPosition(staticPosition + 32);
+      cursor.setPosition(staticPosition + 32);
       return ["0x", 32];
     }
-    const data = cursor2.readBytes(length);
-    cursor2.setPosition(staticPosition + 32);
+    const data = cursor.readBytes(length);
+    cursor.setPosition(staticPosition + 32);
     return [bytesToHex(data), 32];
   }
-  const value = bytesToHex(cursor2.readBytes(Number.parseInt(size2), 32));
+  const value = bytesToHex(cursor.readBytes(Number.parseInt(size2), 32));
   return [value, 32];
 }
-function decodeNumber(cursor2, param) {
+function decodeNumber(cursor, param) {
   const signed = param.type.startsWith("int");
   const size2 = Number.parseInt(param.type.split("int")[1] || "256");
-  const value = cursor2.readBytes(32);
+  const value = cursor.readBytes(32);
   return [
     size2 > 48 ? bytesToBigInt(value, { signed }) : bytesToNumber(value, { signed }),
     32
   ];
 }
-function decodeTuple(cursor2, param, { staticPosition }) {
+function decodeTuple(cursor, param, { staticPosition }) {
   const hasUnnamedChild = param.components.length === 0 || param.components.some(({ name }) => !name);
   const value = hasUnnamedChild ? [] : {};
   let consumed = 0;
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     for (let i = 0; i < param.components.length; ++i) {
       const component = param.components[i];
-      cursor2.setPosition(start + consumed);
-      const [data, consumed_] = decodeParameter(cursor2, component, {
+      cursor.setPosition(start + consumed);
+      const [data, consumed_] = decodeParameter(cursor, component, {
         staticPosition: start
       });
       consumed += consumed_;
       value[hasUnnamedChild ? i : component?.name] = data;
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value, 32];
   }
   for (let i = 0; i < param.components.length; ++i) {
     const component = param.components[i];
-    const [data, consumed_] = decodeParameter(cursor2, component, {
+    const [data, consumed_] = decodeParameter(cursor, component, {
       staticPosition
     });
     value[hasUnnamedChild ? i : component?.name] = data;
@@ -2848,18 +2848,18 @@ function decodeTuple(cursor2, param, { staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeString(cursor2, { staticPosition }) {
-  const offset = bytesToNumber(cursor2.readBytes(32));
+function decodeString(cursor, { staticPosition }) {
+  const offset = bytesToNumber(cursor.readBytes(32));
   const start = staticPosition + offset;
-  cursor2.setPosition(start);
-  const length = bytesToNumber(cursor2.readBytes(32));
+  cursor.setPosition(start);
+  const length = bytesToNumber(cursor.readBytes(32));
   if (length === 0) {
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return ["", 32];
   }
-  const data = cursor2.readBytes(length, 32);
+  const data = cursor.readBytes(length, 32);
   const value = bytesToString(trim(data));
-  cursor2.setPosition(staticPosition + 32);
+  cursor.setPosition(staticPosition + 32);
   return [value, 32];
 }
 function hasDynamicChild(param) {
@@ -3487,7 +3487,7 @@ var require_pg_int8 = __commonJS({
       var carry;
       var t;
       var digits;
-      var pad3;
+      var pad2;
       var l;
       var i;
       {
@@ -3499,12 +3499,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3515,12 +3515,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3531,12 +3531,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -4011,25 +4011,25 @@ var require_utils = __commonJS({
       let year = date.getFullYear();
       const isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      let ret = String(year).padStart(4, "0") + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0") + ":" + String(date.getSeconds()).padStart(2, "0") + "." + String(date.getMilliseconds()).padStart(3, "0");
+      let ret2 = String(year).padStart(4, "0") + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0") + ":" + String(date.getSeconds()).padStart(2, "0") + "." + String(date.getMilliseconds()).padStart(3, "0");
       if (offset < 0) {
-        ret += "-";
+        ret2 += "-";
         offset *= -1;
       } else {
-        ret += "+";
+        ret2 += "+";
       }
-      ret += String(Math.floor(offset / 60)).padStart(2, "0") + ":" + String(offset % 60).padStart(2, "0");
-      if (isBCYear) ret += " BC";
-      return ret;
+      ret2 += String(Math.floor(offset / 60)).padStart(2, "0") + ":" + String(offset % 60).padStart(2, "0");
+      if (isBCYear) ret2 += " BC";
+      return ret2;
     }
     function dateToStringUTC(date) {
       let year = date.getUTCFullYear();
       const isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      let ret = String(year).padStart(4, "0") + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0") + "T" + String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0") + ":" + String(date.getUTCSeconds()).padStart(2, "0") + "." + String(date.getUTCMilliseconds()).padStart(3, "0");
-      ret += "+00:00";
-      if (isBCYear) ret += " BC";
-      return ret;
+      let ret2 = String(year).padStart(4, "0") + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0") + "T" + String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0") + ":" + String(date.getUTCSeconds()).padStart(2, "0") + "." + String(date.getUTCMilliseconds()).padStart(3, "0");
+      ret2 += "+00:00";
+      if (isBCYear) ret2 += " BC";
+      return ret2;
     }
     function normalizeQueryConfig(config, values, callback) {
       config = typeof config === "string" ? { text: config } : cloneQueryConfig(config);
@@ -8351,7 +8351,8 @@ var keldrin_v1_default = {
               }
             }
           }
-        }
+        },
+        description: "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed (DEX price only where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
       }
     },
     "/v1/assets/{contract}": {
@@ -9842,6 +9843,65 @@ var keldrin_v1_default = {
           }
         }
       }
+    },
+    "/v1/assets/{contract}/risk": {
+      get: {
+        summary: "NAV-based risk for one token (verified feeds only)",
+        description: "Deterministic risk from official Chainlink total-return NAV daily closes (the same closes as /nav/history?interval=daily, provisional sessions excluded): 30- and 60-day annualized volatility (sample sd of daily log returns x sqrt(252)), max drawdown since the first official close in the window (at most 400 days; see history_window) and over the last 90 closes with peak and trough round ids, and 1/5/20-day and since-start returns. Includes stale (more than 2 completed trading days since the newest close used) and excluded_days_no_decimal_value. A metric without enough history is null with the reason. Facts from history, not a forecast or advice. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
+        parameters: [
+          {
+            name: "contract",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              pattern: "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Risk metrics",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object"
+                }
+              }
+            }
+          },
+          "400": {
+            description: "Bad input",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            description: "Unknown token (UNKNOWN_ASSET) or no NAV feed (NO_NAV_FEED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            description: "Not enabled (NAV_NOT_ENABLED) or feed not independently verified (NAV_NOT_VERIFIED)",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   components: {
@@ -10408,8 +10468,8 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   if (interval === "daily" && Date.parse(to) - Date.parse(from) > 400 * 864e5) return e(400, "RANGE_TOO_LONG", "daily ranges are limited to 400 days", "page by date range");
   const limit = Number(q.get("limit") ?? 500);
   if (!Number.isInteger(limit) || limit < 1 || limit > 1e3) return e(400, "BAD_LIMIT", "limit must be an integer 1-1000");
-  const cursor2 = q.get("cursor");
-  if (cursor2 !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor2)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
+  const cursor = q.get("cursor");
+  if (cursor !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
   const known = (await db2.query("SELECT count(*)::int AS n FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0].n;
   if (!known) return e(404, "UNKNOWN_ASSET", `no tracked asset ${contract}`, "GET /v1/assets lists tracked tokens");
   const feed = (await db2.query(
@@ -10442,7 +10502,7 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   const ny = "(r.updated_at AT TIME ZONE 'America/New_York')";
   let rows;
   if (interval === "round") {
-    const [cu, cr] = cursor2 ? cursor2.split("-") : [null, null];
+    const [cu, cr] = cursor ? cursor.split("-") : [null, null];
     rows = (await db2.query(
       `WITH ${ph} SELECT ${cols} FROM nav_rounds r JOIN ph ON ph.phase_id = r.phase_id
        WHERE r.chain_id=$1 AND r.feed_address=$2 AND r.updated_at >= $3::timestamptz AND r.updated_at < $4::timestamptz AND ${coveredExpr}
@@ -10917,18 +10977,18 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
   const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail) : rev?.detail;
   if (!rev || rev.verdict !== "CONFIRMED") return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "feed_not_verified", staleness: { state: "unknown", threshold_s: null } } } };
   const p99 = detail?.stats?.p99_in_session_gap_s ?? null;
-  let round;
+  let round2;
   try {
-    round = await readRound(feed.feed_address);
+    round2 = await readRound(feed.feed_address);
   } catch (e2) {
     const reason = e2.message === "rpc_result_invalid" ? "rpc_result_invalid" : "rpc_unavailable";
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: reason, staleness: { state: "unknown", threshold_s: null } } } };
   }
-  if (BigInt(round.answer_raw) <= 0n || round.updated_unix <= 0 || round.updated_unix > nowSec + 60) {
+  if (BigInt(round2.answer_raw) <= 0n || round2.updated_unix <= 0 || round2.updated_unix > nowSec + 60) {
     cache2.delete(feed.feed_address);
     return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: "rpc_result_invalid", staleness: { state: "unknown", threshold_s: null } } } };
   }
-  const id = BigInt(round.round_id);
+  const id = BigInt(round2.round_id);
   const livePhase = Number(id >> 64n);
   const reviewed = Array.isArray(detail?.covered) && detail.covered.some((c) => Number(c.phase) === livePhase);
   const ph = (await db2.query(
@@ -10936,14 +10996,14 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
     [CHAIN_ID, feed.feed_address, livePhase]
   )).rows[0];
   if (!reviewed || !ph?.ok) return { status: 200, body: { data: { ...base, feed: feed.feed_address, nav: null, nav_unavailable_reason: !reviewed ? "phase_not_reviewed" : "aggregator_decimals_differ_from_proxy", staleness: { state: "unknown", threshold_s: null } } } };
-  const st = classifyStaleness(nowSec, round.updated_unix, p99);
+  const st = classifyStaleness(nowSec, round2.updated_unix, p99);
   if (dex.price_usd && (st.state === "unexpectedly_stale" || st.state === "unknown")) {
     dex.nav_premium_pct = null;
     dex.premium_unavailable_reason = `nav_${st.state}`;
   } else if (dex.price_usd) {
-    const navNum = Number(formatNav(round.answer_raw, feed.decimals));
+    const navNum = Number(formatNav(round2.answer_raw, feed.decimals));
     dex.nav_premium_pct = Number(((Number(dex.price_usd) / navNum - 1) * 100).toFixed(4));
-    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round.updated_unix * 1e3).toISOString()}.`;
+    const when = `DEX at block ${dex.block} vs the NAV round updated ${new Date(round2.updated_unix * 1e3).toISOString()}.`;
     dex.premium_note = (market.session === "open" ? "DEX price vs the last published NAV during the regular session. " : "Market closed: the NAV is held at its last value while the DEX keeps trading, so the gap reflects the closure, not necessarily mispricing. ") + when;
   }
   return {
@@ -10953,14 +11013,14 @@ async function marketContext(db2, contract, now = /* @__PURE__ */ new Date(), re
         ...base,
         feed: feed.feed_address,
         nav: {
-          round_id: round.round_id,
+          round_id: round2.round_id,
           phase_id: Number(id >> 64n),
-          answer_raw: round.answer_raw,
+          answer_raw: round2.answer_raw,
           decimals: feed.decimals,
-          nav: formatNav(round.answer_raw, feed.decimals),
-          updated_at: new Date(round.updated_unix * 1e3).toISOString(),
-          age_s: Math.max(0, nowSec - round.updated_unix),
-          read_at: round.read_at,
+          nav: formatNav(round2.answer_raw, feed.decimals),
+          updated_at: new Date(round2.updated_unix * 1e3).toISOString(),
+          age_s: Math.max(0, nowSec - round2.updated_unix),
+          read_at: round2.read_at,
           source: "latestRoundData() on the Chainlink proxy, read live from Base's public RPC (reused for up to 30 s inside the server; responses are not CDN-cached)",
           label: "Last published total-return reference per token, not a live equity price. It already includes dividends and splits."
         },
@@ -11020,6 +11080,111 @@ async function assetCorporateActions(db2, contract) {
       }
     }
   };
+}
+
+// src/api/risk.ts
+var RISK_METHOD = "risk-1";
+var sd = (r) => {
+  const m = r.reduce((a, b) => a + b, 0) / r.length;
+  return Math.sqrt(r.reduce((a, b) => a + (b - m) ** 2, 0) / (r.length - 1));
+};
+var round = (v, d = 4) => Math.round(v * 10 ** d) / 10 ** d;
+function vol(closes, window) {
+  const last = closes.slice(-(window + 1));
+  const r = [];
+  for (let i = 1; i < last.length; i++) r.push(Math.log(last[i].nav / last[i - 1].nav));
+  if (r.length < window) return { value_pct: null, returns_used: r.length, reason: `needs ${window} daily returns (${r.length} available)` };
+  return { value_pct: round(sd(r) * Math.sqrt(252) * 100, 2), returns_used: r.length, from: last[0].session_day, to: last[last.length - 1].session_day };
+}
+function drawdown(closes) {
+  if (closes.length < 2) return { value_pct: null, reason: "needs at least 2 closes" };
+  let peak = closes[0], worst = 0, at = { peak: closes[0], trough: closes[0] };
+  for (const c of closes) {
+    if (c.nav > peak.nav) peak = c;
+    const dd = c.nav / peak.nav - 1;
+    if (dd < worst) {
+      worst = dd;
+      at = { peak, trough: c };
+    }
+  }
+  if (worst === 0) return { value_pct: 0, peak: null, trough: null, note: "no close below an earlier high in this window", from: closes[0].session_day, to: closes[closes.length - 1].session_day };
+  return { value_pct: round(worst * 100, 2), peak: { session_day: at.peak.session_day, nav: at.peak.nav, round_id: at.peak.round_id }, trough: { session_day: at.trough.session_day, nav: at.trough.nav, round_id: at.trough.round_id }, from: closes[0].session_day, to: closes[closes.length - 1].session_day };
+}
+function ret(closes, n) {
+  if (closes.length <= n) return null;
+  const a = closes[closes.length - 1 - n], b = closes[closes.length - 1];
+  return { value_pct: round((b.nav / a.nav - 1) * 100, 2), from: a.session_day, to: b.session_day };
+}
+function riskFrom(closes) {
+  return {
+    volatility_30d_annualized: vol(closes, 30),
+    volatility_60d_annualized: vol(closes, 60),
+    max_drawdown_since_start: drawdown(closes),
+    max_drawdown_last_90_closes: drawdown(closes.slice(-90)),
+    return_1d: ret(closes, 1),
+    return_5d: ret(closes, 5),
+    return_20d: ret(closes, 20),
+    return_since_start: closes.length >= 2 ? { value_pct: round((closes[closes.length - 1].nav / closes[0].nav - 1) * 100, 2), from: closes[0].session_day, to: closes[closes.length - 1].session_day } : null
+  };
+}
+async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
+  const from = new Date(now.getTime() - 400 * 864e5).toISOString().slice(0, 10);
+  const h = await navHistory(db2, contract, new URLSearchParams({ interval: "daily", from, to: now.toISOString().slice(0, 10) }), now);
+  if (h.status !== 200) return h;
+  const b = h.body;
+  const used = b.data.filter((d) => !d.provisional && d.nav !== null).map((d) => ({ session_day: d.session_day, nav: Number(d.nav), round_id: d.round_id }));
+  const excluded = b.data.filter((d) => !d.provisional && d.nav === null).map((d) => d.session_day);
+  const q = b.meta.quality ?? {};
+  const first = typeof q.first_official_round_at === "string" ? q.first_official_round_at.slice(0, 10) : null;
+  const capped = first !== null && first < from;
+  const asOf = used.length ? used[used.length - 1].session_day : null;
+  const today = now.toISOString().slice(0, 10);
+  const behind = asOf ? dateRange(asOf, today).slice(1).filter((d) => isTradingDay(d) === true && d < today).length : null;
+  return {
+    status: 200,
+    body: {
+      data: { token: b.meta.token, symbol: b.meta.symbol, as_of_close: asOf, closes_used: used.length, trading_days_since_last_close: behind, stale: behind !== null && behind > 2, history_window: { from: used.length ? used[0].session_day : null, to: asOf, capped_at_400_days: capped }, ...riskFrom(used) },
+      meta: {
+        method: RISK_METHOD,
+        method_note: 'Daily log returns of official Chainlink total-return NAV closes (last official in-session round per NYSE trading day). Volatility = sample standard deviation x sqrt(252), in percent, over the last 30 or 60 returns. Drawdown = worst close vs the highest earlier close. Provisional (unfinished) sessions are excluded. A trading day without a usable official close joins the two neighbouring closes into one multi-day return (listed in missing_trading_days or excluded_days_no_decimal_value). "since start" = since the first official close in the window (history_window); the window is at most 400 days.',
+        semantics: "Total-return NAV: dividends and splits are already included. NAV-based risk, not DEX-price risk. Facts from history, not a forecast or advice.",
+        feed: b.meta.feed,
+        missing_trading_days: q.missing_trading_days ?? [],
+        excluded_days_no_decimal_value: excluded,
+        verification: q.verification ?? null,
+        stale_rule: "stale = more than 2 completed NYSE trading days since the newest official close used (the indexer may be behind); the metrics are then still the true history up to as_of_close",
+        source: "Computed from GET /v1/assets/{contract}/nav/history?interval=daily; every close used carries its Chainlink round id there."
+      }
+    }
+  };
+}
+
+// src/api/coverage.ts
+var UNKNOWN_COVERAGE = { coverage_level: "unknown", capabilities: { identity: false, corporate_actions: false, nav_history: false, risk: false, market_context: false, dex_price: false } };
+var COVERAGE_SQL = `
+  SELECT lower(a.contract_address) AS k, a.identity_state = 'verified' AS id_ok,
+    COALESCE((SELECT COALESCE(r.verdict = 'CONFIRMED' AND jsonb_typeof(r.detail->'covered') = 'array', false) FROM nav_feeds f LEFT JOIN LATERAL (SELECT verdict, detail FROM nav_reviews n WHERE n.chain_id = f.chain_id AND n.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) r ON true
+              WHERE f.chain_id = $1 AND lower(f.token_address) = lower(a.contract_address) ORDER BY f.discovered_at DESC LIMIT 1), false) AS nav_ok,
+    COALESCE((SELECT d.verdict = 'CONFIRMED' AND jsonb_array_length(COALESCE(d.detail->'covered', '[]'::jsonb)) > 0 FROM dex_reviews d
+              WHERE d.chain_id = $1 AND lower(d.token_address) = lower(a.contract_address) ORDER BY d.checked_at DESC LIMIT 1), false) AS dex_ok
+  FROM assets a`;
+function coverageOf(r) {
+  const id = Boolean(r.id_ok), nav = id && Boolean(r.nav_ok), dex = id && Boolean(r.dex_ok);
+  return {
+    coverage_level: !id ? "unverified" : nav ? "full" : dex ? "market" : "identity",
+    capabilities: { identity: id, corporate_actions: id, nav_history: nav, risk: nav, market_context: nav, dex_price: dex }
+  };
+}
+async function coverageMap(db2) {
+  try {
+    return await coverageRows(db2);
+  } catch {
+    return null;
+  }
+}
+async function coverageRows(db2) {
+  const rows = (await db2.query(COVERAGE_SQL, [CHAIN_ID])).rows;
+  return new Map(rows.map((r) => [r.k, coverageOf(r)]));
 }
 
 // src/version.ts
@@ -11225,6 +11390,7 @@ var TOOLS = [
   { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
   { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
@@ -11259,10 +11425,11 @@ async function callTool(db2, name, args, client) {
     switch (name) {
       case "list_assets": {
         const q = typeof args.query === "string" ? args.query.trim().toLowerCase() : "";
+        const cov = await coverageMap(db2);
         const rows = (await db2.query(
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
-        const body = { data: rows.slice(0, 200), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        const body = { data: rows.slice(0, 200).map((r) => ({ ...r, coverage_level: cov ? cov.get(r.contract_address.toLowerCase())?.coverage_level ?? "unknown" : "unknown" })), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
         return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
@@ -11276,6 +11443,11 @@ async function callTool(db2, name, args, client) {
         if (typeof args.limit === "number") q.set("limit", String(args.limit));
         const out = await navHistory(db2, await resolveToken(db2, args.token), q);
         return toolResult(out, (b) => `${b.meta.symbol}: ${b.meta.count} ${b.meta.interval} NAV point(s) ${b.meta.from}..${b.meta.to}; verification ${b.meta.quality.verification.verdict}; missing trading days: ${(b.meta.quality.missing_trading_days ?? []).length}. Total-return NAV: do not apply the multiplier again.`);
+      }
+      case "get_risk": {
+        if (!navOn) return toolResult(navOff, () => "");
+        const out = await assetRisk(db2, await resolveToken(db2, args.token));
+        return toolResult(out, (b) => `${b.data.symbol}: 30-day volatility ${b.data.volatility_30d_annualized.value_pct ?? "n/a"}% (annualized), max drawdown since start ${b.data.max_drawdown_since_start.value_pct ?? "n/a"}%, from ${b.data.closes_used} official closes to ${b.data.as_of_close}. NAV-based, not advice.`);
       }
       case "get_market_context": {
         if (!navOn) return toolResult(navOff, () => "");
@@ -11337,7 +11509,7 @@ async function handleMcp(db2, raw, client = "mcp") {
           protocolVersion: version3,
           capabilities: { tools: {} },
           serverInfo: { name: "keldrin", title: "keldrin", version: PACKAGE_VERSION },
-          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
+          instructions: "keldrin (intelligence for programmable equities) is the verified record for Coinbase tokenized stocks on Base. Use get_corporate_actions for dividends/splits/multipliers, get_nav_history for Chainlink NAV with round ids, get_risk for NAV-based volatility and drawdown, get_market_context for session + NAV freshness + DEX gap, get_dex_price for onchain DEX prices, get_snapshot / get_report for everything in one answer (3 free per day, then a paid x402 link; never pay without the user). Values are facts with provenance, not trade signals or advice. 'unknown' is a valid answer."
         });
       }
       case "ping":
@@ -11384,50 +11556,12 @@ async function submitFeedback(db2, raw, client) {
   }
 }
 
+// src/pipeline/payments.ts
+var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
+
 // src/api/stats.ts
 var CONFIRMED_INTEGRATIONS = [];
-var USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-var ROUTER = "0x8aee621035d93deb3c0c1177fac252dc2dd501a0";
-var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
-var TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-var PAYMENTS_FROM_BLOCK = 63080000n;
-var pad2 = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
-var cursor = null;
-async function countPayments(rpc = publicRpc) {
-  const head = BigInt(await rpc("eth_blockNumber", []));
-  let start = PAYMENTS_FROM_BLOCK;
-  if (cursor) start = BigInt(Number(cursor.to) + 1);
-  const forwards = [];
-  for (let a = start; a <= head; a += 10000n) {
-    const b = a + 9999n < head ? a + 9999n : head;
-    forwards.push(...await rpc("eth_getLogs", [{ address: USDC2, topics: [TRANSFER, pad2(ROUTER), pad2(PAYOUT)], fromBlock: "0x" + a.toString(16), toBlock: "0x" + b.toString(16) }]));
-  }
-  const txs = [...new Set(forwards.map((l) => l.transactionHash))].filter((t) => !cursor?.txs.includes(t));
-  const payers = [...cursor?.payers ?? []];
-  const paidTxs = [...cursor?.txs ?? []];
-  for (const tx of txs) {
-    const rc = await rpc("eth_getTransactionReceipt", [tx]);
-    const inbound = rc.logs.find((l) => l.address?.toLowerCase() === USDC2.toLowerCase() && l.topics[0] === TRANSFER && l.topics[2]?.toLowerCase() === pad2(ROUTER) && BigInt(l.data) === 50000n);
-    if (inbound) {
-      payers.push("0x" + inbound.topics[1].slice(26).toLowerCase());
-      paidTxs.push(tx);
-    }
-  }
-  let to = head;
-  if (cursor && cursor.to > head) to = cursor.to;
-  cursor = { to, txs: paidTxs, payers };
-  const wallets = new Set(payers);
-  return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
-}
-async function withDeadline2(p, ms) {
-  let t;
-  try {
-    return await Promise.race([p, new Promise((_, rej) => t = setTimeout(() => rej(new Error("deadline")), ms))]);
-  } finally {
-    clearTimeout(t);
-  }
-}
-async function stats(db2, rpc = publicRpc) {
+async function stats(db2) {
   const one = async (sql, params = []) => (await db2.query(sql, params)).rows[0];
   const [assets, feeds, rounds, records, calendar, pools, runs] = await Promise.all([
     one("SELECT count(*)::int AS n FROM assets"),
@@ -11442,9 +11576,15 @@ async function stats(db2, rpc = publicRpc) {
   let payments = null;
   let payments_unavailable_reason;
   try {
-    payments = await withDeadline2(countPayments(rpc), 8e3);
+    const scan = (await db2.query(`SELECT max(to_block)::text AS to_block, to_char(max(scanned_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS at FROM x402_payment_scans WHERE chain_id = $1`, [CHAIN_ID])).rows[0];
+    if (!scan?.to_block) payments_unavailable_reason = "not counted yet: the research robot has not completed its first payment scan";
+    else {
+      const rows = (await db2.query("SELECT tx_hash, payer FROM x402_payments WHERE chain_id = $1 ORDER BY block_number", [CHAIN_ID])).rows;
+      const wallets = new Set(rows.map((r) => r.payer.toLowerCase()));
+      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.slice(-50).map((r) => r.tx_hash), transactions_shown: Math.min(rows.length, 50), to_block: scan.to_block, counted_at: scan.at };
+    }
   } catch {
-    payments_unavailable_reason = "onchain read failed; try again later";
+    payments_unavailable_reason = "payment records unavailable right now";
   }
   return {
     status: 200,
@@ -11461,7 +11601,7 @@ async function stats(db2, rpc = publicRpc) {
         ...payments_unavailable_reason ? { x402_payments_unavailable_reason: payments_unavailable_reason } : {},
         confirmed_external_integrations: CONFIRMED_INTEGRATIONS
       },
-      meta: { note: "Counts read from keldrin's database at request time (cached up to about 20 min; about 1 min when the onchain payment count is unavailable); payments counted onchain from USDC transfers. `external_paying_wallets` excludes only keldrin's payout wallet (which made the first test payment); a payment from any other wallet counts as external. `dex_pools_verified.count` is the pools served (latest CONFIRMED review); `discovered` is every pool found." }
+      meta: { note: "Counts read from keldrin's database at request time (cached up to about 20 min); x402 payments are counted onchain from USDC transfers by keldrin's research robot every 8 h and stored (to_block and counted_at say how far). `external_paying_wallets` excludes only keldrin's payout wallet (which made the first test payment); a payment from any other wallet counts as external. `dex_pools_verified.count` is the pools served (latest CONFIRMED review); `discovered` is every pool found." }
     }
   };
 }
@@ -11504,7 +11644,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
-- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified | unknown) and capabilities per token (full = verified NAV, risk, market context, corporate actions; DEX where verified pools exist)
 - GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex \u2014 live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
@@ -11517,6 +11657,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
+- GET /v1/assets/{contract}/risk \u2014 NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
@@ -11594,7 +11735,7 @@ async function handle(db2, req, res) {
       return send(res, out.status, out.body, void 0, "no-store");
     }
     if (p === "/mcp") return send(res, 405, err3("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -11659,7 +11800,11 @@ async function handle(db2, req, res) {
     }
     if (p === "/v1/assets") {
       const rows = await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
-      return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+      const cov = await coverageMap(db2);
+      const data = rows.rows.map((r) => ({ ...r, ...(cov && cov.get(String(r.contract_address).toLowerCase())) ?? UNKNOWN_COVERAGE }));
+      const levels = {};
+      for (const d of data) levels[d.coverage_level] = (levels[d.coverage_level] ?? 0) + 1;
+      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, ...cov ? {} : { coverage_unavailable_reason: "coverage records unavailable right now" }, coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, corporate actions; DEX price where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read" }));
     }
     const meta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");
@@ -11687,6 +11832,13 @@ async function handle(db2, req, res) {
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db2, cm[1]) : await assetCorporateActions(db2, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body) : out.body, void 0, cm[2] === "market-context" ? "no-store" : void 0);
+    }
+    const rm = p.match(/^\/v1\/assets\/([^/]+)\/risk$/);
+    if (rm) {
+      if (!ADDR3.test(rm[1])) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err3("NAV_NOT_ENABLED", "NAV-based risk is not publicly enabled yet"));
+      const out = await assetRisk(db2, rm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body) : out.body);
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

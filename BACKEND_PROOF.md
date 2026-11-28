@@ -170,3 +170,26 @@ Reviewer in a separate context; no blockers; 142/142 before fixes. Fixed on bran
 Nits fixed: playground no longer swaps a non-NAV token for NVDAc; keyboard focus and Enter on explorer rows; risk excludes provisional closes and says "last N returns"; v4 main pool links to Uniswap's pool page.
 Checked onchain: tx 0x5c3665…ab05 status 1; payer = payout wallet 0xb98f…fa91 (founder's test, correctly not external).
 Production at merge: /v1/stats returned x402_payments null (public RPC throttled; finding 3). Tests after fixes: 143 pass, 3 skipped (Postgres tests run in CI).
+
+## Phase 1 of the approved roadmap (2026-11-28)
+- **Risk** `/v1/assets/{c}/risk` and MCP `get_risk`:
+  - Computed from the same official, non-provisional daily closes as /nav/history.
+  - A window's figure is only computed from that full window (a 60-day value never comes from 30 days).
+  - Drawdown names its peak and trough round ids.
+  - Tests: closed-form volatility check, null-with-reason, drawdown and returns.
+- **Coverage level** per token: full, market, identity or unverified, plus capabilities. Derived from identity_state and the latest CONFIRMED NAV and DEX reviews. Tests cover the pure rules and the SQL on the real schema.
+- **x402 payment count:**
+  - The robot step `payments-index` (Alchemy) scans incrementally from the last scanned block to head − 30 and appends to `x402_payments` and `x402_payment_scans`. /v1/stats reads the table instead of scanning at request time.
+  - Migration 010 plus grants 013 applied to Supabase. Role checks: reader SELECT only; writer insert only, cannot delete; anon denied; RLS on.
+  - A read-only dry run found 3 payments (0xe5e2213c…, 0x102877aa…, 0x5c3665fc…), all paid by the payout wallet (founder tests).
+- **Privacy and terms** at /legal, linked from every footer and the feedback form. Its text awaits the founder's approval.
+- Tests: 149 pass, 3 skipped (the Postgres tests run in CI).
+- **Independent review (separate context):** 1 gate blocker (the legal text needs founder approval before going public), 7 should-fix and several nits. Fixed:
+  - Legal claims now match the code: about 3 days of counter retention, the hash is reversible only with our secret key, payer wallet addresses of payments to keldrin are stored, the rate limits, the processors. Analytics now runs on every page.
+  - The payments workflow step runs even after earlier failures, and evidence upload always runs.
+  - /v1/assets survives a coverage failure (shown as "unknown").
+  - Risk labels: `max_drawdown_last_90_closes`, `history_window` (400-day cap), `excluded_days_no_decimal_value`, and a `stale` flag (more than 2 trading days behind).
+  - Coverage uses the newest feed (LEFT JOIN LATERAL, covered must be an array). "full" no longer claims DEX.
+  - Payments scan only up to the finalized block, and a missing receipt fails the run. At most 50 tx hashes are listed.
+- **Read-only check on Supabase with the new code:** coverage full 13 / identity 422 (1.4 s). NVDAc risk from 79 closes: 30-day volatility 104.59%, 60-day 76.02%, max drawdown −47.5% (2026-10-06 → 2026-11-20), not stale.
+- Tests: 152 pass, 3 skipped.

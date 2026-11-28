@@ -50,7 +50,7 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T031 | P1 | Decide the x402 host (Bankr x402 Cloud vs Vercel + facilitator) | OPEN (research) | Does Bankr support secrets? Phase 5 |
 | T032 | P0 (proposed) | NAV history indexer + `…/nav/history` (NVDAc first, then 14 feeds) — first MAXXAGENT test milestone | BUILT (Phase 5; verified locally; switched off pending the rights decision) | docs/research/FEASIBILITY_CD003.md; Chainlink rights decision |
 | T033 | P0 | Per-asset `…/corporate-actions` route | BUILT (Phase 6; not deployed) | Existing verified data |
-| T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | PROPOSED | docs/research/RISK_METHODOLOGY.md |
+| T034 | P1 (proposed) | `…/risk` NAV-based volatility and drawdown | BUILT 2026-11-28 (/v1/assets/{c}/risk + MCP get_risk; method risk-1; full windows only) | docs/research/RISK_METHODOLOGY.md |
 | T035 | P0 | `…/market-context` + sessions calendar — first MAXXAGENT test milestone | BUILT (Phase 6; not deployed) | docs/research/MARKET_SESSIONS.md |
 | T036 | P1 (proposed) | `…/transfer-policy` snapshot | PROPOSED | docs/research/B20_POLICIES.md |
 | T037 | P0 | DEX price + depth + NAV gap (Phase 8) | BUILT + independently reviewed (not deployed) | BACKEND_PROOF Phase 8 |
@@ -62,14 +62,16 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T044 | P1 | Open-source the product: new public repo with code, tests, developer docs and a license; this repo stays private | DEFERRED by the founder (2026-11-27): build and prove the product first | Founder, 2026-11-27 |
 | T045 | P0 | Phase 13 launch readiness | IN PROGRESS: agent guide, review fixes, external tests 30/30, paid tx, MAXXAGENT package, listings prep, ops audit, launch report done; founder actions open (docs/LAUNCH_REPORT.md §9) | docs/LAUNCH_REPORT.md |
 | T046 | P1 | Bankr snapshot 1.0.1 redeploy | DONE 2026-11-28 (Bankr version 2; terms re-checked) | bankr/x402/keldrin-snapshot |
-| T047 | P1 | Publish CLI 0.7.0 | DONE (founder) |
-| T056 | P1 | Publish CLI 0.7.1 + MCP Registry 0.7.1 + Bankr descriptions | CLI 0.7.1 published and Bankr descriptions updated (founder, 2026-11-28); MCP Registry: button added, founder runs it | npm/ |
+| T047 | P1 | Publish CLI 0.7.0 | DONE (founder; 0.7.0, then 0.7.1 on 2026-11-28) |
+| T056 | P1 | Publish CLI 0.7.1 + MCP Registry 0.7.1 + Bankr descriptions | DONE (CLI 0.7.1 published, Bankr descriptions updated, MCP Registry 0.7.1 active, 2026-11-28) | npm/ |
 | T048 | P0 | Public Explorer + API Playground + Transparency (/v1/stats, /v1/overview) | BUILT 2026-11-28 (approved); awaiting merge + outside test | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
 | T049 | P1 (proposed) | Status history (status_checks) + Status page; verified events feed | PROPOSED | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
-| T050 | P1 | Vercel Web Analytics (same-origin script) | BUILT on branch; founder enables Analytics in Vercel and closes PR #22 | public/index.html |
-| T051 | P1 | BankrBot/skills PR | PREPARED (integrations/bankr/skill); founder forks and opens it |
+| T050 | P1 | Vercel Web Analytics (same-origin script) | DONE (founder enabled Vercel Analytics 2026-11-28); close PR #22 | public/index.html |
+| T051 | P1 | BankrBot/skills PR | OPEN at BankrBot/skills#879 (founder opened 2026-11-28; awaiting Bankr review) |
 | T052 | P1 | README in Breakra's style | DONE (old workspace note moved to docs/WORKSPACE.md) |
 | T053 | P1 | Review fixes for public pages (#26 follow-up) | DONE (#27 merged) | BACKEND_PROOF.md |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |
-| T054 | P1 | x402 payment count on /transparency | OPEN: the public RPC refuses eth_getLogs ("request limit reached") from production, so the count shows "unavailable". Proposed: the research robot (Alchemy) counts payments and stores them; needs founder approval (new table + migration) | src/api/stats.ts |
+| T054 | P1 | x402 payment count on /transparency | BUILT 2026-11-28: robot step payments-index + tables x402_payments/x402_payment_scans (applied to Supabase); first stored count after merge and the next robot run | src/api/stats.ts |
 | T055 | P1 | Launch kit: thread, video script, form text | DRAFTED (docs/LAUNCH_KIT.md); founder posts | docs/LAUNCH_KIT.md |
+| T057 | P0 | Coverage level + capabilities per token (ROADMAP 1.3) | BUILT 2026-11-28 (/v1/assets, MCP list_assets, Explorer) | src/api/coverage.ts |
+| T058 | P0 | Privacy and terms page (ROADMAP 1.1) | BUILT 2026-11-28; text awaits founder approval | public/legal.html |

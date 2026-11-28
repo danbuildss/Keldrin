@@ -28,8 +28,8 @@ What this tells us:
 
 | Capability | How | Effort | Verifiable? | Recommendation |
 |---|---|---|---|---|
-| Supply history | `totalSupply()` at daily-close blocks (we already map session closes to blocks for NAV) | Small | Yes (block) | **P0** |
-| Mint/burn history | Transfer logs from/to 0x0 since token creation | Small | Yes (tx hash) | **P0** |
+| Supply history | `totalSupply()` at daily-close blocks (we already map session closes to blocks for NAV) | Small | Yes (block) | Was P0; see §4: already free elsewhere |
+| Mint/burn history | Transfer logs from/to 0x0 since token creation | Small | Yes (tx hash) | Was P0; see §4: Pegproof reconciles this for free |
 | Coverage levels L1/L2/L3 per token | From data we already hold (feeds, verified pools, identity) | Small | Yes | **P0**: makes "435 tracked vs 13 full" explicit in the API |
 | Historical DEX volume | `Swap` events on our 416 verified pools, priced at the block | Medium | Yes (tx hash) | P1 |
 | Holder counts and concentration | Replay every Transfer since creation per token, then label pools, routers, the issuer and custodians | Medium (labelling is the hard part) | Partly (counts addresses, not people) | P1, published with methodology |
@@ -44,41 +44,78 @@ for reorg safety. Base's public RPC refuses `eth_getLogs` from our server ("requ
 2026-11-28), so all log reading has to run in the robot on Alchemy, not in the API. Cost: within Alchemy's free
 tier for 13 tokens. We need to measure it before extending to 435 tokens. We introduce no new paid provider.
 
-## 3. Competitors: what was checked today
+## 3. Competitors: read on 2026-11-28 (live pages and machine files)
 
-| Who | Read on 2026-11-28 | Overlap | Not offered (in what we read) |
-|---|---|---|---|
-| BStocks (basestocks.finance, OpenAPI 1.0.0 + llms.txt) | Trading app plus API. Free: stocks (DEX price, Chainlink reference, liquidity, **24h volume**, multiplier, status), news titles, earn venues, **wallet portfolio**, trade calls. Paid $0.10 x402: model-written report, **candle history** | Prices, liquidity, volume, multiplier and staleness handling | No corporate-action, dividend, split or filing endpoints. No Chainlink round-id history. No SEC linkage |
-| Proof of Stock (proofofstock.xyz, llms.txt v0.9.0) | Authenticity vs issuer registries on **Base and Robinhood Chain**, look-alike list, NAV/DEX premium, MCP, x402 passes at $0.01. Strong verification culture: list hashes, receipts, factory checks, an external kill switch | Market session, premium, MCP, verification ethos | Earlier review (docs/research/PROOF_OF_STOCK.md): no round-id NAV history, no corporate-action reconciliation |
-| Pegproof, StocksOnChain, RWA.xyz, Allium | **Not checked**: their sites are not reachable from this session's network | Founder's research says high overlap | Unknown. Do not assume until read |
+| Who | What they serve (as read) | Price | Overlap with keldrin | Not offered (in what we read) |
+|---|---|---|---|---|
+| **StocksOnChain** (stocksonchain.io, llms.txt + JSON files) | 1,017 stocks, 3,833 listings, **5 issuers on 5 chains**. Holders reconstructed from the full Transfer tape and checked against `totalSupply()`. Daily history of supply, multiplier, holders, price and volume. Corporate-action feed with tx hashes. MCP, agent skill, OpenAPI. CC BY 4.0 | Free | **High for the onchain layer** (holders, supply, daily history) | For Coinbase, only `created`, `listing` and `minted` events (157 of 160): no dividends or multiplier changes. No SEC links, no Chainlink NAV. Snapshot dated 2026-11-17 (11 days old when read) |
+| **Pegproof** (pegproof.com, llms.txt + /v1/issuers + Coinbase page) | Integrity checks across **5 issuers**: supply reconciled with the full mint/burn ledger, who can mint, freeze, seize or upgrade, multiplier control, look-alikes. Coinbase: 138/138 supply checks pass, checked every 10 min, seizures listed with tx. Robinhood checked in full. MCP, JSON API, verify.sh | Free | **High for supply / mint-burn / issuer controls** | No NAV history, no corporate-action calendar or SEC linkage, no DEX prices |
+| **BStocks** (basestocks.finance, OpenAPI 1.0.0) | Trading app plus API: DEX price, Chainlink reference, liquidity, 24h volume, multiplier, staleness, wallet portfolio, trade calls. Candle history and a model-written report at $0.10 x402 | Free, plus $0.10 calls | High for live prices, volume and history candles | No corporate-action, dividend, split or filing endpoints. No round-id NAV history |
+| **Proof of Stock** (proofofstock.xyz, llms.txt v0.9.0) | Token authenticity vs issuer registries (Base + Robinhood Chain), look-alike list, NAV/DEX premium, MCP. Strong proof culture (list hashes, receipts, kill switch) | Free; $0.01 x402 passes | Medium (session, premium, MCP) | No round-id NAV history, no corporate-action reconciliation |
+| **Allium** (allium.so, tokenized-asset page) | Enterprise data: supply, market cap, holders and transfers for tokenized assets incl. stocks across 17 chains, in SQL, REST or warehouse. Research reports | Sales-led, no public price | High for the onchain layer, at enterprise level | Not Coinbase-B20-specific in what we read. No NAV round history or SEC linkage mentioned |
+| **RWA.xyz** (app.rwa-xyz.com/stocks + llms.txt; docs.rwa.xyz still blocked) | Registry and analytics for all RWAs, incl. tokenized stocks: 6,943 stock tokens across platforms and networks. Distributed value, transfer volume, active addresses, holders, league tables, CSV and code samples. Enterprise API. Cited by the IMF, ECB, BIS and Fed banks (their claim) | Free dashboard; NAV, fees, holders per token and the API are behind login / enterprise | High for market-wide adoption metrics | In what we could read: no Coinbase-specific corporate-action reconciliation or Chainlink round history. The NAV column is locked, so we could not check its source |
 
-The founder's research says BStocks documents corporate actions. Its current OpenAPI has no such endpoint, and it
-mentions corporate actions only to explain why feeds pause. We should re-check if their docs change.
+**Market size context** (third-party figures, not verified by keldrin):
+- **RWA.xyz** (stocks page, as of 2026-11-28): tokenized stocks total about $3.77B distributed value, 5.03M holders.
+  League table: bStocks $1.4B (116 tokens), Ondo $891.2M (437), xStocks $716.9M (1,503), Securitize $228.9M,
+  Reality $189.5M, Robinhood $148.0M, Figure $63.8M, **Coinbase Global $55.5M (423 tokens, 8th)**, WisdomTree
+  $27.0M, Superstate $26.1M.
+- **Pegproof** (values from CoinGecko, not checked by Pegproof): Coinbase about $38M.
+- **StocksOnChain:** about $1.67B tracked on 2026-11-17.
 
-## 4. Where keldrin can win (hypotheses to test with developers)
+The sources differ in scope and method, but they agree that Coinbase is one of the smaller issuers by value: roughly
+1–2% of tokenized stock value.
 
-1. **History with proof.** Every NAV point carries its round id, every corporate action links its SEC filing and
-   onchain transaction, and anyone can re-verify with `npx keldrin verify-*`. Neither competitor we read serves this.
-2. **Corporate-action reconciliation.** We link issuer, SEC and onchain multiplier events, including late and
-   predicted actions. This is the gap MAXXAGENT named.
-3. **Supply and issuance history** as the first onchain layer, served with tx-hash proof, the same way.
+## 4. What this means: where to double down
 
-Be careful about:
-- **Live prices and volume:** BStocks does this well, for free. Don't compete on it.
-- **Authenticity:** Proof of Stock does this well. Link to it rather than rebuild it.
+The onchain adoption layer is already served **for free**:
+- **StocksOnChain:** holders, supply and daily history across 5 issuers.
+- **Pegproof:** supply reconciliation, mint/burn ledgers and issuer controls.
+- **Allium:** the same at enterprise level.
+
+Building supply, mint/burn and holder counts as our P0 would make keldrin the sixth source of something that is free
+elsewhere.
+
+What none of them serves, in what we read, is what keldrin already has:
+1. **Chainlink NAV history with the round id behind every point.** Plus daily closes in NYSE time, and freshness
+   judged against each feed's own rhythm.
+2. **Corporate actions reconciled across issuer, SEC and chain.** Dividends and splits matched to the SEC filing
+   and the onchain multiplier change, with predicted and late states. StocksOnChain has no Coinbase dividends or
+   multiplier events; Pegproof and BStocks have no corporate-action feed.
+3. **NAV-based risk and context in one answer.** Volatility, drawdown, the gap to the DEX price, session and
+   freshness, delivered as a single verified answer to agents (MCP, x402).
+
+This is the "history plus truth" layer a lending protocol, a portfolio app or a trading agent needs before acting.
+It is also exactly what MAXXAGENT said they had to rebuild themselves.
+
+**Recommendation:**
+- **Double down** on NAV history, corporate-action reconciliation and NAV-based risk, and make them the best and
+  most reliable available.
+- **Use or link** the free onchain sources instead of rebuilding them: StocksOnChain and Pegproof are CC BY or
+  free, and Proof of Stock covers authenticity. Their figures can also serve as an independent cross-check
+  against our own reads.
+- **Watch the issuer question.** Coinbase may be the smallest issuer by value. Long term, the moat could be the
+  same NAV-plus-corporate-action truth across issuers. That depends on whether other issuers publish NAV feeds and
+  corporate-action mechanics we can verify; this has not been researched yet.
 
 ## 5. Proposed roadmap (for founder approval; nothing approved here)
 
-1. **Now, 0–30 days:** launch and developer adoption. Target 5 integrations and 1 paying user. Ship the cheap P0s
-   only if a developer asks: coverage levels, supply history, mint/burn history.
-2. **30–90 days:** historical DEX volume, then holder counts with published methodology, for the 13 stocks; then
-   level-2 tokens.
-3. **Later:** protocol exposure, other issuers, once repeat usage exists.
+1. **Now, 0–30 days:** launch and developer adoption. Target 5 integrations and 1 paying user. Interview the users
+   keldrin is meant for (lending, agents, portfolio apps) on NAV, corporate actions and risk.
+2. **Deepen the moat, 30–90 days:**
+   - corporate-action coverage across all 435 Coinbase tokens (calendar, SEC links, late detection);
+   - NAV history for every new Chainlink feed;
+   - a risk endpoint (volatility, drawdown) in the API rather than only on the Explorer page;
+   - coverage levels per token.
+3. **Onchain layer:** cross-check against StocksOnChain and Pegproof rather than building it first. Build our own
+   only where a customer needs something they don't serve, or where we need independent verification.
+4. **Cross-issuer research:** check whether xStocks, Ondo and Robinhood publish NAV feeds and corporate-action
+   events we can verify. Expand only after usage on Base exists.
 
 ## 6. Open items
 
 - An all-time mint/burn and holder scan for the 13 tokens (about 1 robot run). It gives real history numbers and
   measures the Alchemy cost.
-- A competitor read of Pegproof, StocksOnChain, RWA.xyz and Allium, which needs those hosts allowed in this
-  environment.
+- RWA.xyz docs and API (docs.rwa.xyz, app.rwa.xyz) are still blocked; the public stocks page was read.
+- Cross-issuer feasibility: NAV and corporate-action sources for xStocks, Ondo and Robinhood.
 - Data rights for redistributing derived onchain metrics. Onchain data is public. Third-party labels would not be.

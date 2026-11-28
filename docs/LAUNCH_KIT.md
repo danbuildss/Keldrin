@@ -41,7 +41,7 @@ Check it yourself: `npx keldrin verify-nav NVDAc`
 **5/**
 Built for apps and agents:
 - free REST API, no key
-- remote MCP (8 tools) for Claude and other agents
+- remote MCP (9 tools) for Claude and other agents
 - CLI: `npx keldrin`
 - agent guide: keldrin.vercel.app/skill.md
 

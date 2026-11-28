@@ -11,6 +11,8 @@ import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
 import { overview, stats } from "./stats.ts";
+import { assetRisk } from "./risk.ts";
+import { coverageMap, UNKNOWN_COVERAGE } from "./coverage.ts";
 import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
@@ -53,7 +55,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... — one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z — events added or changed since a timestamp (poll this)
-- GET /v1/assets — tokens, identity checks, current multiplier (WAD)
+- GET /v1/assets — tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified | unknown) and capabilities per token (full = verified NAV, risk, market context, corporate actions; DEX where verified pools exist)
 - GET /v1/assets/{contract}/corporate-actions — one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context — US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex — live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
@@ -66,6 +68,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats — transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md — 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
+- GET /v1/assets/{contract}/risk — NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... — confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc — same, by exact token symbol (store the address, not the symbol)
@@ -150,7 +153,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/risk", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -218,8 +221,12 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       return send(res, 200, ok(rows.map((r) => ({ ...r.payload, review: r.review })), { count: rows.length, snapshot_as_of: snap.as_of }));
     }
     if (p === "/v1/assets") {
-      const rows = await db.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
-      return send(res, 200, ok(rows.rows, { count: rows.rows.length }));
+      const rows = await db.query<Json>("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
+      const cov = await coverageMap(db as never);
+      const data = rows.rows.map((r) => ({ ...r, ...((cov && cov.get(String(r.contract_address).toLowerCase())) ?? UNKNOWN_COVERAGE) }));
+      const levels: Record<string, number> = {};
+      for (const d of data) levels[d.coverage_level as string] = (levels[d.coverage_level as string] ?? 0) + 1;
+      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, ...(cov ? {} : { coverage_unavailable_reason: "coverage records unavailable right now" }), coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, corporate actions; DEX price where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read" }));
     }
     const meta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1000)) }), undefined, "no-store"); // time-sensitive: never CDN-cached
@@ -248,6 +255,13 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
       if (cm[2] === "market-context" && process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "market context with live NAV is not publicly enabled yet", "GET /v1/market/session gives the session alone"));
       const out = cm[2] === "market-context" ? await marketContext(db, cm[1]) : await assetCorporateActions(db, cm[1]);
       return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json), undefined, cm[2] === "market-context" ? "no-store" : undefined);
+    }
+    const rm = p.match(/^\/v1\/assets\/([^/]+)\/risk$/);
+    if (rm) {
+      if (!ADDR.test(rm[1])) return send(res, 400, err("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
+      if (process.env.NAV_HISTORY_PUBLIC !== "true") return send(res, 503, err("NAV_NOT_ENABLED", "NAV-based risk is not publicly enabled yet"));
+      const out = await assetRisk(db, rm[1]);
+      return send(res, out.status, out.status === 200 ? meta(out.body as Json) : (out.body as Json));
     }
     const nm = p.match(/^\/v1\/assets\/([^/]+)\/nav\/history$/);
     if (nm) {

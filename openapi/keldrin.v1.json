@@ -82,7 +82,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed (DEX price only where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
       }
     },
     "/v1/assets/{contract}": {
@@ -1570,6 +1571,65 @@
         "responses": {
           "200": {
             "description": "Markdown"
+          }
+        }
+      }
+    },
+    "/v1/assets/{contract}/risk": {
+      "get": {
+        "summary": "NAV-based risk for one token (verified feeds only)",
+        "description": "Deterministic risk from official Chainlink total-return NAV daily closes (the same closes as /nav/history?interval=daily, provisional sessions excluded): 30- and 60-day annualized volatility (sample sd of daily log returns x sqrt(252)), max drawdown since the first official close in the window (at most 400 days; see history_window) and over the last 90 closes with peak and trough round ids, and 1/5/20-day and since-start returns. Includes stale (more than 2 completed trading days since the newest close used) and excluded_days_no_decimal_value. A metric without enough history is null with the reason. Facts from history, not a forecast or advice. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
+        "parameters": [
+          {
+            "name": "contract",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risk metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown token (UNKNOWN_ASSET) or no NAV feed (NO_NAV_FEED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Not enabled (NAV_NOT_ENABLED) or feed not independently verified (NAV_NOT_VERIFIED)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
