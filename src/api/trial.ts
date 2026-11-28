@@ -99,17 +99,21 @@ async function nextAction(db: PGlite, token: string) {
 export async function snapshot(db: PGlite, now = new Date(), readRound: RoundReader = liveLatestRound, readDex: DexReader = liveDex): Promise<Out> {
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db.query<{ token_address: string }>("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
+  // One time budget for the whole answer, inside Vercel's 15 s function limit.
+  const started = Date.now();
+  const BUDGET_MS = 13_000;
   // Fast path (production readers only): every stock's DEX pools and NAV round in one multicall at one block.
+  // A stock or feed the batch could not read falls back to its own live read, so one failed sub-call never fails the answer.
   if (readRound === liveLatestRound && readDex === liveDex) {
     try {
-      const feedRows = (await db.query<{ token_address: string; feed_address: string }>("SELECT DISTINCT ON (lower(token_address)) token_address, feed_address FROM nav_feeds WHERE chain_id=$1 ORDER BY lower(token_address), discovered_at DESC", [CHAIN_ID])).rows;
-      const b = await withDeadline(batchRead(db, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 8_000);
-      readRound = async (feed) => {
-        const r = b.rounds.get(feed.toLowerCase());
-        if (!r) throw new Error("rpc_unavailable");
-        return r;
+      const feedRows = (await db.query<{ token_address: string; feed_address: string }>("SELECT DISTINCT ON (lower(f.token_address)) f.token_address, f.feed_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1 ORDER BY lower(f.token_address), f.discovered_at DESC", [CHAIN_ID])).rows;
+      const b = await withDeadline(batchRead(db, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 6_000);
+      readRound = async (feed) => b.rounds.get(feed.toLowerCase()) ?? liveLatestRound(feed);
+      readDex = async (d, c) => {
+        const hit = b.dex.get(c.toLowerCase());
+        const reason = (hit?.body as { data?: { unavailable_reason?: string } } | undefined)?.data?.unavailable_reason;
+        return hit && !TRANSIENT.has(reason as string) ? hit : liveDex(d, c);
       };
-      readDex = async (_db, c) => b.dex.get(c.toLowerCase()) ?? { status: 200, body: { data: { main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
     } catch {
       // fall back to per-stock live reads below
     }
@@ -122,7 +126,7 @@ export async function snapshot(db: PGlite, now = new Date(), readRound: RoundRea
       const d = (mc.body as { data: Record<string, any> }).data;
       if (TRANSIENT.has(d.nav_unavailable_reason) || TRANSIENT.has(d.dex?.unavailable_reason)) throw new Error(`live read ${d.symbol}`);
       return { symbol: d.symbol as string, token: d.token, nav: d.nav, nav_unavailable_reason: d.nav_unavailable_reason ?? null, staleness: d.staleness, dex: d.dex, next_corporate_action: await nextAction(db, f.token_address) };
-    }), 12_000);
+    }), Math.max(1_000, BUDGET_MS - (Date.now() - started)));
     const verified = stocks.filter((s) => !UNVERIFIED.has(s.nav_unavailable_reason)).sort((a, b) => a.symbol.localeCompare(b.symbol));
     return { status: 200, body: { data: { market: marketNow(Math.floor(now.getTime() / 1000)), count: verified.length, stocks: verified }, meta: { note: "Verified data with provenance, not advice. The NAV is Chainlink's last published total-return reference, not a live equity price." } } };
   } catch (e) {

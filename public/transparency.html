@@ -47,15 +47,15 @@ if (!s.ok) {
     card(`${n(d.nav_feeds.independently_confirmed)}/${n(d.nav_feeds.total)}`, "NAV feeds verified", "Chainlink feeds with a CONFIRMED independent review"),
     card(n(d.nav_rounds_indexed.count), "NAV rounds indexed", d.nav_rounds_indexed.first ? `from ${esc(d.nav_rounds_indexed.first.slice(0, 10))} to ${esc((d.nav_rounds_indexed.last || "").slice(0, 10))}` : ""),
     card(n(d.corporate_action_records_confirmed), "confirmed corporate actions", `plus ${n(d.calendar_entries)} announced calendar entries`),
-    card(n(d.dex_pools_verified.count), "DEX pools verified", `across ${n(d.dex_pools_verified.tokens)} tokens`),
+    card(n(d.dex_pools_verified.count), "DEX pools verified", `served across ${n(d.dex_pools_verified.tokens)} tokens, of ${n(d.dex_pools_verified.discovered)} discovered`),
     card(`${n(d.research_runs.ok)}/${n(d.research_runs.total)}`, "research runs ok", d.research_runs.last_finished_at ? `last ${esc(ago(d.research_runs.last_finished_at))} · ${esc(d.research_runs.last_outcome || "")}` : ""),
-    card(d.x402_payments ? n(d.x402_payments.external_paying_wallets) : "—", "external paying wallets", "wallets other than keldrin's own that paid for an answer"),
-    card(n(d.confirmed_external_integrations.length), "confirmed integrations", d.confirmed_external_integrations.length ? d.confirmed_external_integrations.map((i) => esc(i.name)).join(", ") : "none confirmed yet (one team testing)"),
+    card(d.x402_payments ? n(d.x402_payments.external_paying_wallets) : "—", "external paying wallets", "wallets other than keldrin's payout wallet that paid for an answer"),
+    card(n(d.confirmed_external_integrations.length), "confirmed integrations", d.confirmed_external_integrations.length ? d.confirmed_external_integrations.map((i) => esc(i.name)).join(", ") : "none confirmed yet"),
   ].join("");
   $("#asof").textContent = `Read ${s.body.meta?.as_of ? new Date(s.body.meta.as_of).toUTCString() : "now"} · ${s.body.meta?.note || ""}`;
   const p = d.x402_payments;
   $("#pay").innerHTML = p
-    ? `<b>${n(p.payments)}</b> payment(s) of $0.05 USDC on Base, from <b>${n(p.paying_wallets)}</b> wallet(s), <b>${n(p.external_paying_wallets)}</b> external. ${p.transactions.map((t) => `<a class="mono" href="${basescan("tx", esc(t))}" target="_blank" rel="noopener">${esc(short(t))} ↗</a>`).join(" · ")}<br><span class="note">Payments by keldrin's own wallet are tests, not adoption. Counted up to block ${esc(p.to_block)}.</span>`
+    ? `<b>${n(p.payments)}</b> payment(s) of $0.05 USDC on Base, from <b>${n(p.paying_wallets)}</b> wallet(s), <b>${n(p.external_paying_wallets)}</b> external. ${p.transactions.map((t) => `<a class="mono" href="${basescan("tx", esc(t))}" target="_blank" rel="noopener">${esc(short(t))} ↗</a>`).join(" · ")}<br><span class="note">Payments by keldrin's payout wallet are tests, not adoption. Counted up to block ${esc(p.to_block)}.</span>`
     : `Unavailable right now: ${esc(d.x402_payments_unavailable_reason || "onchain read failed")}. Nothing is shown rather than a guess.`;
 }
 </script>
