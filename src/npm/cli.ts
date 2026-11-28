@@ -15,7 +15,7 @@
 // Flags: --json (raw JSON), --api=<url> (default https://keldrin.vercel.app or $KELDRIN_API), --rpc=<url> (default
 // https://mainnet.base.org or $BASE_RPC_URL). Exit codes: 0 ok, 1 a verification found a mismatch, 2 error.
 
-const VERSION = "0.7.0";
+const VERSION = "0.7.1";
 const argv = process.argv.slice(2);
 const flags = new Map(argv.filter((a) => a.startsWith("--")).map((a) => { const [k, ...v] = a.slice(2).split("="); return [k, v.length ? v.join("=") : "true"] as [string, string]; }));
 const pos = argv.filter((a) => !a.startsWith("--"));

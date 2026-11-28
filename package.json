@@ -1,6 +1,6 @@
 {
   "name": "keldrin",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "type": "module",
   "description": "keldrin: intelligence for programmable equities. The verified record for tokenized stocks on Base.",

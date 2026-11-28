@@ -3,7 +3,7 @@
   "name": "io.github.danbuildss/keldrin",
   "title": "keldrin",
   "description": "Intelligence for programmable equities: verified NAV, corporate actions and DEX data on Base.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "websiteUrl": "https://keldrin.vercel.app",
   "remotes": [
     {

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Keldrin API",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "description": "Verified corporate-action records for Coinbase tokenized stocks (B20) on Base. Read-only, informational; not an oracle or investment advice. Only independently CONFIRMED records are served. WAD values are exact integer strings scaled by 1e18. Read-only. Rate limited per client; successful reads are cached up to 60 s at the CDN.",
     "x-guidance": "Free one-stock routes under /v1. One-call snapshot (/v1/snapshot) and report (/v1/report?token=) give 3 free complete answers per client per day, then 402 FREE_TRIES_USED with the paid links. Paid: GET /api/snapshot and /api/report (forward to Bankr x402 Cloud): x402 v2, scheme exact, network eip155:8453, USDC, amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Sign once, never re-sign automatically; only a 2xx is charged. Agent guide: https://keldrin.vercel.app/skill.md"
   },
