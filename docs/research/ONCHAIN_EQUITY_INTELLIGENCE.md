@@ -53,13 +53,18 @@ tier for 13 tokens. We need to measure it before extending to 435 tokens. We int
 | **BStocks** (basestocks.finance, OpenAPI 1.0.0) | Trading app plus API: DEX price, Chainlink reference, liquidity, 24h volume, multiplier, staleness, wallet portfolio, trade calls. Candle history and a model-written report at $0.10 x402 | Free, plus $0.10 calls | High for live prices, volume and history candles | No corporate-action, dividend, split or filing endpoints. No round-id NAV history |
 | **Proof of Stock** (proofofstock.xyz, llms.txt v0.9.0) | Token authenticity vs issuer registries (Base + Robinhood Chain), look-alike list, NAV/DEX premium, MCP. Strong proof culture (list hashes, receipts, kill switch) | Free; $0.01 x402 passes | Medium (session, premium, MCP) | No round-id NAV history, no corporate-action reconciliation |
 | **Allium** (allium.so, tokenized-asset page) | Enterprise data: supply, market cap, holders and transfers for tokenized assets incl. stocks across 17 chains, in SQL, REST or warehouse. Research reports | Sales-led, no public price | High for the onchain layer, at enterprise level | Not Coinbase-B20-specific in what we read. No NAV round history or SEC linkage mentioned |
-| RWA.xyz | **Not read**: app.rwa-xyz.com and rwa.xyz are still blocked (the hosts allowed so far don't include those exact names) | — | — | — |
+| **RWA.xyz** (app.rwa-xyz.com/stocks + llms.txt; docs.rwa.xyz still blocked) | Registry and analytics for all RWAs, incl. tokenized stocks: 6,943 stock tokens across platforms and networks. Distributed value, transfer volume, active addresses, holders, league tables, CSV and code samples. Enterprise API. Cited by the IMF, ECB, BIS and Fed banks (their claim) | Free dashboard; NAV, fees, holders per token and the API are behind login / enterprise | High for market-wide adoption metrics | In what we could read: no Coinbase-specific corporate-action reconciliation or Chainlink round history. The NAV column is locked, so we could not check its source |
 
-**Market size context** (from Pegproof's /v1/issuers, which takes values from CoinGecko and states
-`checked_by_pegproof: false`; keldrin has not verified them): bStocks about $1.13B, xStocks about $1.03B, Ondo
-about $802M, Robinhood about $151M, **Coinbase about $38M** (data time 2026-11-26). StocksOnChain's tracked total is
-about $1.67B (2026-11-17). If these figures are roughly right, Coinbase on Base is the smallest of the five issuers
-by value.
+**Market size context** (third-party figures, not verified by keldrin):
+- **RWA.xyz** (stocks page, as of 2026-11-28): tokenized stocks total about $3.77B distributed value, 5.03M holders.
+  League table: bStocks $1.4B (116 tokens), Ondo $891.2M (437), xStocks $716.9M (1,503), Securitize $228.9M,
+  Reality $189.5M, Robinhood $148.0M, Figure $63.8M, **Coinbase Global $55.5M (423 tokens, 8th)**, WisdomTree
+  $27.0M, Superstate $26.1M.
+- **Pegproof** (values from CoinGecko, not checked by Pegproof): Coinbase about $38M.
+- **StocksOnChain:** about $1.67B tracked on 2026-11-17.
+
+The sources differ in scope and method, but they agree that Coinbase is one of the smaller issuers by value: roughly
+1–2% of tokenized stock value.
 
 ## 4. What this means: where to double down
 
@@ -111,6 +116,6 @@ It is also exactly what MAXXAGENT said they had to rebuild themselves.
 
 - An all-time mint/burn and holder scan for the 13 tokens (about 1 robot run). It gives real history numbers and
   measures the Alchemy cost.
-- RWA.xyz: needs the exact hosts app.rwa-xyz.com and rwa.xyz allowed.
+- RWA.xyz docs and API (docs.rwa.xyz, app.rwa.xyz) are still blocked; the public stocks page was read.
 - Cross-issuer feasibility: NAV and corporate-action sources for xStocks, Ondo and Robinhood.
 - Data rights for redistributing derived onchain metrics. Onchain data is public. Third-party labels would not be.
