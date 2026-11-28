@@ -26,7 +26,7 @@ export function nyToUtc(ts: string): string | null {
   return null;
 }
 
-export type HeaderFacts = { form: string | null; items: string[]; filed: string | null; accepted_utc: string | null };
+export type HeaderFacts = { form: string | null; items: string[]; filed: string | null; accepted_utc: string | null; ciks: string[] };
 
 /** Pure: facts from an EDGAR -index-headers.html page. */
 export function parseHeaders(html: string): HeaderFacts {
@@ -35,24 +35,29 @@ export function parseHeaders(html: string): HeaderFacts {
   const items = [...t.matchAll(/ITEM INFORMATION:\s*([^\n<]+)/g)].map((m) => m[1].trim());
   const f = t.match(/FILED AS OF DATE:\s*(\d{8})/)?.[1];
   const a = t.match(/<ACCEPTANCE-DATETIME>(\d{14})/)?.[1];
-  return { form, items, filed: f ? `${f.slice(0, 4)}-${f.slice(4, 6)}-${f.slice(6)}` : null, accepted_utc: a ? nyToUtc(a) : null };
+  const ciks = [...new Set([...t.matchAll(/CENTRAL INDEX KEY:\s*(\d{10})/g)].map((m) => m[1]))]; // co-registrants list several
+  return { form, items, filed: f ? `${f.slice(0, 4)}-${f.slice(4, 6)}-${f.slice(6)}` : null, accepted_utc: a ? nyToUtc(a) : null, ciks };
 }
 
-export function judge(stored: { form: string; filed_date: string; accepted_at: string }, h: HeaderFacts): { verdict: "CONFIRMED" | "REJECTED"; claims: { claim: string; ok: boolean; evidence: string }[] } {
+export function judge(stored: { form: string; filed_date: string; accepted_at: string; cik?: string }, h: HeaderFacts): { verdict: "CONFIRMED" | "REJECTED"; claims: { claim: string; ok: boolean; evidence: string }[] } {
   const claims = [
     { claim: "form", ok: h.form === stored.form, evidence: `headers ${h.form} vs stored ${stored.form}` },
     { claim: "item 2.02 listed", ok: h.items.some((i) => /^Results of Operations and Financial Condition$/i.test(i)), evidence: h.items.join(" | ") },
     { claim: "filed date", ok: h.filed === stored.filed_date, evidence: `headers ${h.filed} vs stored ${stored.filed_date}` },
+    ...(stored.cik ? [{ claim: "filer CIK", ok: h.ciks.includes(stored.cik), evidence: `headers ${h.ciks.join(",")} vs stored ${stored.cik}` }] : []),
     { claim: "acceptance time", ok: h.accepted_utc !== null && Date.parse(h.accepted_utc) === Date.parse(stored.accepted_at), evidence: `headers ${h.accepted_utc} vs stored ${stored.accepted_at}` },
   ];
   return { verdict: claims.every((c) => c.ok) ? "CONFIRMED" : "REJECTED", claims };
 }
 
-/** Reviews every stored release without a final (CONFIRMED or REJECTED) review; UNSURE ones (SEC unreachable) are retried next run. */
-export async function verifyEarnings(db: PGlite): Promise<Record<string, number>> {
+/** Reviews stored releases without a final (CONFIRMED or REJECTED) review, at most `limit` per run (the first backfill
+ *  spreads over several runs). UNSURE ones (SEC page unreachable) are retried on later runs, up to 3 times. */
+export async function verifyEarnings(db: PGlite, limit = 600): Promise<Record<string, number>> {
   const rows = (await db.query<{ contract_address: string; cik: string; accession: string; form: string; filed_date: string; accepted_at: string }>(
     `SELECT e.contract_address, e.cik, e.accession, e.form, to_char(e.filed_date, 'YYYY-MM-DD') AS filed_date, to_char(e.accepted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS accepted_at
-     FROM earnings_releases e WHERE e.chain_id = $1 AND NOT EXISTS (SELECT 1 FROM earnings_reviews r WHERE r.accession = e.accession AND lower(r.contract_address) = lower(e.contract_address) AND r.verdict IN ('CONFIRMED', 'REJECTED'))`,
+     FROM earnings_releases e WHERE e.chain_id = $1 AND NOT EXISTS (SELECT 1 FROM earnings_reviews r WHERE r.accession = e.accession AND lower(r.contract_address) = lower(e.contract_address) AND r.verdict IN ('CONFIRMED', 'REJECTED'))
+       AND (SELECT count(*) FROM earnings_reviews u WHERE u.accession = e.accession AND lower(u.contract_address) = lower(e.contract_address) AND u.verdict = 'UNSURE') < 3
+     ORDER BY e.accepted_at DESC LIMIT ${Math.max(1, Math.floor(limit))}`,
     [CHAIN_ID],
   )).rows;
   const tally: Record<string, number> = {};

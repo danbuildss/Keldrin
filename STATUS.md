@@ -1,13 +1,15 @@
 # Status | 2026-11-28 (roadmap approved; Phase 1 "launch ready" in progress)
 
 **Current state.** Live at https://keldrin.vercel.app:
-- REST API, remote MCP (9 tools), CLI 0.7.1 on npm, and the MCP Registry listing (0.7.1, active).
+- REST API, remote MCP (10 tools), CLI 0.7.1 on npm, and the MCP Registry listing (0.7.1, active).
 - x402 snapshot and report on Bankr ($0.05; 3 payments onchain, all keldrin's own tests).
 - Website: Explorer (company logos), Playground and Transparency.
 - Positioning locked (POSITIONING.md); roadmap approved (ROADMAP.md).
 - No confirmed users, integrations or revenue. MAXXAGENT agreed to test. BankrBot/skills PR #879 is open.
 
-**Phase 1 (ROADMAP.md), built on branch claude/awesome-brahmagupta-9y3hiy, awaiting review and merge:**
+**Phase 1 (ROADMAP.md): live since #32 (2026-11-28).** Payment count live (3, all own tests). Next on branch: earnings releases (Phase 6.2, approved) and Phase 3 outreach drafts.
+
+**Phase 1 items:**
 - risk endpoint (1.2);
 - coverage levels (1.3);
 - payment count stored by the robot (1.4; migration applied to Supabase);
@@ -55,7 +57,7 @@
 ## Customer Discovery 001 (2026-11-27)
 - CD-001 Hector (Stocks Maxxing Telegram admin): asked for earnings, dividends and onchain data; suggested a token. Prospect only. CD-002 Bankr unchanged (prospect). See CUSTOMER_DISCOVERY.md, docs/DEMAND_MATRIX.md, docs/INTEGRATION_PIPELINE.md.
 - Token: exploratory only (docs/TOKEN_RESEARCH.md). "Public calls" and "a treasury of stocks" conflict with CLAUDE.md; nothing built.
-- Proposed scope changes (NOT approved; TASKS.md T020–T026): earnings release events from 8-K 2.02; announced upcoming earnings dates; headline results; derived ex-dividend date; dividend history; asset context endpoint; DEX market data and fundamentals as P1. Excluded: results vs expectations (needs licensed consensus).
+- Proposed scope changes (TASKS.md T021–T026; T020 earnings releases approved and built 2026-11-28): announced upcoming earnings dates; headline results; derived ex-dividend date; dividend history; asset context endpoint; DEX market data and fundamentals as P1. Excluded: results vs expectations (needs licensed consensus).
 - Recommended order: Phase 4 scheduling first, then earnings.
 
 ## Phase 4 (approved 2026-11-27) — DONE

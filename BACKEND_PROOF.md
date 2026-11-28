@@ -193,3 +193,18 @@ Production at merge: /v1/stats returned x402_payments null (public RPC throttled
   - Payments scan only up to the finalized block, and a missing receipt fails the run. At most 50 tx hashes are listed.
 - **Read-only check on Supabase with the new code:** coverage full 13 / identity 422 (1.4 s). NVDAc risk from 79 closes: 30-day volatility 104.59%, 60-day 76.02%, max drawdown −47.5% (2026-10-06 → 2026-11-20), not stale.
 - Tests: 152 pass, 3 skipped.
+
+## Earnings releases (ROADMAP 6.2, approved 2026-11-28)
+- **Indexing:** SEC 8-K/8-K/A filings listing item 2.02 since 2025-01-01, read from the data.sec.gov submissions index *including its older pages*. Heavy filers keep only about a year in `recent`; GS's `recent` starts on 2025-11-26.
+- **Re-check:** every release is checked against the filing's own -index-headers.html on www.sec.gov: form, item text, filed date, acceptance time (New York → UTC, DST-correct) and filer CIK. Only CONFIRMED releases are served.
+- **Live check:** the latest release for NVDA, AAPL, GOOGL and MSTR was re-checked CONFIRMED (8, 8, 8 and 12 releases since 2025).
+- **Database:** migration 011 + grants 014 applied to Supabase on 2026-11-28 (`supabase migrate` output: "applied 011_earnings.sql, supabase/014_earnings_grants.sql"). Role checks: reader SELECT only; writer insert only, cannot delete; anon denied; RLS on.
+- **Independent review:** 1 blocker (the "since 2025" claim was false for heavy filers: fixed by reading the older pages), plus:
+  - one company's SEC error no longer stops the others;
+  - indexing and verifying are separate workflow steps;
+  - verify is capped at 600 per run;
+  - an UNSURE release is retried at most 3 times;
+  - the filer CIK is checked;
+  - a Z suffix is required on acceptance times;
+  - `is_amendment` is added, and the wording is honest ("re-checked against the filing's own headers").
+  - Still open (not a correctness issue): failed CIK lookups are not cached, so unresolved tokens repeat 2 efts calls per run.

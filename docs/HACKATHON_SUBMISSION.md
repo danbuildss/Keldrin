@@ -56,7 +56,7 @@ and onchain DEX prices, each with its proof, through one integration.
   served. "Unknown" is a valid answer.
 
 **How to use it:**
-- **API and agents:** a free REST API (no key), a remote MCP server with 9 tools (listed in the official MCP
+- **API and agents:** a free REST API (no key), a remote MCP server with 10 tools (listed in the official MCP
   Registry), a CLI (`npx keldrin`) that re-checks served values against Base, and an agent guide (/skill.md).
 - **Paid answers:** one-call snapshot and report at $0.05 USDC on Base via x402 on Bankr x402 Cloud, 3 free a day.
 - **Website:** Explorer, API Playground and a Transparency page.

@@ -12,8 +12,9 @@ import { resolveCik, underlyingTicker } from "./company.ts";
 export const EARNINGS_SINCE = "2025-01-01";
 const opts = { headers: { "user-agent": SEC_USER_AGENT }, minIntervalMs: LIMITS.secMinIntervalMs };
 
+export type FilesPage = { name: string; filingFrom: string; filingTo: string };
 export type Recent = { accessionNumber: string[]; filingDate: string[]; reportDate: string[]; acceptanceDateTime: string[]; form: string[]; items: string[]; primaryDocument: string[] };
-export type Release = { accession: string; form: string; items: string; filed_date: string; accepted_at: string; report_date: string | null; primary_document_url: string };
+export type Release = { accession: string; form: string; is_amendment: boolean; items: string; filed_date: string; accepted_at: string; report_date: string | null; primary_document_url: string };
 
 /** Pure: 8-K (and 8-K/A) filings listing item 2.02, filed on or after `since`, newest first. */
 export function earningsReleases(recent: Recent, cik: string, since = EARNINGS_SINCE): Release[] {
@@ -26,14 +27,30 @@ export function earningsReleases(recent: Recent, cik: string, since = EARNINGS_S
     if (recent.filingDate[i] < since) continue;
     const acc = recent.accessionNumber[i];
     const accepted = recent.acceptanceDateTime[i];
-    if (!/^\d{10}-\d{2}-\d{6}$/.test(acc) || !accepted || Number.isNaN(Date.parse(accepted))) continue;
+    // SEC gives acceptanceDateTime in UTC with a Z; anything else would be parsed in local time, so it is skipped
+    if (!/^\d{10}-\d{2}-\d{6}$/.test(acc) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(accepted ?? "")) continue;
     out.push({
-      accession: acc, form, items, filed_date: recent.filingDate[i], accepted_at: new Date(accepted).toISOString(),
+      accession: acc, form, is_amendment: form === "8-K/A", items, filed_date: recent.filingDate[i], accepted_at: new Date(accepted).toISOString(),
       report_date: recent.reportDate[i] || null,
       primary_document_url: `https://www.sec.gov/Archives/edgar/data/${Number(cik)}/${acc.replace(/-/g, "")}/${recent.primaryDocument[i]}`,
     });
   }
   return out.sort((a, b) => b.accepted_at.localeCompare(a.accepted_at));
+}
+
+/** All filings since `since`: the submissions index's `recent` block plus every older page it lists whose range
+ *  reaches `since` (heavy filers keep only about a year in `recent`). */
+export async function filingsSince(cik: string, since = EARNINGS_SINCE): Promise<{ recent: Recent; sources: { url: string; sha256: string }[] }> {
+  const { data, meta } = await fetchJson<{ filings: { recent: Recent; files?: FilesPage[] } }>(`https://data.sec.gov/submissions/CIK${cik}.json`, opts);
+  const all: Recent = JSON.parse(JSON.stringify(data.filings.recent));
+  const sources = [{ url: meta.url, sha256: meta.sha256 }];
+  for (const f of data.filings.files ?? []) {
+    if (f.filingTo < since || !/^CIK\d{10}-submissions-\d{3}\.json$/.test(f.name)) continue;
+    const page = await fetchJson<Recent>(`https://data.sec.gov/submissions/${f.name}`, opts);
+    for (const k of Object.keys(all) as (keyof Recent)[]) all[k].push(...((page.data[k] as string[]) ?? []));
+    sources.push({ url: page.meta.url, sha256: page.meta.sha256 });
+  }
+  return { recent: all, sources };
 }
 
 /** One run: for each identity-verified token (or `symbols`), resolve the SEC company once and append new releases. */
@@ -47,22 +64,33 @@ export async function indexEarnings(db: PGlite, symbols?: string[]): Promise<{ t
     if (!ticker) { res.push({ symbol: a.symbol, releases: 0, added: 0, note: "no underlying ticker" }); continue; }
     let cik = (await db.query<{ cik: string }>("SELECT cik FROM sec_companies WHERE chain_id=$1 AND lower(contract_address)=lower($2) ORDER BY resolved_at DESC LIMIT 1", [CHAIN_ID, a.contract_address])).rows[0]?.cik;
     if (!cik) {
-      const r = await resolveCik(a.name, ticker);
+      let r;
+      try {
+        r = await resolveCik(a.name, ticker);
+      } catch (e) {
+        res.push({ symbol: a.symbol, releases: 0, added: 0, note: "CIK lookup failed: " + String((e as Error).message).slice(0, 120) });
+        continue;
+      }
       if (!r.cik) { res.push({ symbol: a.symbol, releases: 0, added: 0, note: r.reason }); continue; }
       cik = r.cik;
       await db.query("INSERT INTO sec_companies (chain_id, contract_address, cik, company_name, ticker, evidence) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING",
         [CHAIN_ID, a.contract_address, cik, r.name, ticker, JSON.stringify(r.evidence)]);
     }
-    const { data, meta } = await fetchJson<{ filings: { recent: Recent } }>(`https://data.sec.gov/submissions/CIK${cik}.json`, opts);
-    const rel = earningsReleases(data.filings.recent, cik);
-    let added = 0;
-    for (const r of rel) {
-      const ins = await db.query("INSERT INTO earnings_releases (chain_id, contract_address, cik, accession, form, items, filed_date, accepted_at, report_date, primary_document_url, source_url, source_sha256) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT DO NOTHING RETURNING accession",
-        [CHAIN_ID, a.contract_address, cik, r.accession, r.form, r.items, r.filed_date, r.accepted_at, r.report_date, r.primary_document_url, meta.url, meta.sha256]);
-      added += ins.rows.length;
+    try {
+      const { recent, sources } = await filingsSince(cik);
+      const rel = earningsReleases(recent, cik);
+      let added = 0;
+      for (const r of rel) {
+        const ins = await db.query("INSERT INTO earnings_releases (chain_id, contract_address, cik, accession, form, items, filed_date, accepted_at, report_date, primary_document_url, source_url, source_sha256) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT DO NOTHING RETURNING accession",
+          [CHAIN_ID, a.contract_address, cik, r.accession, r.form, r.items, r.filed_date, r.accepted_at, r.report_date, r.primary_document_url, sources.map((x) => x.url).join(" "), sources.map((x) => x.sha256).join(" ")]);
+        added += ins.rows.length;
+      }
+      const files6k = recent.form.some((f) => f === "6-K");
+      res.push({ symbol: a.symbol, releases: rel.length, added, ...(rel.length === 0 && files6k ? { note: "files 6-K (foreign issuer): not covered" } : {}) });
+    } catch (e) {
+      // one company's SEC error never stops the others; it is retried next run
+      res.push({ symbol: a.symbol, releases: 0, added: 0, note: "SEC read failed: " + String((e as Error).message).slice(0, 120) });
     }
-    const files6k = data.filings.recent.form.some((f) => f === "6-K");
-    res.push({ symbol: a.symbol, releases: rel.length, added, ...(rel.length === 0 && files6k ? { note: "files 6-K (foreign issuer): not covered" } : {}) });
   }
   return { tokens: res };
 }

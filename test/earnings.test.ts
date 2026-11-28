@@ -24,6 +24,8 @@ test("earnings: only 8-K filings listing item 2.02, since 2025, with SEC's accep
   assert.equal(r[0].accepted_at, "2026-11-17T21:20:51.000Z");
   assert.equal(r[0].primary_document_url, "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000088/nvda-20261117.htm");
   assert.equal(earningsReleases({ ...recent, items: ["12.02", "", "", ""] }, "1").length, 0, "12.02 is not 2.02");
+  assert.equal(earningsReleases({ ...recent, acceptanceDateTime: ["2026-11-17T21:20:51", "", "", ""] }, "1").length, 0, "a time without Z (local) is never guessed");
+  assert.equal(earningsReleases({ ...recent, form: ["8-K/A", "8-K", "4", "8-K"] }, "1")[0].is_amendment, true);
 });
 
 const headers = `<ACCEPTANCE-DATETIME>20261117162051
@@ -37,15 +39,19 @@ test("earnings verifier: New York acceptance time converts to UTC across dayligh
   assert.equal(nyToUtc("20261117162051"), "2026-11-17T21:20:51.000Z", "EST: UTC-5");
   assert.equal(nyToUtc("20260826162119"), "2026-08-26T20:21:19.000Z", "EDT: UTC-4");
   assert.equal(nyToUtc("2026"), null);
+  assert.equal(nyToUtc("20260308023000"), null, "02:30 does not exist on the spring-forward day: fail closed");
 });
 
 test("earnings verifier: CONFIRMED only when form, item, filed date and acceptance time all agree", () => {
   const h = parseHeaders(headers);
-  assert.deepEqual(h, { form: "8-K", items: ["Results of Operations and Financial Condition", "Financial Statements and Exhibits"], filed: "2026-11-17", accepted_utc: "2026-11-17T21:20:51.000Z" });
+  assert.deepEqual(h, { form: "8-K", items: ["Results of Operations and Financial Condition", "Financial Statements and Exhibits"], filed: "2026-11-17", accepted_utc: "2026-11-17T21:20:51.000Z", ciks: [] });
   const stored = { form: "8-K", filed_date: "2026-11-17", accepted_at: "2026-11-17T21:20:51Z" };
   assert.equal(judge(stored, h).verdict, "CONFIRMED");
   assert.equal(judge({ ...stored, accepted_at: "2026-11-17T21:20:52Z" }, h).verdict, "REJECTED");
   assert.equal(judge(stored, parseHeaders(headers.replace("Results of Operations and Financial Condition", "Other Events"))).verdict, "REJECTED");
+  const withCik = headers + "\n\t\tCENTRAL INDEX KEY:\t\t\t0001045810";
+  assert.equal(judge({ ...stored, cik: "0001045810" }, parseHeaders(withCik)).verdict, "CONFIRMED");
+  assert.equal(judge({ ...stored, cik: "0000320193" }, parseHeaders(withCik)).verdict, "REJECTED", "another company's filing never passes");
 });
 
 test("earnings API: serves only CONFIRMED releases and says why a token is not covered", async () => {
