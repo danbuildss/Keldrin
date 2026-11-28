@@ -8352,7 +8352,7 @@ var keldrin_v1_default = {
             }
           }
         },
-        description: "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed; market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
+        description: "Each token carries coverage_level (full = verified identity + independently CONFIRMED Chainlink NAV feed (DEX price only where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read) and a capabilities object (identity, corporate_actions, nav_history, risk, market_context, dex_price). meta.coverage_levels counts tokens per level."
       }
     },
     "/v1/assets/{contract}": {
@@ -9847,7 +9847,7 @@ var keldrin_v1_default = {
     "/v1/assets/{contract}/risk": {
       get: {
         summary: "NAV-based risk for one token (verified feeds only)",
-        description: "Deterministic risk from official Chainlink total-return NAV daily closes (the same closes as /nav/history?interval=daily, provisional sessions excluded): 30- and 60-day annualized volatility (sample sd of daily log returns x sqrt(252)), max drawdown since start and over 90 closes with peak and trough round ids, and 1/5/20-day and since-start returns. A metric without enough history is null with the reason. Facts from history, not a forecast or advice. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
+        description: "Deterministic risk from official Chainlink total-return NAV daily closes (the same closes as /nav/history?interval=daily, provisional sessions excluded): 30- and 60-day annualized volatility (sample sd of daily log returns x sqrt(252)), max drawdown since the first official close in the window (at most 400 days; see history_window) and over the last 90 closes with peak and trough round ids, and 1/5/20-day and since-start returns. Includes stale (more than 2 completed trading days since the newest close used) and excluded_days_no_decimal_value. A metric without enough history is null with the reason. Facts from history, not a forecast or advice. Returns 503 NAV_NOT_ENABLED until enabled by the operator.",
         parameters: [
           {
             name: "contract",
@@ -11107,6 +11107,7 @@ function drawdown(closes) {
       at = { peak, trough: c };
     }
   }
+  if (worst === 0) return { value_pct: 0, peak: null, trough: null, note: "no close below an earlier high in this window", from: closes[0].session_day, to: closes[closes.length - 1].session_day };
   return { value_pct: round(worst * 100, 2), peak: { session_day: at.peak.session_day, nav: at.peak.nav, round_id: at.peak.round_id }, trough: { session_day: at.trough.session_day, nav: at.trough.nav, round_id: at.trough.round_id }, from: closes[0].session_day, to: closes[closes.length - 1].session_day };
 }
 function ret(closes, n) {
@@ -11119,7 +11120,7 @@ function riskFrom(closes) {
     volatility_30d_annualized: vol(closes, 30),
     volatility_60d_annualized: vol(closes, 60),
     max_drawdown_since_start: drawdown(closes),
-    max_drawdown_90d: drawdown(closes.slice(-90)),
+    max_drawdown_last_90_closes: drawdown(closes.slice(-90)),
     return_1d: ret(closes, 1),
     return_5d: ret(closes, 5),
     return_20d: ret(closes, 20),
@@ -11132,18 +11133,26 @@ async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
   if (h.status !== 200) return h;
   const b = h.body;
   const used = b.data.filter((d) => !d.provisional && d.nav !== null).map((d) => ({ session_day: d.session_day, nav: Number(d.nav), round_id: d.round_id }));
+  const excluded = b.data.filter((d) => !d.provisional && d.nav === null).map((d) => d.session_day);
   const q = b.meta.quality ?? {};
+  const first = typeof q.first_official_round_at === "string" ? q.first_official_round_at.slice(0, 10) : null;
+  const capped = first !== null && first < from;
+  const asOf = used.length ? used[used.length - 1].session_day : null;
+  const today = now.toISOString().slice(0, 10);
+  const behind = asOf ? dateRange(asOf, today).slice(1).filter((d) => isTradingDay(d) === true && d < today).length : null;
   return {
     status: 200,
     body: {
-      data: { token: b.meta.token, symbol: b.meta.symbol, as_of_close: used.length ? used[used.length - 1].session_day : null, closes_used: used.length, ...riskFrom(used) },
+      data: { token: b.meta.token, symbol: b.meta.symbol, as_of_close: asOf, closes_used: used.length, trading_days_since_last_close: behind, stale: behind !== null && behind > 2, history_window: { from: used.length ? used[0].session_day : null, to: asOf, capped_at_400_days: capped }, ...riskFrom(used) },
       meta: {
         method: RISK_METHOD,
-        method_note: "Daily log returns of official Chainlink total-return NAV closes (last official in-session round per NYSE trading day). Volatility = sample standard deviation x sqrt(252), in percent, over the last 30 or 60 returns. Drawdown = worst close vs the highest earlier close. Provisional (unfinished) sessions are excluded. A trading day without an official close joins the two neighbouring closes into one multi-day return (listed in missing_trading_days).",
+        method_note: 'Daily log returns of official Chainlink total-return NAV closes (last official in-session round per NYSE trading day). Volatility = sample standard deviation x sqrt(252), in percent, over the last 30 or 60 returns. Drawdown = worst close vs the highest earlier close. Provisional (unfinished) sessions are excluded. A trading day without a usable official close joins the two neighbouring closes into one multi-day return (listed in missing_trading_days or excluded_days_no_decimal_value). "since start" = since the first official close in the window (history_window); the window is at most 400 days.',
         semantics: "Total-return NAV: dividends and splits are already included. NAV-based risk, not DEX-price risk. Facts from history, not a forecast or advice.",
         feed: b.meta.feed,
         missing_trading_days: q.missing_trading_days ?? [],
+        excluded_days_no_decimal_value: excluded,
         verification: q.verification ?? null,
+        stale_rule: "stale = more than 2 completed NYSE trading days since the newest official close used (the indexer may be behind); the metrics are then still the true history up to as_of_close",
         source: "Computed from GET /v1/assets/{contract}/nav/history?interval=daily; every close used carries its Chainlink round id there."
       }
     }
@@ -11151,9 +11160,10 @@ async function assetRisk(db2, contract, now = /* @__PURE__ */ new Date()) {
 }
 
 // src/api/coverage.ts
+var UNKNOWN_COVERAGE = { coverage_level: "unknown", capabilities: { identity: false, corporate_actions: false, nav_history: false, risk: false, market_context: false, dex_price: false } };
 var COVERAGE_SQL = `
   SELECT lower(a.contract_address) AS k, a.identity_state = 'verified' AS id_ok,
-    COALESCE((SELECT r.verdict = 'CONFIRMED' FROM nav_feeds f JOIN LATERAL (SELECT verdict FROM nav_reviews n WHERE n.chain_id = f.chain_id AND n.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) r ON true
+    COALESCE((SELECT COALESCE(r.verdict = 'CONFIRMED' AND jsonb_typeof(r.detail->'covered') = 'array', false) FROM nav_feeds f LEFT JOIN LATERAL (SELECT verdict, detail FROM nav_reviews n WHERE n.chain_id = f.chain_id AND n.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) r ON true
               WHERE f.chain_id = $1 AND lower(f.token_address) = lower(a.contract_address) ORDER BY f.discovered_at DESC LIMIT 1), false) AS nav_ok,
     COALESCE((SELECT d.verdict = 'CONFIRMED' AND jsonb_array_length(COALESCE(d.detail->'covered', '[]'::jsonb)) > 0 FROM dex_reviews d
               WHERE d.chain_id = $1 AND lower(d.token_address) = lower(a.contract_address) ORDER BY d.checked_at DESC LIMIT 1), false) AS dex_ok
@@ -11166,6 +11176,13 @@ function coverageOf(r) {
   };
 }
 async function coverageMap(db2) {
+  try {
+    return await coverageRows(db2);
+  } catch {
+    return null;
+  }
+}
+async function coverageRows(db2) {
   const rows = (await db2.query(COVERAGE_SQL, [CHAIN_ID])).rows;
   return new Map(rows.map((r) => [r.k, coverageOf(r)]));
 }
@@ -11373,7 +11390,7 @@ var TOOLS = [
   { name: "list_assets", title: "List tokenized stocks", description: "Coinbase tokenized stocks on Base that keldrin tracks: symbol, contract address, current multiplier (WAD) and whether a verified Chainlink NAV feed exists. Optional `query` filters by symbol or name.", inputSchema: { type: "object", properties: { query: { type: "string", description: "Optional case-insensitive filter on symbol or name" }, with_nav_only: { type: "boolean", description: "Only tokens with an indexed Chainlink NAV feed" } }, additionalProperties: false }, annotations: ro },
   { name: "get_corporate_actions", title: "Corporate actions for a token", description: "Verified dividends, splits and multiplier changes for one token, applied and upcoming: multiplier before/after (WAD), effective time, SEC filing, onchain tx and evidence links. Balances never change; the multiplier does.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_nav_history", title: "Chainlink NAV history with proof", description: "Official Chainlink total-return NAV history for one token, each point with feed, phase, aggregator and round id (re-readable with getRoundData). interval=daily gives the last official in-session round per NYSE trading day; interval=round gives every official round. Missing days are listed, never filled. The NAV already includes dividends and splits.", inputSchema: { type: "object", properties: { token: tokenArg, interval: { type: "string", enum: ["daily", "round"], default: "daily" }, from: { type: "string", description: "YYYY-MM-DD" }, to: { type: "string", description: "YYYY-MM-DD" }, limit: { type: "integer", minimum: 1, maximum: 1e3, description: "round interval only" } }, required: ["token"], additionalProperties: false }, annotations: ro },
-  { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since start and 90 days, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
+  { name: "get_risk", title: "NAV-based risk for a token", description: "Volatility (30- and 60-day, annualized), max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids) and 1/5/20-day returns, computed from official Chainlink total-return NAV daily closes. Facts from history, not a forecast or advice.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: ro },
   { name: "get_market_context", title: "Market context for a token", description: "US session now (open/pre/after/closed/weekend/holiday), next open/close, the latest Chainlink NAV read live with round id and age, staleness (fresh / expected_closed / unexpectedly_stale), and the main DEX price with its gap vs NAV. The NAV is the last published reference, not a live equity price.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_dex_price", title: "Live DEX price on Base", description: "Live DEX price of one token read onchain at one block from keldrin's verified pools (Uniswap v3, Aerodrome, Slipstream, plain Uniswap v4 vs USDC/WETH/ETH): price per token in USD, estimated 2% depth, the main (deepest usable) pool and every pool's status.", inputSchema: { type: "object", properties: { token: tokenArg }, required: ["token"], additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
   { name: "get_snapshot", title: "All verified stocks in one answer", description: "Every Coinbase tokenized stock on Base with a verified Chainlink NAV feed: latest NAV with round id, freshness, main DEX price with gap vs NAV, next corporate action, plus the US session. Uses the caller's 3 free snapshots/reports per day; after that it returns the paid x402 link ($0.05 USDC on Base) and never pays by itself.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { ...ro, idempotentHint: false } },
@@ -11412,7 +11429,7 @@ async function callTool(db2, name, args, client) {
         const rows = (await db2.query(
           "SELECT a.symbol, a.contract_address, a.name, a.multiplier_wad::text AS multiplier_wad, EXISTS (SELECT 1 FROM nav_feeds f WHERE lower(f.token_address)=lower(a.contract_address)) AS has_nav FROM assets a ORDER BY a.symbol"
         )).rows.filter((r) => (!q || r.symbol.toLowerCase().includes(q) || (r.name ?? "").toLowerCase().includes(q)) && (!args.with_nav_only || r.has_nav));
-        const body = { data: rows.slice(0, 200).map((r) => ({ ...r, coverage_level: cov.get(r.contract_address.toLowerCase())?.coverage_level ?? "unverified" })), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
+        const body = { data: rows.slice(0, 200).map((r) => ({ ...r, coverage_level: cov ? cov.get(r.contract_address.toLowerCase())?.coverage_level ?? "unknown" : "unknown" })), meta: { count: rows.length, shown: Math.min(rows.length, 200) } };
         return toolResult({ status: 200, body }, () => `${rows.length} tracked token(s)${q ? ` matching "${q}"` : ""}; ${rows.filter((r) => r.has_nav).length} with an indexed Chainlink NAV feed.`);
       }
       case "get_corporate_actions": {
@@ -11564,7 +11581,7 @@ async function stats(db2) {
     else {
       const rows = (await db2.query("SELECT tx_hash, payer FROM x402_payments WHERE chain_id = $1 ORDER BY block_number", [CHAIN_ID])).rows;
       const wallets = new Set(rows.map((r) => r.payer.toLowerCase()));
-      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.map((r) => r.tx_hash), to_block: scan.to_block, counted_at: scan.at };
+      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.slice(-50).map((r) => r.tx_hash), transactions_shown: Math.min(rows.length, 50), to_block: scan.to_block, counted_at: scan.at };
     }
   } catch {
     payments_unavailable_reason = "payment records unavailable right now";
@@ -11627,7 +11644,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 
 - GET /v1/events?status=predicted|verified_matched|late|confirmed_onchain&contract=0x... \u2014 one list of applied and upcoming corporate actions (ticker, event_type, status, confidence, expected_adjustment_date, multiplier_delta, sec_filing_url, quoted_text, onchain_tx)
 - GET /v1/changes?since=2026-11-27T00:00:00Z \u2014 events added or changed since a timestamp (poll this)
-- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified) and capabilities per token
+- GET /v1/assets \u2014 tokens, identity checks, current multiplier (WAD), coverage_level (full | market | identity | unverified | unknown) and capabilities per token (full = verified NAV, risk, market context, corporate actions; DEX where verified pools exist)
 - GET /v1/assets/{contract}/corporate-actions \u2014 one token's verified dividends, splits and multiplier changes (multiplier and uiMultiplier before/after in WAD, effective time, announcement txs, evidence links). Balances never change; the multiplier does
 - GET /v1/assets/{contract}/market-context \u2014 US session now, next open/close, latest Chainlink NAV read live with round id and age, and staleness: fresh | expected_closed | unexpectedly_stale (judged against the feed's own verified update rhythm), plus the main DEX price and its gap vs NAV (withheld when the NAV is stale or its rhythm unknown)
 - GET /v1/assets/{contract}/dex \u2014 live DEX price on Base read onchain at one pinned block: main market (deepest verified pool), price per token in USD, estimated 2% depth, every pool with venue/address; Uniswap v3, Aerodrome, Slipstream and plain (no-hook) Uniswap v4 pools, independently re-derived
@@ -11640,7 +11657,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
-- GET /v1/assets/{contract}/risk \u2014 NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since start and 90 days, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
+- GET /v1/assets/{contract}/risk \u2014 NAV-based risk from official daily closes: 30- and 60-day annualized volatility, max drawdown (since the first official close and over the last 90 closes, with peak and trough round ids), 1/5/20-day and since-start returns. Verified feeds only; method risk-1; facts from history, not a forecast
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
 - GET /v1/actions?contract=0x...&limit=50&cursor=... \u2014 confirmed corporate actions, newest first
 - GET /v1/actions?symbol=GOOGLc \u2014 same, by exact token symbol (store the address, not the symbol)
@@ -11784,10 +11801,10 @@ async function handle(db2, req, res) {
     if (p === "/v1/assets") {
       const rows = await db2.query("SELECT chain_id, contract_address, symbol, name, isin, identity_state, multiplier_wad::text, observed_block::text FROM assets ORDER BY symbol");
       const cov = await coverageMap(db2);
-      const data = rows.rows.map((r) => ({ ...r, ...cov.get(String(r.contract_address).toLowerCase()) ?? { coverage_level: "unverified", capabilities: {} } }));
+      const data = rows.rows.map((r) => ({ ...r, ...(cov && cov.get(String(r.contract_address).toLowerCase())) ?? UNKNOWN_COVERAGE }));
       const levels = {};
       for (const d of data) levels[d.coverage_level] = (levels[d.coverage_level] ?? 0) + 1;
-      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, DEX, corporate actions); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed" }));
+      return send(res, 200, ok(data, { count: data.length, coverage_levels: levels, ...cov ? {} : { coverage_unavailable_reason: "coverage records unavailable right now" }, coverage_note: "full = verified identity + independently CONFIRMED Chainlink NAV feed (NAV history, risk, market context, corporate actions; DEX price where verified pools exist, see capabilities.dex_price); market = verified DEX pools without a verified NAV; identity = identity and corporate actions only; unverified = identity check not passed; unknown = coverage could not be read" }));
     }
     const meta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
     if (p === "/v1/market/session") return send(res, 200, meta({ data: marketNow(Math.floor(Date.now() / 1e3)) }), void 0, "no-store");

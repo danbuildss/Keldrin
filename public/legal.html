@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
+<script defer src="/_vercel/insights/script.js"></script>
 <style>.legal h2{font-size:22px;letter-spacing:-.02em;margin:34px 0 10px}.legal p,.legal li{font-size:14px;line-height:1.7;color:#333;max-width:760px}.legal ul{margin:6px 0 0 20px}.legal td,.legal th{font-size:13px}</style>
 </head>
 <body>
@@ -20,13 +21,13 @@
 <section style="padding-top:0">
 <h2 id="privacy">Privacy</h2>
 <div class="scroll"><table><thead><tr><th>What</th><th>When</th><th>What is kept</th><th>How long</th><th>Who can see it</th></tr></thead><tbody>
-<tr><td>Feedback form</td><td>Only if you submit it</td><td>Your email, your X handle and message if you give them, the time, and a salted one-way hash of your network address (used only to limit spam to 5 a day). Your IP address itself is not stored.</td><td>Until you ask us to delete it</td><td>Only the keldrin team, in our database. Never sold or shared.</td></tr>
-<tr><td>Free snapshot/report counter</td><td>When you call <span class="mono">/v1/snapshot</span> or <span class="mono">/v1/report</span></td><td>A salted one-way hash of your network address and a count per day, so the 3 free answers a day can be enforced</td><td>Deleted after 2 days</td><td>Nobody can turn the hash back into your address</td></tr>
-<tr><td>API, MCP and CLI requests</td><td>Every request</td><td>We do not store what you ask for. Our host processes request data, such as IP addresses, to deliver the service and enforce the fair-use limit (300 requests per minute per IP)</td><td>As set by our host's platform logs</td><td>Our hosting provider, Vercel</td></tr>
-<tr><td>Website visits</td><td>When you open a page</td><td>Aggregated page-view statistics from Vercel Web Analytics, which Vercel describes as cookieless</td><td>As set by Vercel</td><td>The keldrin team, as totals</td></tr>
-<tr><td>Paid calls (x402)</td><td>If you pay for a snapshot or report</td><td>The payment is a public transaction on Base, processed by Bankr's x402 service. keldrin counts its own payments from public chain data</td><td>Public blockchains keep transactions permanently</td><td>Anyone: blockchain data is public</td></tr>
+<tr><td>Feedback form</td><td>Only if you submit it</td><td>Your email, your X handle and message if you give them, the time, and a salted one-way hash of your network address (used only to limit spam to 5 a day). Your IP address itself is not stored.</td><td>Until you ask us to delete it</td><td>Only the keldrin team, in our database (hosted by Supabase). Never sold or shared.</td></tr>
+<tr><td>Free snapshot/report counter</td><td>When you call <span class="mono">/v1/snapshot</span> or <span class="mono">/v1/report</span></td><td>A salted one-way hash of your network address and a count per day, so the 3 free answers a day can be enforced</td><td>About 3 days: older rows are removed the next time the counter is used</td><td>The keldrin team only. The hash cannot be turned back into your address without our secret key, and we never try</td></tr>
+<tr><td>API, MCP and CLI requests</td><td>Every request</td><td>We do not store what you ask for. Our host processes request data, such as IP addresses, to deliver the service and enforce the fair-use limits</td><td>As set by our host's platform logs</td><td>Our hosting provider, Vercel</td></tr>
+<tr><td>Website visits</td><td>When you open a page on keldrin.vercel.app</td><td>Aggregated page-view statistics from Vercel Web Analytics, which Vercel describes as cookieless</td><td>As set by Vercel</td><td>The keldrin team, as totals</td></tr>
+<tr><td>Paid calls (x402)</td><td>If you pay for a snapshot or report</td><td>The payment is a public transaction on Base, processed by Bankr's x402 service. keldrin stores, from public chain data, each payment made to keldrin: its transaction hash, block and the paying wallet address. It counts distinct paying wallets and publishes the transaction hashes on the Transparency page</td><td>Kept as a permanent record (blockchains keep transactions permanently too)</td><td>Anyone can see the transactions onchain; keldrin publishes the hashes and counts, not a list of wallet addresses</td></tr>
 </tbody></table></div>
-<p style="margin-top:14px">keldrin uses no cookies and no advertising trackers, and does not identify wallet owners or track individual wallets. To ask for your feedback entry to be deleted, send a new message through the feedback form on the <a href="/#fb">home page</a> with the same email address.</p>
+<p style="margin-top:14px">keldrin uses no cookies and no advertising trackers. Apart from payments made to keldrin itself, it does not record wallet addresses, identify wallet owners or follow individual wallets. To ask for your feedback entry to be deleted, send a new message through the feedback form on the <a href="/#fb">home page</a> with the same email address.</p>
 </section>
 
 <section style="padding-top:0">
@@ -36,8 +37,8 @@
 <li><b>Not an oracle or price guarantee.</b> The Chainlink NAV is a published total-return reference, not a live equity price. DEX prices describe onchain pools at a block. Do not use keldrin as the only input for liquidations, settlement or any execution-critical decision.</li>
 <li><b>No warranty.</b> We work to keep the data accurate, verified and fresh, and we say "unknown" when we are not sure. Data can still be wrong, late or unavailable. keldrin is provided "as is", without warranties of any kind, and to the extent the law allows, we are not liable for losses from using it.</li>
 <li><b>Sources and rights.</b> keldrin derives its data from public onchain records on Base (including Chainlink feeds), public SEC filings and Coinbase's public tokenized-stock information. Those sources keep their own terms. keldrin is not affiliated with or endorsed by Coinbase, Chainlink, Base, Bankr or the companies whose stocks are tokenized. Company logos are trademarks of their owners.</li>
-<li><b>Fair use.</b> Free access is limited to 300 requests per minute per IP, and 3 free snapshots or reports a day. Don't try to get around the limits, overload the service, or misrepresent where the data came from. Please credit keldrin when you republish its data.</li>
-<li><b>Payments.</b> Paid calls cost $0.05 USDC on Base via x402 and are charged only for a complete answer. Payments are final onchain transactions.</li>
+<li><b>Fair use.</b> Free access is rate-limited: up to 300 requests per minute per IP at the network edge, and the API may answer 429 sooner under load (about 120 requests per minute per client per server). Snapshots and reports are free 3 times a day. Don't try to get around the limits, overload the service, or misrepresent where the data came from. Please credit keldrin when you republish its data.</li>
+<li><b>Payments.</b> Paid calls cost $0.05 USDC on Base via x402. keldrin returns a success response only for a complete answer, and Bankr's x402 service settles payment only on success. Payments are final onchain transactions.</li>
 <li><b>Changes.</b> We may change these terms or the service. The date at the top shows the latest version.</li>
 </ul>
 </section>

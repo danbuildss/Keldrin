@@ -184,3 +184,12 @@ Production at merge: /v1/stats returned x402_payments null (public RPC throttled
   - A read-only dry run found 3 payments (0xe5e2213c…, 0x102877aa…, 0x5c3665fc…), all paid by the payout wallet (founder tests).
 - **Privacy and terms** at /legal, linked from every footer and the feedback form. Its text awaits the founder's approval.
 - Tests: 149 pass, 3 skipped (the Postgres tests run in CI).
+- **Independent review (separate context):** 1 gate blocker (the legal text needs founder approval before going public), 7 should-fix and several nits. Fixed:
+  - Legal claims now match the code: about 3 days of counter retention, the hash is reversible only with our secret key, payer wallet addresses of payments to keldrin are stored, the rate limits, the processors. Analytics now runs on every page.
+  - The payments workflow step runs even after earlier failures, and evidence upload always runs.
+  - /v1/assets survives a coverage failure (shown as "unknown").
+  - Risk labels: `max_drawdown_last_90_closes`, `history_window` (400-day cap), `excluded_days_no_decimal_value`, and a `stale` flag (more than 2 trading days behind).
+  - Coverage uses the newest feed (LEFT JOIN LATERAL, covered must be an array). "full" no longer claims DEX.
+  - Payments scan only up to the finalized block, and a missing receipt fails the run. At most 50 tx hashes are listed.
+- **Read-only check on Supabase with the new code:** coverage full 13 / identity 422 (1.4 s). NVDAc risk from 79 closes: 30-day volatility 104.59%, 60-day 76.02%, max drawdown −47.5% (2026-10-06 → 2026-11-20), not stale.
+- Tests: 152 pass, 3 skipped.

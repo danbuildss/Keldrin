@@ -32,3 +32,10 @@ test("risk: drawdown names the peak and trough closes with their round ids", () 
   assert.equal(r.return_1d?.value_pct, -10);
   assert.equal(r.return_since_start?.value_pct, 17);
 });
+
+test("risk: a window with no drawdown says so instead of naming a peak and trough", () => {
+  const dd = riskFrom(series([100, 101, 102, 103])).max_drawdown_since_start as { value_pct: number; peak: unknown; note?: string };
+  assert.equal(dd.value_pct, 0);
+  assert.equal(dd.peak, null);
+  assert.match(String(dd.note), /no close below/);
+});

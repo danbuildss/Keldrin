@@ -68,7 +68,7 @@ test("product pages: no hard-coded financial figures; every number comes from th
 
 test("privacy and terms: one page, linked from every footer, naming everything keldrin stores", () => {
   const legal = readFileSync(new URL("../public/legal.html", import.meta.url), "utf8");
-  for (const must of [/Feedback form/, /salted one-way hash/, /Deleted after 2 days/, /Vercel Web Analytics/, /no cookies/, /is investment, legal or tax advice/, /not affiliated/, /300 requests per minute/])
+  for (const must of [/Feedback form/, /salted one-way hash/, /About 3 days/, /paying wallet address/, /Vercel Web Analytics/, /no cookies/, /is investment, legal or tax advice/, /not affiliated/, /300 requests per minute/])
     assert.match(legal, must);
   assert.match(html, /href="\/legal"/, "home footer links the page");
   assert.match(readFileSync(new URL("../public/site.js", import.meta.url), "utf8"), /href="\/legal"/, "shared footer links the page");

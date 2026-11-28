@@ -33,7 +33,7 @@ export async function stats(db: PGlite): Promise<Out> {
     else {
       const rows = (await db.query<{ tx_hash: string; payer: string }>("SELECT tx_hash, payer FROM x402_payments WHERE chain_id = $1 ORDER BY block_number", [CHAIN_ID])).rows;
       const wallets = new Set(rows.map((r) => r.payer.toLowerCase()));
-      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.map((r) => r.tx_hash), to_block: scan.to_block, counted_at: scan.at };
+      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.slice(-50).map((r) => r.tx_hash), transactions_shown: Math.min(rows.length, 50), to_block: scan.to_block, counted_at: scan.at };
     }
   } catch {
     payments_unavailable_reason = "payment records unavailable right now";

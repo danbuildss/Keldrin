@@ -21,6 +21,7 @@ function fakeChain() {
   };
   return async (method: string, params: any[]) => {
     if (method === "eth_blockNumber") return "0x" + (63_085_000).toString(16);
+    if (method === "eth_getBlockByNumber") return { number: "0x" + (63_085_000).toString(16) };
     if (method === "eth_getLogs") return [{ transactionHash: "0xa", topics: [], data: "0x" }, { transactionHash: "0xb", topics: [], data: "0x" }];
     if (method === "eth_getTransactionReceipt") return receipts[params[0]];
     throw new Error("unexpected " + method);
@@ -64,7 +65,7 @@ test("payments: the robot scans incrementally from its last scanned block and ne
     const ranges: string[] = [];
     const base = fakeChain();
     const rpc = async (m: string, p: any[]) => {
-      if (m === "eth_blockNumber") return "0x" + head.toString(16);
+      if (m === "eth_getBlockByNumber") return { number: "0x" + head.toString(16) };
       if (m === "eth_getLogs") { ranges.push(p[0].fromBlock); return base(m, p); }
       return base(m, p);
     };
@@ -79,6 +80,24 @@ test("payments: the robot scans incrementally from its last scanned block and ne
     const n = (await db.query<{ n: number }>("SELECT count(*)::int AS n FROM x402_payments")).rows[0].n;
     assert.equal(n, 1, "ON CONFLICT DO NOTHING: one payment stays one row");
     assert.equal((await indexPayments(db, rpc, "test")).skipped, true, "head unchanged: nothing to scan");
+  } finally {
+    await db.close();
+  }
+});
+
+test("payments: the robot only scans up to the finalized block, and a missing receipt fails the run instead of skipping a payment", async () => {
+  const db = await openDb();
+  try {
+    const base = fakeChain();
+    const asked: string[] = [];
+    const rpc = async (m: string, p: any[]) => {
+      if (m === "eth_getBlockByNumber") { asked.push(p[0]); return { number: "0x" + (63_084_000).toString(16) }; }
+      if (m === "eth_getTransactionReceipt") return null;
+      return base(m, p);
+    };
+    await assert.rejects(indexPayments(db, rpc, "test"), /receipt unavailable/);
+    assert.deepEqual(asked, ["finalized"]);
+    assert.equal((await db.query<{ n: number }>("SELECT count(*)::int AS n FROM x402_payment_scans")).rows[0].n, 0, "no scan row: the blocks are retried next run");
   } finally {
     await db.close();
   }

@@ -26,3 +26,8 @@ test("coverage: the SQL runs on the real schema; a token with no reviews is iden
     await db.close();
   }
 });
+
+test("coverage: a failing coverage query returns null so /v1/assets can still answer (as unknown)", async () => {
+  const broken = { query: async () => { throw new Error("permission denied for table nav_reviews"); } };
+  assert.equal(await coverageMap(broken as never), null);
+});

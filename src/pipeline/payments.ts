@@ -5,7 +5,7 @@ import { CHAIN_ID } from "../config.ts";
 // ROADMAP Phase 1.4 (approved 2026-11-28): the research robot counts keldrin's x402 payments onchain (it has an
 // Alchemy RPC; Base's public RPC refuses eth_getLogs from the API) and appends them to x402_payments. /v1/stats then
 // reads the table instead of scanning the chain at request time. Incremental: each run scans from the last scanned
-// block + 1 up to head - CONFIRMATIONS, so a reorg at the tip is never recorded.
+// block + 1 up to the chain's FINALIZED block, so an append-only row can never come from a block that is later reorged.
 
 export const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 export const ROUTER = "0x8aee621035d93deb3c0c1177fac252dc2dd501a0";
@@ -13,7 +13,6 @@ export const PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
 export const PRICE_RAW = 50_000n; // $0.05 USDC (6 decimals)
 export const PAYMENTS_FROM_BLOCK = 63_080_000n; // keldrin's Bankr endpoints went live after this block (2026-11-27)
 const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-const CONFIRMATIONS = 30n;
 const CHUNK = 10_000n;
 const pad = (a: string) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
 
@@ -30,8 +29,11 @@ export async function scanPayments(rpc: Rpc, from: bigint, to: bigint): Promise<
   }
   const out: Payment[] = [];
   for (const tx of [...new Set(forwards.map((l) => l.transactionHash))]) {
-    const rc = (await rpc("eth_getTransactionReceipt", [tx])) as { blockNumber: string; status?: string; logs: Log[] };
+    const rc = (await rpc("eth_getTransactionReceipt", [tx])) as { blockNumber: string; status?: string; logs: Log[] } | null;
+    if (!rc) throw new Error(`receipt unavailable for ${tx}`); // fail the run (retried next run) rather than skip a payment
     if (rc.status !== undefined && rc.status !== "0x1") continue;
+    // assumes one keldrin payment per transaction (Bankr settles each x402 call in its own tx); a batched tx paying
+    // several sellers could be misattributed, so re-check this if Bankr ever batches
     const inbound = rc.logs.find((l) => l.address?.toLowerCase() === USDC.toLowerCase() && l.topics[0] === TRANSFER && l.topics[2]?.toLowerCase() === pad(ROUTER) && BigInt(l.data) === PRICE_RAW);
     if (inbound) out.push({ tx_hash: tx.toLowerCase(), block_number: BigInt(rc.blockNumber), payer: "0x" + inbound.topics[1].slice(26).toLowerCase(), amount_raw: PRICE_RAW });
   }
@@ -40,10 +42,12 @@ export async function scanPayments(rpc: Rpc, from: bigint, to: bigint): Promise<
 
 /** One incremental run: scan new blocks, append payments and a scan row. */
 export async function indexPayments(db: PGlite, rpc: Rpc, rpcHost: string): Promise<{ from: bigint; to: bigint; found: number; skipped: boolean }> {
-  const head = BigInt(await rpc("eth_blockNumber", []));
+  const fin = (await rpc("eth_getBlockByNumber", ["finalized", false])) as { number?: string } | null;
+  if (!fin?.number) throw new Error("finalized block unavailable");
+  const head = BigInt(fin.number);
   const last = (await db.query<{ to_block: string | null }>("SELECT max(to_block)::text AS to_block FROM x402_payment_scans WHERE chain_id = $1", [CHAIN_ID])).rows[0]?.to_block;
   const from = last ? BigInt(last) + 1n : PAYMENTS_FROM_BLOCK;
-  const to = head - CONFIRMATIONS;
+  const to = head;
   if (to < from) return { from, to, found: 0, skipped: true };
   const found = await scanPayments(rpc, from, to);
   for (const p of found) {

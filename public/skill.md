@@ -39,7 +39,7 @@ Docs: `https://keldrin.vercel.app/llms.txt` · contract: `https://keldrin.vercel
 - "What does the token trade at on Base right now, and how deep is the market?" → `GET /v1/assets/{token}/dex`
 - "Give me all of it for every stock in one call" → snapshot; "everything about one stock" → report.
 
-Every token in `GET /v1/assets` says what is verified for it: `coverage_level` is `full` (NAV history, risk, market context, DEX, corporate actions), `market` (verified DEX pools, no verified NAV), `identity` (identity and corporate actions only) or `unverified`.
+Every token in `GET /v1/assets` says what is verified for it: `coverage_level` is `full` (NAV history, risk, market context, corporate actions; DEX price where verified pools exist, see `capabilities.dex_price`), `market` (verified DEX pools, no verified NAV), `identity` (identity and corporate actions only) `unverified`, or `unknown` (coverage could not be read right now).
 
 Don't use it for: stocks that are not Coinbase tokenized stocks on Base, live equity prices on the exchange, order execution, or advice. NAV, market context and DEX prices exist only for tokens with a verified Chainlink NAV feed (`GET /mcp` tool `list_assets` with `with_nav_only: true`, or the snapshot's list); corporate actions cover all tracked tokens.
 
