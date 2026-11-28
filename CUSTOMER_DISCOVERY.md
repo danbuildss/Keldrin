@@ -12,7 +12,7 @@ Detail lives in `docs/DEMAND_MATRIX.md` (needs → capabilities), `docs/INTEGRAT
 | ID | Who | Channel | Strongest evidence | Status | Next action (owner) |
 |---|---|---|---|---|---|
 | CD-001 | Hector, admin of a Stocks Maxxing Telegram group | Telegram, then DM | Specific request: earnings, dividends, onchain data | Conversation open; **not** a customer or partner | Founder continues in DM; ask what he would integrate and for what |
-| CD-003 | MAXXAGENT builder (Stocks Maxxing, Agentic Stock Finance) | Public post relayed by founder | **Built it themselves**: NAV history from raw rounds, risk, market hours, liquidity checks, B20 watcher; open-source code (MIT) | **Agreed to test endpoints**; no integration commitment | Deliver nav/history + market-context test URL (docs/partners/MAXXAGENT.md) |
+| CD-003 | MAXXAGENT builder (Stocks Maxxing, Agentic Stock Finance) | Public post relayed by founder | **Built it themselves**: NAV history from raw rounds, risk, market hours, liquidity checks, B20 watcher; open-source code (MIT) | **Agreed to test endpoints**; no integration commitment | Test package sent by the founder 2026-11-28 (/start.md + 3 live URLs; docs/partners/MAXXAGENT_TEST_MESSAGE_V2.md). Awaiting their feedback. |
 | CD-002 | Bankr (agent / team) | Reply to founder's brief | Specific requests (fields, statuses, diff feed, late flag) plus an offer to host x402 | Interested; no commitment | Founder shares the live API; ask them to test `/v1/events` against GOOGLc (Dec 14) and NVDAc (Dec 23) |
 
 ## CD-001 — Hector (2026-11-27)

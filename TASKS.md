@@ -61,6 +61,9 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T043 | P0 | x402 paid API (Phase 11) | LIVE: Bankr snapshot/report $0.05, origin forwards, 3 free tries; paid tx 0x5c3665fc…ab05 | bankr/README.md |
 | T044 | P1 | Open-source the product: new public repo with code, tests, developer docs and a license; this repo stays private | DEFERRED by the founder (2026-11-27): build and prove the product first | Founder, 2026-11-27 |
 | T045 | P0 | Phase 13 launch readiness | IN PROGRESS: agent guide, review fixes, external tests 30/30, paid tx, MAXXAGENT package, listings prep, ops audit, launch report done; founder actions open (docs/LAUNCH_REPORT.md §9) | docs/LAUNCH_REPORT.md |
-| T046 | P1 | Bankr snapshot 1.0.1 redeploy | OPEN (founder; one filter line) | bankr/x402/keldrin-snapshot |
+| T046 | P1 | Bankr snapshot 1.0.1 redeploy | DONE 2026-11-28 (Bankr version 2; terms re-checked) | bankr/x402/keldrin-snapshot |
 | T047 | P1 | Publish CLI 0.7.0 | OPEN (founder; npm token + publish button) | npm/ |
+| T048 | P0 (proposed) | Public Explorer + API Playground + Transparency (/v1/stats) | PROPOSED, awaiting approval | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
+| T049 | P1 (proposed) | Status history (status_checks) + Status page; verified events feed | PROPOSED | docs/PUBLIC_PRODUCT_EXPERIENCE.md |
+| T050 | P1 | Vercel Web Analytics (same-origin script) | BUILT on branch; founder enables Analytics in Vercel and closes PR #22 | public/index.html |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |

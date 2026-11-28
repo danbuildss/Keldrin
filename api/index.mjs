@@ -10538,6 +10538,28 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   return { status: 200, body: { data: d.closes.map((c) => ({ session_day: c.session_day, session_close: c.session_close, provisional: c.provisional, ...item(c.row, false) })), meta: { ...meta, count: d.closes.length, quality } } };
 }
 
+// src/lib/retry.ts
+async function retryOnce(fn, pauseMs = 250) {
+  try {
+    return await fn();
+  } catch {
+    await new Promise((r) => setTimeout(r, pauseMs + Math.floor(Math.random() * pauseMs)));
+    return fn();
+  }
+}
+async function mapLimit(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
 // src/lib/marketSession.ts
 var isoS = (s) => s === null ? null : new Date(s * 1e3).toISOString();
 var dayShift = (date, n) => new Date(Date.parse(date + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
@@ -10647,7 +10669,8 @@ var ABI = parseAbi([
   "function getPool(address,address,uint24) view returns (address)"
 ]);
 var firstWord = (hex) => BigInt("0x" + hex.slice(2, 66));
-var publicRpc = async (method, params) => {
+var publicRpc = (method, params) => retryOnce(() => rpcOnce(method, params));
+var rpcOnce = async (method, params) => {
   const r = await fetch(DEX_RPC_URL, { method: "POST", signal: AbortSignal.timeout(6e3), headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.6" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
   const j = await r.json();
   if (j.error || j.result === void 0) throw new Error("rpc_unavailable");
@@ -10814,14 +10837,18 @@ var word = (hex, i) => BigInt("0x" + hex.slice(2 + i * 64, 2 + (i + 1) * 64));
 var liveLatestRound = async (feed) => {
   const hit = cache2.get(feed);
   if (hit && Date.now() - hit.at < CACHE_MS2) return hit.value;
-  const r = await fetch(PUBLIC_RPC_URL, {
-    method: "POST",
-    signal: AbortSignal.timeout(5e3),
-    headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.4" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: feed, data: "0xfeaf968c" }, "latest"] })
+  const result = await retryOnce(async () => {
+    const r = await fetch(PUBLIC_RPC_URL, {
+      method: "POST",
+      signal: AbortSignal.timeout(5e3),
+      headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.4" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: feed, data: "0xfeaf968c" }, "latest"] })
+    });
+    const j2 = await r.json();
+    if (!j2.result || j2.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
+    return j2.result;
   });
-  const j = await r.json();
-  if (!j.result || j.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
+  const j = { result };
   const a = word(j.result, 1);
   const value = { round_id: word(j.result, 0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(word(j.result, 3)), read_at: (/* @__PURE__ */ new Date()).toISOString() };
   cache2.set(feed, { at: Date.now(), value });
@@ -11089,13 +11116,13 @@ async function snapshot(db2, now = /* @__PURE__ */ new Date(), readRound = liveL
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db2.query("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
   try {
-    const stocks = await withDeadline(Promise.all(feeds.map(async (f) => {
+    const stocks = await withDeadline(mapLimit(feeds, 4, async (f) => {
       const mc = await marketContext(db2, f.token_address, now, readRound, readDex);
       if (mc.status !== 200) throw new Error("market context");
       const d = mc.body.data;
       if (TRANSIENT.has(d.nav_unavailable_reason) || TRANSIENT.has(d.dex?.unavailable_reason)) throw new Error(`live read ${d.symbol}`);
       return { symbol: d.symbol, token: d.token, nav: d.nav, nav_unavailable_reason: d.nav_unavailable_reason ?? null, staleness: d.staleness, dex: d.dex, next_corporate_action: await nextAction(db2, f.token_address) };
-    })), 1e4);
+    }), 12e3);
     const verified = stocks.filter((s) => !UNVERIFIED.has(s.nav_unavailable_reason)).sort((a, b) => a.symbol.localeCompare(b.symbol));
     return { status: 200, body: { data: { market: marketNow(Math.floor(now.getTime() / 1e3)), count: verified.length, stocks: verified }, meta: { note: "Verified data with provenance, not advice. The NAV is Chainlink's last published total-return reference, not a live equity price." } } };
   } catch (e2) {

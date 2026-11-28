@@ -1,5 +1,6 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { CHAIN_ID } from "../config.ts";
+import { retryOnce } from "../lib/retry.ts";
 import { classifyStaleness, marketNow, STALENESS_METHOD } from "../lib/marketSession.ts";
 import { formatNav } from "./nav.ts";
 import { liveDex } from "./dex.ts";
@@ -20,14 +21,18 @@ export type RoundReader = (feed: string) => Promise<Round>;
 export const liveLatestRound: RoundReader = async (feed) => {
   const hit = cache.get(feed);
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.value;
-  const r = await fetch(PUBLIC_RPC_URL, {
-    method: "POST",
-    signal: AbortSignal.timeout(5000),
-    headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.4" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: feed, data: "0xfeaf968c" }, "latest"] }),
+  const result = await retryOnce(async () => {
+    const r = await fetch(PUBLIC_RPC_URL, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+      headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.4" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: feed, data: "0xfeaf968c" }, "latest"] }),
+    });
+    const j = (await r.json()) as { result?: string; error?: unknown };
+    if (!j.result || j.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
+    return j.result;
   });
-  const j = (await r.json()) as { result?: string; error?: unknown };
-  if (!j.result || j.result.length < 2 + 64 * 5) throw new Error("rpc_unavailable");
+  const j = { result };
   const a = word(j.result, 1);
   const value = { round_id: word(j.result, 0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(word(j.result, 3)), read_at: new Date().toISOString() };
   cache.set(feed, { at: Date.now(), value });
