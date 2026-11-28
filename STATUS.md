@@ -84,3 +84,4 @@
 - Not complete until the founder actions in LAUNCH_REPORT §9 are done (rate-limit rule, Bankr redeploy, CLI 0.7.0, MAXXAGENT message, listings, hackathon submission).
 
 - 2026-11-28: founder actions done: rate-limit rule live, MAXXAGENT package sent, Bankr snapshot redeployed (v2); CLI 0.7.0 publish running. Analytics added (same-origin). Next-phase proposal written (docs/PUBLIC_PRODUCT_EXPERIENCE.md), awaiting approval. Brand unchanged by founder's instruction.
+- 2026-11-28 (later): approved public product built: snapshot batched into one multicall (1.3 s locally), /v1/overview + /v1/stats, Explorer, Playground, Transparency pages; README rewritten; Bankr skill PR prepared. Awaiting merge, then outside tests.

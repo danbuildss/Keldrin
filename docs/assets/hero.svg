@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="keldrin: the verified record for tokenized stocks on Base">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="2.2" fill="#ffffff" fill-opacity=".22"/></pattern>
+  </defs>
+  <rect width="1200" height="420" fill="#0000FF"/>
+  <rect width="1200" height="420" fill="url(#dots)"/>
+  <polyline points="0,300 120,285 240,292 360,250 480,262 600,228 720,240 840,196 960,214 1080,170 1200,182" fill="none" stroke="#ffffff" stroke-opacity=".55" stroke-width="3"/>
+  <g transform="translate(80,96)">
+    <path fill="#ffffff" fill-rule="evenodd" d="M6 8h52l-10 48H16L6 8zm22 12v24h8V20h-8z"/>
+    <text x="84" y="50" font-family="Inter, Helvetica, Arial, sans-serif" font-size="56" font-weight="700" fill="#ffffff" letter-spacing="-2">keldrin</text>
+  </g>
+  <text x="80" y="230" font-family="Inter, Helvetica, Arial, sans-serif" font-size="44" font-weight="600" fill="#ffffff" letter-spacing="-1.5">Proof behind every stock on Base.</text>
+  <text x="80" y="278" font-family="Inter, Helvetica, Arial, sans-serif" font-size="20" fill="#ffffff" fill-opacity=".85">Corporate actions · Chainlink NAV with round ids · freshness · onchain DEX prices</text>
+  <text x="80" y="370" font-family="JetBrains Mono, Menlo, monospace" font-size="16" fill="#ffffff" fill-opacity=".8">free API · MCP · npx keldrin · $0.05 snapshots via x402</text>
+</svg>
