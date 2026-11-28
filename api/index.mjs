@@ -2480,12 +2480,12 @@ var init_cursor = __esm({
 
 // node_modules/viem/_esm/utils/cursor.js
 function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
-  const cursor2 = Object.create(staticCursor);
-  cursor2.bytes = bytes;
-  cursor2.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  cursor2.positionReadCount = /* @__PURE__ */ new Map();
-  cursor2.recursiveReadLimit = recursiveReadLimit;
-  return cursor2;
+  const cursor = Object.create(staticCursor);
+  cursor.bytes = bytes;
+  cursor.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  cursor.positionReadCount = /* @__PURE__ */ new Map();
+  cursor.recursiveReadLimit = recursiveReadLimit;
+  return cursor;
 }
 var staticCursor;
 var init_cursor2 = __esm({
@@ -2696,7 +2696,7 @@ var init_fromBytes = __esm({
 // node_modules/viem/_esm/utils/abi/decodeAbiParameters.js
 function decodeAbiParameters(params, data) {
   const bytes = typeof data === "string" ? hexToBytes(data) : data;
-  const cursor2 = createCursor(bytes);
+  const cursor = createCursor(bytes);
   if (size(bytes) === 0 && params.length > 0)
     throw new AbiDecodingZeroDataError();
   if (size(data) && size(data) < 32)
@@ -2709,8 +2709,8 @@ function decodeAbiParameters(params, data) {
   const values = [];
   for (let i = 0; i < params.length; ++i) {
     const param = params[i];
-    cursor2.setPosition(consumed);
-    const [data2, consumed_] = decodeParameter(cursor2, param, {
+    cursor.setPosition(consumed);
+    const [data2, consumed_] = decodeParameter(cursor, param, {
       staticPosition: 0
     });
     consumed += consumed_;
@@ -2718,71 +2718,71 @@ function decodeAbiParameters(params, data) {
   }
   return values;
 }
-function decodeParameter(cursor2, param, { staticPosition }) {
+function decodeParameter(cursor, param, { staticPosition }) {
   const arrayComponents = getArrayComponents(param.type);
   if (arrayComponents) {
     const [length, type] = arrayComponents;
-    return decodeArray(cursor2, { ...param, type }, { length, staticPosition });
+    return decodeArray(cursor, { ...param, type }, { length, staticPosition });
   }
   if (param.type === "tuple")
-    return decodeTuple(cursor2, param, { staticPosition });
+    return decodeTuple(cursor, param, { staticPosition });
   if (param.type === "address")
-    return decodeAddress(cursor2);
+    return decodeAddress(cursor);
   if (param.type === "bool")
-    return decodeBool(cursor2);
+    return decodeBool(cursor);
   if (param.type.startsWith("bytes"))
-    return decodeBytes(cursor2, param, { staticPosition });
+    return decodeBytes(cursor, param, { staticPosition });
   if (param.type.startsWith("uint") || param.type.startsWith("int"))
-    return decodeNumber(cursor2, param);
+    return decodeNumber(cursor, param);
   if (param.type === "string")
-    return decodeString(cursor2, { staticPosition });
+    return decodeString(cursor, { staticPosition });
   throw new InvalidAbiDecodingTypeError(param.type, {
     docsPath: "/docs/contract/decodeAbiParameters"
   });
 }
-function decodeAddress(cursor2) {
-  const value = cursor2.readBytes(32);
+function decodeAddress(cursor) {
+  const value = cursor.readBytes(32);
   return [checksumAddress(bytesToHex(sliceBytes(value, -20))), 32];
 }
-function decodeArray(cursor2, param, { length, staticPosition }) {
+function decodeArray(cursor, param, { length, staticPosition }) {
   if (!length) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const startOfData = start + sizeOfLength;
-    cursor2.setPosition(start);
-    const length2 = bytesToNumber(cursor2.readBytes(sizeOfLength));
+    cursor.setPosition(start);
+    const length2 = bytesToNumber(cursor.readBytes(sizeOfLength));
     const dynamicChild = hasDynamicChild(param);
     let consumed2 = 0;
     const value2 = [];
     for (let i = 0; i < length2; ++i) {
-      cursor2.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
-      const [data, consumed_] = decodeParameter(cursor2, param, {
+      cursor.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
+      const [data, consumed_] = decodeParameter(cursor, param, {
         staticPosition: startOfData
       });
       consumed2 += consumed_;
       value2.push(data);
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const value2 = [];
     for (let i = 0; i < length; ++i) {
-      cursor2.setPosition(start + i * 32);
-      const [data] = decodeParameter(cursor2, param, {
+      cursor.setPosition(start + i * 32);
+      const [data] = decodeParameter(cursor, param, {
         staticPosition: start
       });
       value2.push(data);
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   let consumed = 0;
   const value = [];
   for (let i = 0; i < length; ++i) {
-    const [data, consumed_] = decodeParameter(cursor2, param, {
+    const [data, consumed_] = decodeParameter(cursor, param, {
       staticPosition: staticPosition + consumed
     });
     consumed += consumed_;
@@ -2790,57 +2790,57 @@ function decodeArray(cursor2, param, { length, staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeBool(cursor2) {
-  return [bytesToBool(cursor2.readBytes(32), { size: 32 }), 32];
+function decodeBool(cursor) {
+  return [bytesToBool(cursor.readBytes(32), { size: 32 }), 32];
 }
-function decodeBytes(cursor2, param, { staticPosition }) {
+function decodeBytes(cursor, param, { staticPosition }) {
   const [_, size2] = param.type.split("bytes");
   if (!size2) {
-    const offset = bytesToNumber(cursor2.readBytes(32));
-    cursor2.setPosition(staticPosition + offset);
-    const length = bytesToNumber(cursor2.readBytes(32));
+    const offset = bytesToNumber(cursor.readBytes(32));
+    cursor.setPosition(staticPosition + offset);
+    const length = bytesToNumber(cursor.readBytes(32));
     if (length === 0) {
-      cursor2.setPosition(staticPosition + 32);
+      cursor.setPosition(staticPosition + 32);
       return ["0x", 32];
     }
-    const data = cursor2.readBytes(length);
-    cursor2.setPosition(staticPosition + 32);
+    const data = cursor.readBytes(length);
+    cursor.setPosition(staticPosition + 32);
     return [bytesToHex(data), 32];
   }
-  const value = bytesToHex(cursor2.readBytes(Number.parseInt(size2), 32));
+  const value = bytesToHex(cursor.readBytes(Number.parseInt(size2), 32));
   return [value, 32];
 }
-function decodeNumber(cursor2, param) {
+function decodeNumber(cursor, param) {
   const signed = param.type.startsWith("int");
   const size2 = Number.parseInt(param.type.split("int")[1] || "256");
-  const value = cursor2.readBytes(32);
+  const value = cursor.readBytes(32);
   return [
     size2 > 48 ? bytesToBigInt(value, { signed }) : bytesToNumber(value, { signed }),
     32
   ];
 }
-function decodeTuple(cursor2, param, { staticPosition }) {
+function decodeTuple(cursor, param, { staticPosition }) {
   const hasUnnamedChild = param.components.length === 0 || param.components.some(({ name }) => !name);
   const value = hasUnnamedChild ? [] : {};
   let consumed = 0;
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     for (let i = 0; i < param.components.length; ++i) {
       const component = param.components[i];
-      cursor2.setPosition(start + consumed);
-      const [data, consumed_] = decodeParameter(cursor2, component, {
+      cursor.setPosition(start + consumed);
+      const [data, consumed_] = decodeParameter(cursor, component, {
         staticPosition: start
       });
       consumed += consumed_;
       value[hasUnnamedChild ? i : component?.name] = data;
     }
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return [value, 32];
   }
   for (let i = 0; i < param.components.length; ++i) {
     const component = param.components[i];
-    const [data, consumed_] = decodeParameter(cursor2, component, {
+    const [data, consumed_] = decodeParameter(cursor, component, {
       staticPosition
     });
     value[hasUnnamedChild ? i : component?.name] = data;
@@ -2848,18 +2848,18 @@ function decodeTuple(cursor2, param, { staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeString(cursor2, { staticPosition }) {
-  const offset = bytesToNumber(cursor2.readBytes(32));
+function decodeString(cursor, { staticPosition }) {
+  const offset = bytesToNumber(cursor.readBytes(32));
   const start = staticPosition + offset;
-  cursor2.setPosition(start);
-  const length = bytesToNumber(cursor2.readBytes(32));
+  cursor.setPosition(start);
+  const length = bytesToNumber(cursor.readBytes(32));
   if (length === 0) {
-    cursor2.setPosition(staticPosition + 32);
+    cursor.setPosition(staticPosition + 32);
     return ["", 32];
   }
-  const data = cursor2.readBytes(length, 32);
+  const data = cursor.readBytes(length, 32);
   const value = bytesToString(trim(data));
-  cursor2.setPosition(staticPosition + 32);
+  cursor.setPosition(staticPosition + 32);
   return [value, 32];
 }
 function hasDynamicChild(param) {
@@ -3487,7 +3487,7 @@ var require_pg_int8 = __commonJS({
       var carry;
       var t;
       var digits;
-      var pad3;
+      var pad2;
       var l;
       var i;
       {
@@ -3499,12 +3499,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3515,12 +3515,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3531,12 +3531,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad3 = "";
+        pad2 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad3 += "0";
+          pad2 += "0";
         }
-        result = pad3 + digits + result;
+        result = pad2 + digits + result;
       }
       {
         carry = high % BASE;
@@ -10468,8 +10468,8 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   if (interval === "daily" && Date.parse(to) - Date.parse(from) > 400 * 864e5) return e(400, "RANGE_TOO_LONG", "daily ranges are limited to 400 days", "page by date range");
   const limit = Number(q.get("limit") ?? 500);
   if (!Number.isInteger(limit) || limit < 1 || limit > 1e3) return e(400, "BAD_LIMIT", "limit must be an integer 1-1000");
-  const cursor2 = q.get("cursor");
-  if (cursor2 !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor2)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
+  const cursor = q.get("cursor");
+  if (cursor !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
   const known = (await db2.query("SELECT count(*)::int AS n FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0].n;
   if (!known) return e(404, "UNKNOWN_ASSET", `no tracked asset ${contract}`, "GET /v1/assets lists tracked tokens");
   const feed = (await db2.query(
@@ -10502,7 +10502,7 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   const ny = "(r.updated_at AT TIME ZONE 'America/New_York')";
   let rows;
   if (interval === "round") {
-    const [cu, cr] = cursor2 ? cursor2.split("-") : [null, null];
+    const [cu, cr] = cursor ? cursor.split("-") : [null, null];
     rows = (await db2.query(
       `WITH ${ph} SELECT ${cols} FROM nav_rounds r JOIN ph ON ph.phase_id = r.phase_id
        WHERE r.chain_id=$1 AND r.feed_address=$2 AND r.updated_at >= $3::timestamptz AND r.updated_at < $4::timestamptz AND ${coveredExpr}
@@ -11539,50 +11539,12 @@ async function submitFeedback(db2, raw, client) {
   }
 }
 
+// src/pipeline/payments.ts
+var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
+
 // src/api/stats.ts
 var CONFIRMED_INTEGRATIONS = [];
-var USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-var ROUTER = "0x8aee621035d93deb3c0c1177fac252dc2dd501a0";
-var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
-var TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-var PAYMENTS_FROM_BLOCK = 63080000n;
-var pad2 = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
-var cursor = null;
-async function countPayments(rpc = publicRpc) {
-  const head = BigInt(await rpc("eth_blockNumber", []));
-  let start = PAYMENTS_FROM_BLOCK;
-  if (cursor) start = BigInt(Number(cursor.to) + 1);
-  const forwards = [];
-  for (let a = start; a <= head; a += 10000n) {
-    const b = a + 9999n < head ? a + 9999n : head;
-    forwards.push(...await rpc("eth_getLogs", [{ address: USDC2, topics: [TRANSFER, pad2(ROUTER), pad2(PAYOUT)], fromBlock: "0x" + a.toString(16), toBlock: "0x" + b.toString(16) }]));
-  }
-  const txs = [...new Set(forwards.map((l) => l.transactionHash))].filter((t) => !cursor?.txs.includes(t));
-  const payers = [...cursor?.payers ?? []];
-  const paidTxs = [...cursor?.txs ?? []];
-  for (const tx of txs) {
-    const rc = await rpc("eth_getTransactionReceipt", [tx]);
-    const inbound = rc.logs.find((l) => l.address?.toLowerCase() === USDC2.toLowerCase() && l.topics[0] === TRANSFER && l.topics[2]?.toLowerCase() === pad2(ROUTER) && BigInt(l.data) === 50000n);
-    if (inbound) {
-      payers.push("0x" + inbound.topics[1].slice(26).toLowerCase());
-      paidTxs.push(tx);
-    }
-  }
-  let to = head;
-  if (cursor && cursor.to > head) to = cursor.to;
-  cursor = { to, txs: paidTxs, payers };
-  const wallets = new Set(payers);
-  return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
-}
-async function withDeadline2(p, ms) {
-  let t;
-  try {
-    return await Promise.race([p, new Promise((_, rej) => t = setTimeout(() => rej(new Error("deadline")), ms))]);
-  } finally {
-    clearTimeout(t);
-  }
-}
-async function stats(db2, rpc = publicRpc) {
+async function stats(db2) {
   const one = async (sql, params = []) => (await db2.query(sql, params)).rows[0];
   const [assets, feeds, rounds, records, calendar, pools, runs] = await Promise.all([
     one("SELECT count(*)::int AS n FROM assets"),
@@ -11597,9 +11559,15 @@ async function stats(db2, rpc = publicRpc) {
   let payments = null;
   let payments_unavailable_reason;
   try {
-    payments = await withDeadline2(countPayments(rpc), 8e3);
+    const scan = (await db2.query(`SELECT max(to_block)::text AS to_block, to_char(max(scanned_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS at FROM x402_payment_scans WHERE chain_id = $1`, [CHAIN_ID])).rows[0];
+    if (!scan?.to_block) payments_unavailable_reason = "not counted yet: the research robot has not completed its first payment scan";
+    else {
+      const rows = (await db2.query("SELECT tx_hash, payer FROM x402_payments WHERE chain_id = $1 ORDER BY block_number", [CHAIN_ID])).rows;
+      const wallets = new Set(rows.map((r) => r.payer.toLowerCase()));
+      payments = { payments: rows.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: rows.map((r) => r.tx_hash), to_block: scan.to_block, counted_at: scan.at };
+    }
   } catch {
-    payments_unavailable_reason = "onchain read failed; try again later";
+    payments_unavailable_reason = "payment records unavailable right now";
   }
   return {
     status: 200,
@@ -11616,7 +11584,7 @@ async function stats(db2, rpc = publicRpc) {
         ...payments_unavailable_reason ? { x402_payments_unavailable_reason: payments_unavailable_reason } : {},
         confirmed_external_integrations: CONFIRMED_INTEGRATIONS
       },
-      meta: { note: "Counts read from keldrin's database at request time (cached up to about 20 min; about 1 min when the onchain payment count is unavailable); payments counted onchain from USDC transfers. `external_paying_wallets` excludes only keldrin's payout wallet (which made the first test payment); a payment from any other wallet counts as external. `dex_pools_verified.count` is the pools served (latest CONFIRMED review); `discovered` is every pool found." }
+      meta: { note: "Counts read from keldrin's database at request time (cached up to about 20 min); x402 payments are counted onchain from USDC transfers by keldrin's research robot every 8 h and stored (to_block and counted_at say how far). `external_paying_wallets` excludes only keldrin's payout wallet (which made the first test payment); a payment from any other wallet counts as external. `dex_pools_verified.count` is the pools served (latest CONFIRMED review); `discovered` is every pool found." }
     }
   };
 }

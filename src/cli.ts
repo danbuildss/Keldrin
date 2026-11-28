@@ -18,6 +18,9 @@ import { computeNavStats, insertNavReview, loadReviewInput } from "./pipeline/na
 import { verifyNavFeed } from "./verify/navVerify.ts";
 import { indexDexPools } from "./pipeline/dexPools.ts";
 import { verifyDexPools } from "./verify/dexVerify.ts";
+import { indexPayments } from "./pipeline/payments.ts";
+import { rpc as chainRpc } from "./adapters/chain.ts";
+import { RPC_URL } from "./config.ts";
 
 const args = process.argv.slice(2);
 const cmd = args[0];
@@ -294,6 +297,14 @@ async function dexIndexCmd() {
   await db.close();
 }
 
+/** Phase 1.4: count keldrin's x402 payments onchain (incremental, append-only); /v1/stats reads the result. */
+async function paymentsIndexCmd() {
+  const db = await openDb(DB_DIR);
+  const r = await indexPayments(db, (m, p) => chainRpc(m, p), new URL(RPC_URL).host);
+  console.log(r.skipped ? `payments-index: nothing new (last scanned block ${r.from - 1n})` : `payments-index: blocks ${r.from}..${r.to}, ${r.found} new payment(s)`);
+  await db.close();
+}
+
 /** Phase 8: independently re-derive every stored pool (public RPC) and record a review per token. */
 async function dexVerifyCmd() {
   const db = await openDb(DB_DIR);
@@ -335,6 +346,7 @@ const commands: Record<string, () => Promise<void>> = {
   "nav-index": navIndexCmd,
   "nav-verify": navVerifyCmd,
   "dex-index": dexIndexCmd,
+  "payments-index": paymentsIndexCmd,
   "dex-verify": dexVerifyCmd,
   serve: async () => {
     const db = await openDb(DB_DIR);
