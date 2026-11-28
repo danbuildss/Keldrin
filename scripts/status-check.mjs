@@ -45,7 +45,7 @@ await check("mcp", async () => {
 });
 await check("agent guide", async () => {
   const r = await get(SITE + "/skill.md");
-  must(r.status === 200 && r.text.includes("50000") && r.text.includes(TERMS.payTo.slice(2, 10)), `HTTP ${r.status}`);
+  must(r.status === 200 && r.text.includes("50000") && r.text.toLowerCase().includes(TERMS.payTo), `HTTP ${r.status}`);
   return "200";
 });
 await check("market context (live chain read)", async () => {
