@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.danbuildss/keldrin",
-  "title": "Keldrin",
-  "description": "Verified tokenized-stock data on Base: corporate actions, Chainlink NAV with round ids, DEX prices.",
+  "title": "keldrin",
+  "description": "Intelligence for programmable equities: verified NAV, corporate actions and DEX data on Base.",
   "version": "0.7.0",
   "websiteUrl": "https://keldrin.vercel.app",
   "remotes": [

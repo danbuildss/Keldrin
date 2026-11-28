@@ -1,7 +1,7 @@
 {
   "name": "keldrin",
   "version": "0.7.0",
-  "description": "Keldrin CLI: verified corporate actions, Chainlink NAV history, market context and DEX prices for Coinbase tokenized stocks on Base, with onchain re-verification. Includes a stdio MCP bridge.",
+  "description": "keldrin CLI (intelligence for programmable equities): verified corporate actions, Chainlink NAV history, market context and DEX prices for Coinbase tokenized stocks on Base, with onchain re-verification. Includes a stdio MCP bridge.",
   "keywords": [
     "tokenized-stocks",
     "base",
