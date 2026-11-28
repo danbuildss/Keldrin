@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // src/npm/cli.ts
-var VERSION = "0.7.0";
+var VERSION = "0.7.1";
 var argv = process.argv.slice(2);
 var flags = new Map(argv.filter((a) => a.startsWith("--")).map((a) => {
   const [k, ...v] = a.slice(2).split("=");

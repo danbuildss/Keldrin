@@ -27,7 +27,7 @@ await t("agent guide", "/skill.md", (r, b) => [r.status === 200 && String(b).inc
 await t("agent guide (upper case)", "/SKILL.md", (r) => [r.status === 200, ""]);
 await t("developer quick start", "/start.md", (r, b) => [r.status === 200 && String(b).includes("0x04689a41629776563E6822F76f2e57D148d28513"), ""]);
 await t("llms.txt", "/llms.txt", (r, b) => [r.status === 200 && String(b).includes("/skill.md"), ""]);
-await t("openapi.json", "/openapi.json", (r, b) => [r.status === 200 && b.info?.version === "0.7.0" && !!b.paths?.["/api/snapshot"], `v${b.info?.version}`]);
+await t("openapi.json", "/openapi.json", (r, b) => [r.status === 200 && b.info?.version === "0.7.1" && !!b.paths?.["/api/snapshot"], `v${b.info?.version}`]);
 await t("API index", "/v1", (r, b) => [r.status === 200, ""]);
 await t("health", "/health", (r, b) => [r.status === 200 && b.data?.last_run?.outcome === "ok", `assets ${b.data?.assets}, last run ${b.data?.last_run?.finished_at}`]);
 await t("assets", "/v1/assets", (r, b) => [r.status === 200 && b.data?.length > 400, `${b.data?.length} tokens`]);

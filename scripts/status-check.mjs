@@ -25,7 +25,7 @@ const must = (cond, msg) => {
 
 await check("website", async () => {
   const r = await get(SITE + "/");
-  must(r.status === 200 && r.text.includes("keldrin, built by SOMEHOW"), `HTTP ${r.status}`);
+  must(r.status === 200 && /keldrin, built by (<a [^>]*>)?SOMEHOW/.test(r.text), `HTTP ${r.status}`);
   return "200";
 });
 await check("api freshness", async () => {
