@@ -157,3 +157,16 @@ Reviewer in a separate context, branch claude/awesome-brahmagupta-9y3hiy; 133/13
 9. Paid snapshot fan-out (~28 calls from Bankr's IP) vs per-instance 120/min. → Accepted; edge rule set at 300/min/IP.
 10. status-check did not check maxTimeoutSeconds. → Added.
 Tests after fixes: 137/137 with a real Postgres, 0 skipped. Bankr snapshot handler bumped to 1.0.1 (needs a redeploy from Bankr chat).
+
+## Public pages: independent review after merge of #26 (2026-11-28)
+Reviewer in a separate context; no blockers; 142/142 before fixes. Fixed on branch claude/awesome-brahmagupta-9y3hiy:
+1. Snapshot could exceed Vercel's 15 s (8 s fast path + 12 s fallback). → One 13 s budget; fast path 6 s, fallback gets the rest.
+2. One failed sub-call in the batch failed every stock. → Missing NAV round or DEX result falls back to that item's own live read.
+3. A failed payment count was CDN-cached for up to 20 min; the scan had no deadline. → 8 s deadline; 60 s cache when payments are missing; per-instance block cursor so later counts scan only new blocks (test).
+4. "DEX pools verified" counted discovered pools. → Counts pools in each token's latest CONFIRMED review (same rule as /dex); `discovered` shown separately (test).
+5. "Cached up to 5 min" understated stale-while-revalidate. → "up to about 10 min old".
+6. Unbacked page text ("one team testing", "13", "435"). → Removed / computed. External wallets: wording says only the payout wallet is excluded.
+7. Filing links not checked. → Only https://(www.)sec.gov/ URLs are linked.
+Nits fixed: playground no longer swaps a non-NAV token for NVDAc; keyboard focus and Enter on explorer rows; risk excludes provisional closes and says "last N returns"; v4 main pool links to Uniswap's pool page.
+Checked onchain: tx 0x5c3665…ab05 status 1; payer = payout wallet 0xb98f…fa91 (founder's test, correctly not external).
+Production at merge: /v1/stats returned x402_payments null (public RPC throttled; finding 3). Tests after fixes: 143 pass, 3 skipped (Postgres tests run in CI).

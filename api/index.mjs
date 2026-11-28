@@ -2480,12 +2480,12 @@ var init_cursor = __esm({
 
 // node_modules/viem/_esm/utils/cursor.js
 function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
-  const cursor = Object.create(staticCursor);
-  cursor.bytes = bytes;
-  cursor.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  cursor.positionReadCount = /* @__PURE__ */ new Map();
-  cursor.recursiveReadLimit = recursiveReadLimit;
-  return cursor;
+  const cursor2 = Object.create(staticCursor);
+  cursor2.bytes = bytes;
+  cursor2.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  cursor2.positionReadCount = /* @__PURE__ */ new Map();
+  cursor2.recursiveReadLimit = recursiveReadLimit;
+  return cursor2;
 }
 var staticCursor;
 var init_cursor2 = __esm({
@@ -2696,7 +2696,7 @@ var init_fromBytes = __esm({
 // node_modules/viem/_esm/utils/abi/decodeAbiParameters.js
 function decodeAbiParameters(params, data) {
   const bytes = typeof data === "string" ? hexToBytes(data) : data;
-  const cursor = createCursor(bytes);
+  const cursor2 = createCursor(bytes);
   if (size(bytes) === 0 && params.length > 0)
     throw new AbiDecodingZeroDataError();
   if (size(data) && size(data) < 32)
@@ -2709,8 +2709,8 @@ function decodeAbiParameters(params, data) {
   const values = [];
   for (let i = 0; i < params.length; ++i) {
     const param = params[i];
-    cursor.setPosition(consumed);
-    const [data2, consumed_] = decodeParameter(cursor, param, {
+    cursor2.setPosition(consumed);
+    const [data2, consumed_] = decodeParameter(cursor2, param, {
       staticPosition: 0
     });
     consumed += consumed_;
@@ -2718,71 +2718,71 @@ function decodeAbiParameters(params, data) {
   }
   return values;
 }
-function decodeParameter(cursor, param, { staticPosition }) {
+function decodeParameter(cursor2, param, { staticPosition }) {
   const arrayComponents = getArrayComponents(param.type);
   if (arrayComponents) {
     const [length, type] = arrayComponents;
-    return decodeArray(cursor, { ...param, type }, { length, staticPosition });
+    return decodeArray(cursor2, { ...param, type }, { length, staticPosition });
   }
   if (param.type === "tuple")
-    return decodeTuple(cursor, param, { staticPosition });
+    return decodeTuple(cursor2, param, { staticPosition });
   if (param.type === "address")
-    return decodeAddress(cursor);
+    return decodeAddress(cursor2);
   if (param.type === "bool")
-    return decodeBool(cursor);
+    return decodeBool(cursor2);
   if (param.type.startsWith("bytes"))
-    return decodeBytes(cursor, param, { staticPosition });
+    return decodeBytes(cursor2, param, { staticPosition });
   if (param.type.startsWith("uint") || param.type.startsWith("int"))
-    return decodeNumber(cursor, param);
+    return decodeNumber(cursor2, param);
   if (param.type === "string")
-    return decodeString(cursor, { staticPosition });
+    return decodeString(cursor2, { staticPosition });
   throw new InvalidAbiDecodingTypeError(param.type, {
     docsPath: "/docs/contract/decodeAbiParameters"
   });
 }
-function decodeAddress(cursor) {
-  const value = cursor.readBytes(32);
+function decodeAddress(cursor2) {
+  const value = cursor2.readBytes(32);
   return [checksumAddress(bytesToHex(sliceBytes(value, -20))), 32];
 }
-function decodeArray(cursor, param, { length, staticPosition }) {
+function decodeArray(cursor2, param, { length, staticPosition }) {
   if (!length) {
-    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const startOfData = start + sizeOfLength;
-    cursor.setPosition(start);
-    const length2 = bytesToNumber(cursor.readBytes(sizeOfLength));
+    cursor2.setPosition(start);
+    const length2 = bytesToNumber(cursor2.readBytes(sizeOfLength));
     const dynamicChild = hasDynamicChild(param);
     let consumed2 = 0;
     const value2 = [];
     for (let i = 0; i < length2; ++i) {
-      cursor.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
-      const [data, consumed_] = decodeParameter(cursor, param, {
+      cursor2.setPosition(startOfData + (dynamicChild ? i * 32 : consumed2));
+      const [data, consumed_] = decodeParameter(cursor2, param, {
         staticPosition: startOfData
       });
       consumed2 += consumed_;
       value2.push(data);
     }
-    cursor.setPosition(staticPosition + 32);
+    cursor2.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     const value2 = [];
     for (let i = 0; i < length; ++i) {
-      cursor.setPosition(start + i * 32);
-      const [data] = decodeParameter(cursor, param, {
+      cursor2.setPosition(start + i * 32);
+      const [data] = decodeParameter(cursor2, param, {
         staticPosition: start
       });
       value2.push(data);
     }
-    cursor.setPosition(staticPosition + 32);
+    cursor2.setPosition(staticPosition + 32);
     return [value2, 32];
   }
   let consumed = 0;
   const value = [];
   for (let i = 0; i < length; ++i) {
-    const [data, consumed_] = decodeParameter(cursor, param, {
+    const [data, consumed_] = decodeParameter(cursor2, param, {
       staticPosition: staticPosition + consumed
     });
     consumed += consumed_;
@@ -2790,57 +2790,57 @@ function decodeArray(cursor, param, { length, staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeBool(cursor) {
-  return [bytesToBool(cursor.readBytes(32), { size: 32 }), 32];
+function decodeBool(cursor2) {
+  return [bytesToBool(cursor2.readBytes(32), { size: 32 }), 32];
 }
-function decodeBytes(cursor, param, { staticPosition }) {
+function decodeBytes(cursor2, param, { staticPosition }) {
   const [_, size2] = param.type.split("bytes");
   if (!size2) {
-    const offset = bytesToNumber(cursor.readBytes(32));
-    cursor.setPosition(staticPosition + offset);
-    const length = bytesToNumber(cursor.readBytes(32));
+    const offset = bytesToNumber(cursor2.readBytes(32));
+    cursor2.setPosition(staticPosition + offset);
+    const length = bytesToNumber(cursor2.readBytes(32));
     if (length === 0) {
-      cursor.setPosition(staticPosition + 32);
+      cursor2.setPosition(staticPosition + 32);
       return ["0x", 32];
     }
-    const data = cursor.readBytes(length);
-    cursor.setPosition(staticPosition + 32);
+    const data = cursor2.readBytes(length);
+    cursor2.setPosition(staticPosition + 32);
     return [bytesToHex(data), 32];
   }
-  const value = bytesToHex(cursor.readBytes(Number.parseInt(size2), 32));
+  const value = bytesToHex(cursor2.readBytes(Number.parseInt(size2), 32));
   return [value, 32];
 }
-function decodeNumber(cursor, param) {
+function decodeNumber(cursor2, param) {
   const signed = param.type.startsWith("int");
   const size2 = Number.parseInt(param.type.split("int")[1] || "256");
-  const value = cursor.readBytes(32);
+  const value = cursor2.readBytes(32);
   return [
     size2 > 48 ? bytesToBigInt(value, { signed }) : bytesToNumber(value, { signed }),
     32
   ];
 }
-function decodeTuple(cursor, param, { staticPosition }) {
+function decodeTuple(cursor2, param, { staticPosition }) {
   const hasUnnamedChild = param.components.length === 0 || param.components.some(({ name }) => !name);
   const value = hasUnnamedChild ? [] : {};
   let consumed = 0;
   if (hasDynamicChild(param)) {
-    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const offset = bytesToNumber(cursor2.readBytes(sizeOfOffset));
     const start = staticPosition + offset;
     for (let i = 0; i < param.components.length; ++i) {
       const component = param.components[i];
-      cursor.setPosition(start + consumed);
-      const [data, consumed_] = decodeParameter(cursor, component, {
+      cursor2.setPosition(start + consumed);
+      const [data, consumed_] = decodeParameter(cursor2, component, {
         staticPosition: start
       });
       consumed += consumed_;
       value[hasUnnamedChild ? i : component?.name] = data;
     }
-    cursor.setPosition(staticPosition + 32);
+    cursor2.setPosition(staticPosition + 32);
     return [value, 32];
   }
   for (let i = 0; i < param.components.length; ++i) {
     const component = param.components[i];
-    const [data, consumed_] = decodeParameter(cursor, component, {
+    const [data, consumed_] = decodeParameter(cursor2, component, {
       staticPosition
     });
     value[hasUnnamedChild ? i : component?.name] = data;
@@ -2848,18 +2848,18 @@ function decodeTuple(cursor, param, { staticPosition }) {
   }
   return [value, consumed];
 }
-function decodeString(cursor, { staticPosition }) {
-  const offset = bytesToNumber(cursor.readBytes(32));
+function decodeString(cursor2, { staticPosition }) {
+  const offset = bytesToNumber(cursor2.readBytes(32));
   const start = staticPosition + offset;
-  cursor.setPosition(start);
-  const length = bytesToNumber(cursor.readBytes(32));
+  cursor2.setPosition(start);
+  const length = bytesToNumber(cursor2.readBytes(32));
   if (length === 0) {
-    cursor.setPosition(staticPosition + 32);
+    cursor2.setPosition(staticPosition + 32);
     return ["", 32];
   }
-  const data = cursor.readBytes(length, 32);
+  const data = cursor2.readBytes(length, 32);
   const value = bytesToString(trim(data));
-  cursor.setPosition(staticPosition + 32);
+  cursor2.setPosition(staticPosition + 32);
   return [value, 32];
 }
 function hasDynamicChild(param) {
@@ -10408,8 +10408,8 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   if (interval === "daily" && Date.parse(to) - Date.parse(from) > 400 * 864e5) return e(400, "RANGE_TOO_LONG", "daily ranges are limited to 400 days", "page by date range");
   const limit = Number(q.get("limit") ?? 500);
   if (!Number.isInteger(limit) || limit < 1 || limit > 1e3) return e(400, "BAD_LIMIT", "limit must be an integer 1-1000");
-  const cursor = q.get("cursor");
-  if (cursor !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
+  const cursor2 = q.get("cursor");
+  if (cursor2 !== null && !/^\d{1,12}-\d{1,30}$/.test(cursor2)) return e(400, "BAD_CURSOR", "cursor is opaque; pass meta.next_cursor back unchanged");
   const known = (await db2.query("SELECT count(*)::int AS n FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0].n;
   if (!known) return e(404, "UNKNOWN_ASSET", `no tracked asset ${contract}`, "GET /v1/assets lists tracked tokens");
   const feed = (await db2.query(
@@ -10442,7 +10442,7 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
   const ny = "(r.updated_at AT TIME ZONE 'America/New_York')";
   let rows;
   if (interval === "round") {
-    const [cu, cr] = cursor ? cursor.split("-") : [null, null];
+    const [cu, cr] = cursor2 ? cursor2.split("-") : [null, null];
     rows = (await db2.query(
       `WITH ${ph} SELECT ${cols} FROM nav_rounds r JOIN ph ON ph.phase_id = r.phase_id
        WHERE r.chain_id=$1 AND r.feed_address=$2 AND r.updated_at >= $3::timestamptz AND r.updated_at < $4::timestamptz AND ${coveredExpr}
@@ -11155,16 +11155,18 @@ async function nextAction(db2, token) {
 async function snapshot(db2, now = /* @__PURE__ */ new Date(), readRound = liveLatestRound, readDex = liveDex) {
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db2.query("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
+  const started = Date.now();
+  const BUDGET_MS = 13e3;
   if (readRound === liveLatestRound && readDex === liveDex) {
     try {
-      const feedRows = (await db2.query("SELECT DISTINCT ON (lower(token_address)) token_address, feed_address FROM nav_feeds WHERE chain_id=$1 ORDER BY lower(token_address), discovered_at DESC", [CHAIN_ID])).rows;
-      const b = await withDeadline(batchRead(db2, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 8e3);
-      readRound = async (feed) => {
-        const r = b.rounds.get(feed.toLowerCase());
-        if (!r) throw new Error("rpc_unavailable");
-        return r;
+      const feedRows = (await db2.query("SELECT DISTINCT ON (lower(f.token_address)) f.token_address, f.feed_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1 ORDER BY lower(f.token_address), f.discovered_at DESC", [CHAIN_ID])).rows;
+      const b = await withDeadline(batchRead(db2, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 6e3);
+      readRound = async (feed) => b.rounds.get(feed.toLowerCase()) ?? liveLatestRound(feed);
+      readDex = async (d, c) => {
+        const hit = b.dex.get(c.toLowerCase());
+        const reason = hit?.body?.data?.unavailable_reason;
+        return hit && !TRANSIENT.has(reason) ? hit : liveDex(d, c);
       };
-      readDex = async (_db, c) => b.dex.get(c.toLowerCase()) ?? { status: 200, body: { data: { main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
     } catch {
     }
   }
@@ -11175,7 +11177,7 @@ async function snapshot(db2, now = /* @__PURE__ */ new Date(), readRound = liveL
       const d = mc.body.data;
       if (TRANSIENT.has(d.nav_unavailable_reason) || TRANSIENT.has(d.dex?.unavailable_reason)) throw new Error(`live read ${d.symbol}`);
       return { symbol: d.symbol, token: d.token, nav: d.nav, nav_unavailable_reason: d.nav_unavailable_reason ?? null, staleness: d.staleness, dex: d.dex, next_corporate_action: await nextAction(db2, f.token_address) };
-    }), 12e3);
+    }), Math.max(1e3, BUDGET_MS - (Date.now() - started)));
     const verified = stocks.filter((s) => !UNVERIFIED.has(s.nav_unavailable_reason)).sort((a, b) => a.symbol.localeCompare(b.symbol));
     return { status: 200, body: { data: { market: marketNow(Math.floor(now.getTime() / 1e3)), count: verified.length, stocks: verified }, meta: { note: "Verified data with provenance, not advice. The NAV is Chainlink's last published total-return reference, not a live equity price." } } };
   } catch (e2) {
@@ -11390,16 +11392,19 @@ var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
 var TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 var PAYMENTS_FROM_BLOCK = 63080000n;
 var pad2 = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
+var cursor = null;
 async function countPayments(rpc = publicRpc) {
   const head = BigInt(await rpc("eth_blockNumber", []));
+  let start = PAYMENTS_FROM_BLOCK;
+  if (cursor) start = BigInt(Number(cursor.to) + 1);
   const forwards = [];
-  for (let a = PAYMENTS_FROM_BLOCK; a <= head; a += 10000n) {
+  for (let a = start; a <= head; a += 10000n) {
     const b = a + 9999n < head ? a + 9999n : head;
     forwards.push(...await rpc("eth_getLogs", [{ address: USDC2, topics: [TRANSFER, pad2(ROUTER), pad2(PAYOUT)], fromBlock: "0x" + a.toString(16), toBlock: "0x" + b.toString(16) }]));
   }
-  const txs = [...new Set(forwards.map((l) => l.transactionHash))];
-  const payers = [];
-  const paidTxs = [];
+  const txs = [...new Set(forwards.map((l) => l.transactionHash))].filter((t) => !cursor?.txs.includes(t));
+  const payers = [...cursor?.payers ?? []];
+  const paidTxs = [...cursor?.txs ?? []];
   for (const tx of txs) {
     const rc = await rpc("eth_getTransactionReceipt", [tx]);
     const inbound = rc.logs.find((l) => l.address?.toLowerCase() === USDC2.toLowerCase() && l.topics[0] === TRANSFER && l.topics[2]?.toLowerCase() === pad2(ROUTER) && BigInt(l.data) === 50000n);
@@ -11408,8 +11413,19 @@ async function countPayments(rpc = publicRpc) {
       paidTxs.push(tx);
     }
   }
+  let to = head;
+  if (cursor && cursor.to > head) to = cursor.to;
+  cursor = { to, txs: paidTxs, payers };
   const wallets = new Set(payers);
   return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
+}
+async function withDeadline2(p, ms) {
+  let t;
+  try {
+    return await Promise.race([p, new Promise((_, rej) => t = setTimeout(() => rej(new Error("deadline")), ms))]);
+  } finally {
+    clearTimeout(t);
+  }
 }
 async function stats(db2, rpc = publicRpc) {
   const one = async (sql, params = []) => (await db2.query(sql, params)).rows[0];
@@ -11419,13 +11435,14 @@ async function stats(db2, rpc = publicRpc) {
     one(`SELECT count(*)::int AS n, to_char(min(updated_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS first, to_char(max(updated_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS last FROM nav_rounds`),
     one("SELECT count(*)::int AS n FROM confirmed_records"),
     one("SELECT count(DISTINCT entry_id)::int AS n FROM calendar_entries"),
-    one("SELECT count(*)::int AS n, count(DISTINCT lower(token_address))::int AS tokens FROM dex_pools WHERE chain_id = $1", [CHAIN_ID]),
+    // served pools only: those in each token's latest CONFIRMED review (the same rule as /v1/assets/{c}/dex)
+    one("SELECT count(*) FILTER (WHERE v.verdict = 'CONFIRMED' AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(v.detail->'covered') c WHERE lower(c) = lower(p.venue || ':' || p.pool_ref)))::int AS n, count(DISTINCT lower(p.token_address)) FILTER (WHERE v.verdict = 'CONFIRMED' AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(v.detail->'covered') c WHERE lower(c) = lower(p.venue || ':' || p.pool_ref)))::int AS tokens, count(*)::int AS discovered FROM dex_pools p LEFT JOIN LATERAL (SELECT verdict, detail FROM dex_reviews r WHERE r.chain_id = p.chain_id AND lower(r.token_address) = lower(p.token_address) ORDER BY checked_at DESC LIMIT 1) v ON true WHERE p.chain_id = $1", [CHAIN_ID]),
     one(`SELECT count(*)::int AS n, count(*) FILTER (WHERE outcome = 'ok')::int AS ok, to_char(max(finished_at) AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS last_at, (SELECT outcome FROM runs ORDER BY started_at DESC LIMIT 1) AS last_outcome FROM runs`)
   ]);
   let payments = null;
   let payments_unavailable_reason;
   try {
-    payments = await countPayments(rpc);
+    payments = await withDeadline2(countPayments(rpc), 8e3);
   } catch {
     payments_unavailable_reason = "onchain read failed; try again later";
   }
@@ -11438,13 +11455,13 @@ async function stats(db2, rpc = publicRpc) {
         nav_rounds_indexed: { count: rounds.n, first: rounds.first, last: rounds.last },
         corporate_action_records_confirmed: records.n,
         calendar_entries: calendar.n,
-        dex_pools_verified: { count: pools.n, tokens: pools.tokens },
+        dex_pools_verified: { count: pools.n, tokens: pools.tokens, discovered: pools.discovered },
         research_runs: { total: runs.n, ok: runs.ok, last_finished_at: runs.last_at, last_outcome: runs.last_outcome },
         x402_payments: payments,
         ...payments_unavailable_reason ? { x402_payments_unavailable_reason: payments_unavailable_reason } : {},
         confirmed_external_integrations: CONFIRMED_INTEGRATIONS
       },
-      meta: { note: "Counts read from keldrin's database at request time (cached up to 10 min); payments counted onchain from USDC transfers. The founder's own test payments are included in `payments` and excluded from `external_paying_wallets`." }
+      meta: { note: "Counts read from keldrin's database at request time (cached up to about 20 min; about 1 min when the onchain payment count is unavailable); payments counted onchain from USDC transfers. `external_paying_wallets` excludes only keldrin's payout wallet (which made the first test payment); a payment from any other wallet counts as external. `dex_pools_verified.count` is the pools served (latest CONFIRMED review); `discovered` is every pool found." }
     }
   };
 }
@@ -11452,7 +11469,7 @@ async function overview(db2) {
   const s = await snapshot(db2);
   if (s.status !== 200) return s;
   const b = s.body;
-  return { status: 200, body: { data: b.data, meta: { ...b.meta ?? {}, freshness: "cached up to 5 minutes; the paid snapshot (x402) and the per-stock routes are read live" } } };
+  return { status: 200, body: { data: b.data, meta: { ...b.meta ?? {}, freshness: "cached at the CDN, up to about 10 minutes old (market session included); the paid snapshot (x402) and the per-stock routes are read live" } } };
 }
 
 // src/api/server.ts
@@ -11496,7 +11513,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/snapshot \u2014 every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> \u2014 everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= \u2014 x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
-- GET /v1/overview \u2014 every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, cached up to 5 min; the paid snapshot is live)
+- GET /v1/overview \u2014 every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, CDN-cached, up to about 10 min old; the paid snapshot is live)
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
@@ -11596,7 +11613,7 @@ async function handle(db2, req, res) {
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
     if (p === "/v1/stats") {
       const out = await stats(db2);
-      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status === 200 ? "public, max-age=60, s-maxage=600, stale-while-revalidate=600" : "no-store");
+      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status !== 200 ? "no-store" : out.body.data?.x402_payments ? "public, max-age=60, s-maxage=600, stale-while-revalidate=600" : "public, max-age=30, s-maxage=60");
     }
     if (p === "/v1/overview") {
       const out = await overview(db2);

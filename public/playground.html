@@ -50,9 +50,9 @@ const EPS = [
   { id: "dex", label: "DEX price, depth and verified pools", path: (c) => `/v1/assets/${c}/dex`, token: true },
   { id: "corporate-actions", label: "Corporate actions and multipliers", path: (c) => `/v1/assets/${c}/corporate-actions`, token: true },
   { id: "session", label: "US market session now", path: () => `/v1/market/session` },
-  { id: "overview", label: "Overview: every verified stock (cached up to 5 min)", path: () => `/v1/overview` },
+  { id: "overview", label: "Overview: every verified stock (CDN-cached, up to about 10 min old)", path: () => `/v1/overview` },
   { id: "events", label: "Corporate-action events (all tokens)", path: () => `/v1/events` },
-  { id: "assets", label: "Tracked tokens (435)", path: () => `/v1/assets` },
+  { id: "assets", label: "Tracked tokens", path: () => `/v1/assets` },
   { id: "stats", label: "Transparency counts", path: () => `/v1/stats` },
   { id: "mcp", label: "MCP: list tools (JSON-RPC POST)", path: () => `/mcp`, post: { jsonrpc: "2.0", id: 1, method: "tools/list" } },
 ];
@@ -65,7 +65,14 @@ const assets = await getJson("/v1/overview");
 if (assets.ok) tokens = assets.body.data.stocks.map((s) => ({ sym: s.symbol, addr: s.token }));
 $("#tok").innerHTML = tokens.map((t) => `<option value="${esc(t.addr)}">${esc(t.sym)}</option>`).join("");
 if (qs.get("endpoint") && EPS.some((e) => e.id === qs.get("endpoint"))) $("#ep").value = qs.get("endpoint");
-const wanted = tokens.find((t) => t.sym === qs.get("token")) || tokens.find((t) => t.sym === "NVDAc");
+// a token from the explorer that is not in the overview list (no NAV feed) is added, never swapped for another
+const qt = qs.get("token") || "";
+if (/^0x[0-9a-fA-F]{40}$/.test(qt) && !tokens.some((t) => t.addr.toLowerCase() === qt.toLowerCase())) {
+  const one = await getJson(`/v1/assets/${qt}/corporate-actions`);
+  if (one.ok) { tokens.push({ sym: one.body.data?.[0]?.symbol || one.body.meta?.symbol || qt.slice(0, 10) + "…", addr: qt }); $("#tok").innerHTML = tokens.map((t) => `<option value="${esc(t.addr)}">${esc(t.sym)}</option>`).join(""); }
+}
+if (!tokens.length) $("#desc").textContent = "The token list is unavailable right now; token endpoints can't be built. Try again in a minute.";
+const wanted = tokens.find((t) => t.sym === qt || t.addr.toLowerCase() === qt.toLowerCase()) || tokens.find((t) => t.sym === "NVDAc");
 if (wanted) $("#tok").value = wanted.addr;
 let lang = "curl", last = { url: "", post: null }, lastJson = "";
 const cur = () => EPS.find((e) => e.id === $("#ep").value);
@@ -89,6 +96,7 @@ function sync() {
 $("#langs").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (!b) return; lang = b.dataset.l; $("#langs").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); $("#code").textContent = code(); });
 $("#f").addEventListener("submit", async (ev) => {
   ev.preventDefault(); sync();
+  if (cur().token && !$("#tok").value) { $("#out").textContent = "no token selected (the token list did not load)"; return; }
   $("#run").disabled = true; $("#out").textContent = "running…";
   try {
     const r = await getJson(last.url, last.post ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(last.post) } : undefined);

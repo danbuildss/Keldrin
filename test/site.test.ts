@@ -10,7 +10,7 @@ import { handle } from "../src/api/server.ts";
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
 
 test("site: lowercase wordmark, SOMEHOW footer, honest live numbers, no metered call, reduced-motion support", () => {
-  assert.match(html, /keldrin, built by SOMEHOW/);
+  assert.match(html, /keldrin, built by <a href="https:\/\/somehowinternet.app\/"[^>]*>SOMEHOW<\/a>/);
   assert.doesNotMatch(html, />Keldrin</, "the wordmark is lowercase");
   assert.match(html, /prefers-reduced-motion/);
   assert.match(html, /fetch\("\/health"|getJson\("\/health"\)/);

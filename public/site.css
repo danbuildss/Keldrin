@@ -39,6 +39,8 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--soft)}
 .up{color:var(--good)}.down{color:var(--bad)}
 input,select{font:inherit;font-size:13px;padding:9px 10px;border:1px solid var(--line);background:var(--soft);outline:none;min-width:0}
 input:focus,select:focus{border-color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+tr.click:focus-visible td{background:var(--soft)}
 pre.json{background:#0b0b0f;color:#d6d6d6;font-family:var(--mono);font-size:12px;line-height:1.6;padding:14px;overflow:auto;max-height:520px;white-space:pre}
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--line)}
 .tabs button{font:inherit;font-size:12px;font-family:var(--mono);padding:8px 12px;border:0;background:none;cursor:pointer;color:var(--mute);border-bottom:2px solid transparent}
