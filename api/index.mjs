@@ -10666,7 +10666,8 @@ var ABI = parseAbi([
   "function balanceOf(address) view returns (uint256)",
   "function getSlot0(bytes32) view returns (uint160, int24, uint24, uint24)",
   "function getLiquidity(bytes32) view returns (uint128)",
-  "function getPool(address,address,uint24) view returns (address)"
+  "function getPool(address,address,uint24) view returns (address)",
+  "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)"
 ]);
 var firstWord = (hex) => BigInt("0x" + hex.slice(2, 66));
 var publicRpc = (method, params) => retryOnce(() => rpcOnce(method, params));
@@ -10730,22 +10731,33 @@ async function liveDex(db2, contract, rpc = publicRpc) {
   return value;
 }
 async function liveDexUncached(db2, contract, rpc) {
+  const prep = await prepareDex(db2, contract);
+  if ("done" in prep) return prep.done;
+  let block;
+  let raw;
+  try {
+    block = BigInt(await rpc("eth_blockNumber", []));
+    raw = await multicall(rpc, prep.calls, block);
+  } catch {
+    return { status: 200, body: { data: { ...prep.base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
+  }
+  return finishDex(prep, raw, block);
+}
+async function prepareDex(db2, contract) {
   const asset = (await db2.query("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
-  if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
+  if (!asset) return { done: { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } } };
   const rev = (await db2.query(
     "SELECT verdict, detail, checked_at::text AS checked_at FROM dex_reviews WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY checked_at DESC LIMIT 1",
     [CHAIN_ID, contract]
   )).rows[0];
   const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail) : rev?.detail;
   const base = { token: asset.contract_address, symbol: asset.symbol };
-  if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered) || detail.covered.length === 0) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: rev ? "pools_not_verified" : "no_verified_pools" } } };
+  if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered) || detail.covered.length === 0) return { done: { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: rev ? "pools_not_verified" : "no_verified_pools" } } } };
   const covered2 = new Set(detail.covered.map((x) => x.toLowerCase()));
   const pools = (await db2.query(
     "SELECT venue, pool_ref, currency0, currency1, quote, fee, stable FROM dex_pools WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY venue, pool_ref",
     [CHAIN_ID, contract]
   )).rows.filter((p) => covered2.has(`${p.venue}:${p.pool_ref}`.toLowerCase()));
-  let block;
-  let raw;
   const calls = [
     { target: asset.contract_address, fn: "decimals" },
     { target: UNI_V3_FACTORY, fn: "getPool", args: [WETH, USDC, 500] },
@@ -10759,12 +10771,11 @@ async function liveDexUncached(db2, contract, rpc) {
     else if (p.venue === "aerodrome_v2") calls.push({ target: p.pool_ref, fn: "getReserves" }, bal);
     else calls.push({ target: p.pool_ref, fn: "slot0", raw: true }, { target: p.pool_ref, fn: "liquidity" }, bal);
   }
-  try {
-    block = BigInt(await rpc("eth_blockNumber", []));
-    raw = await multicall(rpc, calls, block);
-  } catch {
-    return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
-  }
+  return { asset, base, pools, calls, idx, checkedAt: rev.checked_at };
+}
+function finishDex(prep, raw, block) {
+  const { asset, base, pools, idx } = prep;
+  const rev = { checked_at: prep.checkedAt };
   const decRaw = raw[0] ? firstWord(raw[0]) : null;
   if (decRaw === null) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
   if (decRaw > BigInt(MAX_DECIMALS)) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "token_decimals_out_of_range" } } };
@@ -10827,6 +10838,35 @@ async function liveDexUncached(db2, contract, rpc) {
       }
     }
   };
+}
+async function batchRead(db2, tokens, feeds, rpc = publicRpc) {
+  const preps = await Promise.all(tokens.map((c) => prepareDex(db2, c)));
+  const calls = [];
+  const offsets = [];
+  for (const pr of preps) {
+    offsets.push(calls.length);
+    if (!("done" in pr)) calls.push(...pr.calls);
+  }
+  const navAt = calls.length;
+  for (const f of feeds) calls.push({ target: f, fn: "latestRoundData" });
+  const block = BigInt(await rpc("eth_blockNumber", []));
+  const raw = await multicall(rpc, calls, block);
+  const dex = /* @__PURE__ */ new Map();
+  preps.forEach((pr, i) => {
+    const key = tokens[i].toLowerCase();
+    if ("done" in pr) dex.set(key, pr.done);
+    else dex.set(key, finishDex(pr, raw.slice(offsets[i], offsets[i] + pr.calls.length), block));
+  });
+  const rounds = /* @__PURE__ */ new Map();
+  const readAt = (/* @__PURE__ */ new Date()).toISOString();
+  feeds.forEach((f, i) => {
+    const r = raw[navAt + i];
+    if (!r || r.length < 2 + 64 * 5) return;
+    const w = (n) => BigInt("0x" + r.slice(2 + n * 64, 2 + (n + 1) * 64));
+    const a = w(1);
+    rounds.set(f.toLowerCase(), { round_id: w(0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(w(3)), read_at: readAt });
+  });
+  return { block, dex, rounds };
 }
 
 // src/api/marketContext.ts
@@ -11115,6 +11155,19 @@ async function nextAction(db2, token) {
 async function snapshot(db2, now = /* @__PURE__ */ new Date(), readRound = liveLatestRound, readDex = liveDex) {
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db2.query("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
+  if (readRound === liveLatestRound && readDex === liveDex) {
+    try {
+      const feedRows = (await db2.query("SELECT DISTINCT ON (lower(token_address)) token_address, feed_address FROM nav_feeds WHERE chain_id=$1 ORDER BY lower(token_address), discovered_at DESC", [CHAIN_ID])).rows;
+      const b = await withDeadline(batchRead(db2, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 8e3);
+      readRound = async (feed) => {
+        const r = b.rounds.get(feed.toLowerCase());
+        if (!r) throw new Error("rpc_unavailable");
+        return r;
+      };
+      readDex = async (_db, c) => b.dex.get(c.toLowerCase()) ?? { status: 200, body: { data: { main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
+    } catch {
+    }
+  }
   try {
     const stocks = await withDeadline(mapLimit(feeds, 4, async (f) => {
       const mc = await marketContext(db2, f.token_address, now, readRound, readDex);

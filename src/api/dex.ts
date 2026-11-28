@@ -38,6 +38,7 @@ const ABI = parseAbi([
   "function getSlot0(bytes32) view returns (uint160, int24, uint24, uint24)",
   "function getLiquidity(bytes32) view returns (uint128)",
   "function getPool(address,address,uint24) view returns (address)",
+  "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
 ]);
 // Aerodrome Slipstream slot0 has 6 fields; only the first word (sqrtPriceX96) is read, so decode it by hand.
 const firstWord = (hex: string) => BigInt("0x" + hex.slice(2, 66));
@@ -122,24 +123,40 @@ export async function liveDex(db: PGlite, contract: string, rpc: Rpc = publicRpc
   return value;
 }
 
-async function liveDexUncached(db: PGlite, contract: string, rpc: Rpc): Promise<{ status: number; body: unknown }> {
+type DexOut = { status: number; body: unknown };
+type DexPrep = { done: DexOut } | { asset: { contract_address: string; symbol: string }; base: { token: string; symbol: string }; pools: { venue: string; pool_ref: string; currency0: string; currency1: string; quote: string; fee: number | null; stable: boolean | null }[]; calls: Call[]; idx: number[]; checkedAt: string };
+
+async function liveDexUncached(db: PGlite, contract: string, rpc: Rpc): Promise<DexOut> {
+  const prep = await prepareDex(db, contract);
+  if ("done" in prep) return prep.done;
+  let block: bigint;
+  let raw: (string | null)[];
+  try {
+    block = BigInt((await rpc("eth_blockNumber", [])) as string);
+    raw = await multicall(rpc, prep.calls, block);
+  } catch {
+    return { status: 200, body: { data: { ...prep.base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
+  }
+  return finishDex(prep, raw, block);
+}
+
+/** Read the verified pools and build the onchain calls for one token (no RPC). */
+export async function prepareDex(db: PGlite, contract: string): Promise<DexPrep> {
   const asset = (await db.query<{ contract_address: string; symbol: string }>("SELECT contract_address, symbol FROM assets WHERE lower(contract_address)=lower($1)", [contract])).rows[0];
-  if (!asset) return { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } };
+  if (!asset) return { done: { status: 404, body: { error: { code: "UNKNOWN_ASSET", message: `no tracked asset ${contract}`, hint: "GET /v1/assets lists tracked tokens" } } } };
   const rev = (await db.query<{ verdict: string; detail: { covered?: string[] }; checked_at: string }>(
     "SELECT verdict, detail, checked_at::text AS checked_at FROM dex_reviews WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY checked_at DESC LIMIT 1",
     [CHAIN_ID, contract],
   )).rows[0];
   const detail = typeof rev?.detail === "string" ? JSON.parse(rev.detail as unknown as string) : rev?.detail;
   const base = { token: asset.contract_address, symbol: asset.symbol };
-  if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered) || detail.covered.length === 0) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: rev ? "pools_not_verified" : "no_verified_pools" } } };
+  if (!rev || rev.verdict !== "CONFIRMED" || !Array.isArray(detail?.covered) || detail.covered.length === 0) return { done: { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: rev ? "pools_not_verified" : "no_verified_pools" } } } };
   // coverage entries are "venue:pool_ref", so a pool is only served under the venue it was reviewed as
   const covered = new Set((detail.covered as string[]).map((x) => x.toLowerCase()));
   const pools = (await db.query<{ venue: string; pool_ref: string; currency0: string; currency1: string; quote: string; fee: number | null; stable: boolean | null }>(
     "SELECT venue, pool_ref, currency0, currency1, quote, fee, stable FROM dex_pools WHERE chain_id=$1 AND lower(token_address)=lower($2) ORDER BY venue, pool_ref",
     [CHAIN_ID, contract],
   )).rows.filter((p) => covered.has(`${p.venue}:${p.pool_ref}`.toLowerCase()));
-  let block: bigint;
-  let raw: (string | null)[];
   const calls: Call[] = [
     { target: asset.contract_address, fn: "decimals" },
     { target: UNI_V3_FACTORY, fn: "getPool", args: [WETH, USDC, 500] },
@@ -153,12 +170,13 @@ async function liveDexUncached(db: PGlite, contract: string, rpc: Rpc): Promise<
     else if (p.venue === "aerodrome_v2") calls.push({ target: p.pool_ref, fn: "getReserves" }, bal);
     else calls.push({ target: p.pool_ref, fn: "slot0", raw: true }, { target: p.pool_ref, fn: "liquidity" }, bal);
   }
-  try {
-    block = BigInt((await rpc("eth_blockNumber", [])) as string);
-    raw = await multicall(rpc, calls, block);
-  } catch {
-    return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
-  }
+  return { asset, base, pools, calls, idx, checkedAt: rev.checked_at };
+}
+
+/** Turn the raw results of prepareDex's calls (read at one block) into the /dex answer. */
+export function finishDex(prep: Exclude<DexPrep, { done: DexOut }>, raw: (string | null)[], block: bigint): DexOut {
+  const { asset, base, pools, idx } = prep;
+  const rev = { checked_at: prep.checkedAt };
   const decRaw = raw[0] ? firstWord(raw[0]) : null;
   if (decRaw === null) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
   if (decRaw > BigInt(MAX_DECIMALS)) return { status: 200, body: { data: { ...base, main: null, pools: [], unavailable_reason: "token_decimals_out_of_range" } } };
@@ -222,4 +240,39 @@ async function liveDexUncached(db: PGlite, contract: string, rpc: Rpc): Promise<
       },
     },
   };
+}
+
+/**
+ * Snapshot read (all stocks at once): every token's DEX calls plus each NAV feed's latestRoundData in ONE multicall at
+ * ONE block (two RPC requests in total instead of ~40). Returns per-token /dex answers and per-feed NAV rounds; a
+ * feed whose read fails is simply missing from `rounds` (the caller reports it as unavailable).
+ */
+export async function batchRead(db: PGlite, tokens: string[], feeds: string[], rpc: Rpc = publicRpc): Promise<{ block: bigint; dex: Map<string, DexOut>; rounds: Map<string, { round_id: string; answer_raw: string; updated_unix: number; read_at: string }> }> {
+  const preps = await Promise.all(tokens.map((c) => prepareDex(db, c)));
+  const calls: Call[] = [];
+  const offsets: number[] = [];
+  for (const pr of preps) {
+    offsets.push(calls.length);
+    if (!("done" in pr)) calls.push(...pr.calls);
+  }
+  const navAt = calls.length;
+  for (const f of feeds) calls.push({ target: f, fn: "latestRoundData" });
+  const block = BigInt((await rpc("eth_blockNumber", [])) as string);
+  const raw = await multicall(rpc, calls, block);
+  const dex = new Map<string, DexOut>();
+  preps.forEach((pr, i) => {
+    const key = tokens[i].toLowerCase();
+    if ("done" in pr) dex.set(key, pr.done);
+    else dex.set(key, finishDex(pr, raw.slice(offsets[i], offsets[i] + pr.calls.length), block));
+  });
+  const rounds = new Map<string, { round_id: string; answer_raw: string; updated_unix: number; read_at: string }>();
+  const readAt = new Date().toISOString();
+  feeds.forEach((f, i) => {
+    const r = raw[navAt + i];
+    if (!r || r.length < 2 + 64 * 5) return;
+    const w = (n: number) => BigInt("0x" + r.slice(2 + n * 64, 2 + (n + 1) * 64));
+    const a = w(1);
+    rounds.set(f.toLowerCase(), { round_id: w(0).toString(), answer_raw: (a >= 1n << 255n ? a - (1n << 256n) : a).toString(), updated_unix: Number(w(3)), read_at: readAt });
+  });
+  return { block, dex, rounds };
 }

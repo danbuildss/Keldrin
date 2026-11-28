@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { decodeFunctionData, encodeFunctionResult, parseAbi, toFunctionSelector } from "viem";
 import { openDb, upsertAsset } from "../src/db/db.ts";
-import { depth2pctConcentrated, fmt18, liveDex, priceFromSqrt, selectMain, type PoolQuote } from "../src/api/dex.ts";
+import { batchRead, depth2pctConcentrated, fmt18, liveDex, priceFromSqrt, selectMain, type PoolQuote } from "../src/api/dex.ts";
 import { scanV4Initialize, V4_FROM_BLOCK, V4_LOG_CHUNK } from "../src/pipeline/dexPools.ts";
 import { parseV4Initialize, V4_INITIALIZE_TOPIC } from "../src/pipeline/dexPools.ts";
 import { DEX_SEL, v4PoolId, verifyDexPools } from "../src/verify/dexVerify.ts";
@@ -95,6 +95,7 @@ const MC = parseAbi([
   "function getSlot0(bytes32) view returns (uint160, int24, uint24, uint24)",
   "function getLiquidity(bytes32) view returns (uint128)",
   "function balanceOf(address) view returns (uint256)",
+  "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
 ]);
 function fakeDexRpc(prices: { stockSqrt: bigint; stockL: bigint; stockBal?: bigint }) {
   const ETH_USD_POOL = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
@@ -111,6 +112,7 @@ function fakeDexRpc(prices: { stockSqrt: bigint; stockL: bigint; stockBal?: bigi
       else if (d.functionName === "getPool") ret = encodeFunctionResult({ abi: MC, functionName: "getPool", result: ETH_USD_POOL });
       else if (d.functionName === "slot0") ret = encodeFunctionResult({ abi: MC, functionName: "slot0", result: [c.target.toLowerCase() === ETH_USD_POOL.toLowerCase() ? ethSqrt : prices.stockSqrt, 0, 0, 0, 0, 0, true] });
       else if (d.functionName === "liquidity") ret = encodeFunctionResult({ abi: MC, functionName: "liquidity", result: prices.stockL });
+      else if (d.functionName === "latestRoundData") ret = encodeFunctionResult({ abi: MC, functionName: "latestRoundData", result: [(2n << 64n) | 9n, 15000000000n, 1n, 1764266100n, (2n << 64n) | 9n] });
       else if (d.functionName === "balanceOf") ret = encodeFunctionResult({ abi: MC, functionName: "balanceOf", result: prices.stockBal ?? 10n ** 30n });
       else if (d.functionName === "getSlot0") ret = encodeFunctionResult({ abi: MC, functionName: "getSlot0", result: [0n, 0, 0, 0] });
       else ret = encodeFunctionResult({ abi: MC, functionName: "getLiquidity", result: 0n });
@@ -256,4 +258,23 @@ test("v4 discovery scan: chunked, both currency orders, halves a refused chunk, 
 test("priceFromSqrt: the decimal shift is applied before dividing (no precision lost when the stock is token1)", () => {
   // stock token1 (18 dec) vs quote token0 (6 dec), raw ratio 9 stock per quote → 1e12/9 quote per stock
   assert.equal(priceFromSqrt(3n * 2n ** 96n, false, 18, 6), "111111111111.111111111111111111");
+});
+
+test("batchRead: all tokens' pools and NAV rounds in one multicall give the same answer as the single-token read", async () => {
+  const db = await seeded();
+  try {
+    await db.query("INSERT INTO dex_reviews (review_id, chain_id, token_address, verdict, pools_checked, detail, checked_at) VALUES ('rb',8453,$1,'CONFIRMED',1,$2,now())", [NV, JSON.stringify({ covered: [`uniswap_v3:${V3_POOL}`] })]);
+    let calls = 0;
+    const base = fakeDexRpc({ stockSqrt: sqrt150, stockL: 10n ** 15n });
+    const counting = async (m: string, p: any[]) => { calls++; return base(m, p); };
+    const FEED = "0x04689a41629776563E6822F76f2e57D148d28513";
+    const b = await batchRead(db, [NV], [FEED], counting);
+    assert.equal(calls, 2, "eth_blockNumber + one multicall");
+    const single: any = await liveDex(db, NV, base);
+    const batched: any = b.dex.get(NV.toLowerCase());
+    assert.equal(batched.body.data.main.price_usd, single.body.data.main.price_usd);
+    assert.equal(b.rounds.get(FEED.toLowerCase())?.answer_raw, "15000000000");
+  } finally {
+    await db.close();
+  }
 });

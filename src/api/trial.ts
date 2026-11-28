@@ -4,7 +4,7 @@ import { TRIAL_CONSUME_SQL } from "../db/pg.ts";
 import { assetCorporateActions } from "./assetActions.ts";
 import { navHistory } from "./nav.ts";
 import { marketContext, liveLatestRound, type DexReader, type RoundReader } from "./marketContext.ts";
-import { liveDex } from "./dex.ts";
+import { batchRead, liveDex } from "./dex.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { CHAIN_ID } from "../config.ts";
 import { mapLimit } from "../lib/retry.ts";
@@ -99,6 +99,21 @@ async function nextAction(db: PGlite, token: string) {
 export async function snapshot(db: PGlite, now = new Date(), readRound: RoundReader = liveLatestRound, readDex: DexReader = liveDex): Promise<Out> {
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db.query<{ token_address: string }>("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
+  // Fast path (production readers only): every stock's DEX pools and NAV round in one multicall at one block.
+  if (readRound === liveLatestRound && readDex === liveDex) {
+    try {
+      const feedRows = (await db.query<{ token_address: string; feed_address: string }>("SELECT DISTINCT ON (lower(token_address)) token_address, feed_address FROM nav_feeds WHERE chain_id=$1 ORDER BY lower(token_address), discovered_at DESC", [CHAIN_ID])).rows;
+      const b = await withDeadline(batchRead(db, feeds.map((f) => f.token_address), feedRows.map((f) => f.feed_address)), 8_000);
+      readRound = async (feed) => {
+        const r = b.rounds.get(feed.toLowerCase());
+        if (!r) throw new Error("rpc_unavailable");
+        return r;
+      };
+      readDex = async (_db, c) => b.dex.get(c.toLowerCase()) ?? { status: 200, body: { data: { main: null, pools: [], unavailable_reason: "rpc_unavailable" } } };
+    } catch {
+      // fall back to per-stock live reads below
+    }
+  }
   try {
     // at most 4 stocks in flight: the public RPC throttles a burst of ~40 reads
     const stocks = await withDeadline(mapLimit(feeds, 4, async (f) => {
