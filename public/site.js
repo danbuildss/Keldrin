@@ -1,6 +1,16 @@
 // Shared helpers for keldrin's product pages. Every number shown comes from a live API response; nothing is hard-coded.
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const $ = (s) => document.querySelector(s);
+// Ticker badge: the stock's letters on a brand tint, generated from the symbol. No third-party company logos
+// (trademarks; keldrin is not affiliated with the issuers).
+const TINTS = [["#0000FF", "#FFFFFF"], ["#D1D7FF", "#0000FF"], ["#111111", "#FFFFFF"], ["#E8EBFF", "#111111"]];
+export function badge(symbol, size = 32) {
+  const t = String(symbol ?? "").replace(/c$/, "").slice(0, 4).toUpperCase();
+  let h = 0; for (const ch of t) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const [bg, fg] = TINTS[h % TINTS.length];
+  const fs = Math.round(size * (t.length > 3 ? 0.3 : 0.36));
+  return `<span class="badge" aria-hidden="true" style="width:${size}px;height:${size}px;background:${bg};color:${fg};font-size:${fs}px">${esc(t)}</span>`;
+}
 export const short = (a) => (a ? a.slice(0, 6) + "…" + a.slice(-4) : "");
 export const basescan = (kind, v) => `https://basescan.org/${kind}/${v}`;
 export async function getJson(path, init) {

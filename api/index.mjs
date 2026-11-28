@@ -11469,7 +11469,7 @@ async function overview(db2) {
   const s = await snapshot(db2);
   if (s.status !== 200) return s;
   const b = s.body;
-  return { status: 200, body: { data: b.data, meta: { ...b.meta ?? {}, freshness: "cached at the CDN, up to about 10 minutes old (market session included); the paid snapshot (x402) and the per-stock routes are read live" } } };
+  return { status: 200, body: { data: b.data, meta: { ...b.meta ?? {}, freshness: "cached at the CDN and refreshed in the background: normally a few minutes old, at most about 30 minutes (market session included); the paid snapshot (x402) and the per-stock routes are read live" } } };
 }
 
 // src/api/server.ts
@@ -11513,7 +11513,7 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/snapshot \u2014 every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> \u2014 everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= \u2014 x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
-- GET /v1/overview \u2014 every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, CDN-cached, up to about 10 min old; the paid snapshot is live)
+- GET /v1/overview \u2014 every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, CDN-cached and refreshed in the background, normally a few minutes old and at most about 30 min; the paid snapshot is live)
 - GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
@@ -11617,7 +11617,7 @@ async function handle(db2, req, res) {
     }
     if (p === "/v1/overview") {
       const out = await overview(db2);
-      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status === 200 ? "public, max-age=60, s-maxage=300, stale-while-revalidate=300" : "no-store");
+      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status === 200 ? "public, max-age=60, s-maxage=120, stale-while-revalidate=1800" : "no-store");
     }
     if (p === "/health") {
       try {
