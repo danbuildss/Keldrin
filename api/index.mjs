@@ -3487,7 +3487,7 @@ var require_pg_int8 = __commonJS({
       var carry;
       var t;
       var digits;
-      var pad2;
+      var pad3;
       var l;
       var i;
       {
@@ -3499,12 +3499,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad2 = "";
+        pad3 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad2 += "0";
+          pad3 += "0";
         }
-        result = pad2 + digits + result;
+        result = pad3 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3515,12 +3515,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad2 = "";
+        pad3 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad2 += "0";
+          pad3 += "0";
         }
-        result = pad2 + digits + result;
+        result = pad3 + digits + result;
       }
       {
         carry = high % BASE;
@@ -3531,12 +3531,12 @@ var require_pg_int8 = __commonJS({
         if (low === 0 && high === 0) {
           return sign + digits + result;
         }
-        pad2 = "";
+        pad3 = "";
         l = 6 - digits.length;
         for (i = 0; i < l; i++) {
-          pad2 += "0";
+          pad3 += "0";
         }
-        result = pad2 + digits + result;
+        result = pad3 + digits + result;
       }
       {
         carry = high % BASE;
@@ -6413,7 +6413,7 @@ var require_helper = __commonJS({
       var file = env.PGPASSFILE || (isWin ? path.join(env.APPDATA || "./", "postgresql", "pgpass.conf") : path.join(env.HOME || "./", ".pgpass"));
       return file;
     };
-    module.exports.usePgPass = function(stats, fname) {
+    module.exports.usePgPass = function(stats2, fname) {
       if (Object.prototype.hasOwnProperty.call(process.env, "PGPASSWORD")) {
         return false;
       }
@@ -6421,11 +6421,11 @@ var require_helper = __commonJS({
         return true;
       }
       fname = fname || "<unkn>";
-      if (!isRegFile(stats.mode)) {
+      if (!isRegFile(stats2.mode)) {
         warn('WARNING: password file "%s" is not a plain file', fname);
         return false;
       }
-      if (stats.mode & (S_IRWXG | S_IRWXO)) {
+      if (stats2.mode & (S_IRWXG | S_IRWXO)) {
         warn('WARNING: password file "%s" has group or world access; permissions should be u=rw (0600) or less', fname);
         return false;
       }
@@ -10493,17 +10493,17 @@ async function navHistory(db2, contract, q, now = /* @__PURE__ */ new Date()) {
      FROM nav_phases WHERE chain_id=$1 AND feed_address=$2 ORDER BY phase_id, observed_block DESC`,
     [CHAIN_ID, feed.feed_address]
   )).rows;
-  const stats = detail.stats ?? {};
+  const stats2 = detail.stats ?? {};
   const quality = {
     official_rounds: span.n,
     first_official_round_at: span.first,
     last_official_round_at: span.last,
-    missing_round_ids: (stats.missing_round_ids ?? []).slice(0, 50),
-    missing_round_ids_count: (stats.missing_round_ids ?? []).length,
-    max_in_session_gap_s: stats.max_in_session_gap_s ?? null,
-    p99_in_session_gap_s: stats.p99_in_session_gap_s ?? null,
-    overlap_rounds_excluded: stats.overlap_rounds_excluded ?? null,
-    decimals_conflict_phases: stats.decimals_conflict_phases ?? [],
+    missing_round_ids: (stats2.missing_round_ids ?? []).slice(0, 50),
+    missing_round_ids_count: (stats2.missing_round_ids ?? []).length,
+    max_in_session_gap_s: stats2.max_in_session_gap_s ?? null,
+    p99_in_session_gap_s: stats2.p99_in_session_gap_s ?? null,
+    overlap_rounds_excluded: stats2.overlap_rounds_excluded ?? null,
+    decimals_conflict_phases: stats2.decimals_conflict_phases ?? [],
     phases,
     coverage_note: "History starts at the feed's first official round. Rounds an aggregator published outside the window in which the proxy served it, or from an aggregator whose decimals differ from the proxy's, are not official: they are excluded from daily closes and shown only with interval=round&include=all.",
     verification: { verdict: rev.verdict, review_id: rev.review_id, checked_at: rev.checked_at, sampled: rev.sampled, mismatches: rev.mismatches }
@@ -11305,8 +11305,8 @@ async function callTool(db2, name, args, client) {
         if (out.status !== 200) return toolResult(out, () => "");
         const left = await useTry(db2, client);
         const body = out.body;
-        const withMeta = { ...body, meta: { ...body.meta ?? {}, free_tries_left_today: left, paid: PAID } };
-        return toolResult({ status: 200, body: withMeta }, (b) => name === "get_snapshot" ? `${b.data.count} verified stocks; market ${b.data.market.session}. ${left} free snapshot/report tries left today.` : `${b.data.symbol}: ${b.data.corporate_actions.length} corporate action(s), ${b.data.nav_daily_30d ? b.data.nav_daily_30d.meta.count + " daily NAV closes" : "no NAV feed"}, ${b.data.dex_pools?.pools_total ?? 0} DEX pools. ${left} free tries left today.`);
+        const withMeta2 = { ...body, meta: { ...body.meta ?? {}, free_tries_left_today: left, paid: PAID } };
+        return toolResult({ status: 200, body: withMeta2 }, (b) => name === "get_snapshot" ? `${b.data.count} verified stocks; market ${b.data.market.session}. ${left} free snapshot/report tries left today.` : `${b.data.symbol}: ${b.data.corporate_actions.length} corporate action(s), ${b.data.nav_daily_30d ? b.data.nav_daily_30d.meta.count + " daily NAV closes" : "no NAV feed"}, ${b.data.dex_pools?.pools_total ?? 0} DEX pools. ${left} free tries left today.`);
       }
       case "get_market_session": {
         const m = marketNow(Math.floor(Date.now() / 1e3));
@@ -11382,6 +11382,79 @@ async function submitFeedback(db2, raw, client) {
   }
 }
 
+// src/api/stats.ts
+var CONFIRMED_INTEGRATIONS = [];
+var USDC2 = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+var ROUTER = "0x8aee621035d93deb3c0c1177fac252dc2dd501a0";
+var PAYOUT = "0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
+var TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+var PAYMENTS_FROM_BLOCK = 63080000n;
+var pad2 = (a) => "0x" + a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
+async function countPayments(rpc = publicRpc) {
+  const head = BigInt(await rpc("eth_blockNumber", []));
+  const forwards = [];
+  for (let a = PAYMENTS_FROM_BLOCK; a <= head; a += 10000n) {
+    const b = a + 9999n < head ? a + 9999n : head;
+    forwards.push(...await rpc("eth_getLogs", [{ address: USDC2, topics: [TRANSFER, pad2(ROUTER), pad2(PAYOUT)], fromBlock: "0x" + a.toString(16), toBlock: "0x" + b.toString(16) }]));
+  }
+  const txs = [...new Set(forwards.map((l) => l.transactionHash))];
+  const payers = [];
+  const paidTxs = [];
+  for (const tx of txs) {
+    const rc = await rpc("eth_getTransactionReceipt", [tx]);
+    const inbound = rc.logs.find((l) => l.address?.toLowerCase() === USDC2.toLowerCase() && l.topics[0] === TRANSFER && l.topics[2]?.toLowerCase() === pad2(ROUTER) && BigInt(l.data) === 50000n);
+    if (inbound) {
+      payers.push("0x" + inbound.topics[1].slice(26).toLowerCase());
+      paidTxs.push(tx);
+    }
+  }
+  const wallets = new Set(payers);
+  return { payments: paidTxs.length, paying_wallets: wallets.size, external_paying_wallets: [...wallets].filter((w) => w !== PAYOUT).length, transactions: paidTxs, to_block: head.toString() };
+}
+async function stats(db2, rpc = publicRpc) {
+  const one = async (sql, params = []) => (await db2.query(sql, params)).rows[0];
+  const [assets, feeds, rounds, records, calendar, pools, runs] = await Promise.all([
+    one("SELECT count(*)::int AS n FROM assets"),
+    one("SELECT count(*)::int AS n, count(*) FILTER (WHERE v.verdict = 'CONFIRMED')::int AS confirmed FROM nav_feeds f LEFT JOIN LATERAL (SELECT verdict FROM nav_reviews r WHERE r.feed_address = f.feed_address ORDER BY checked_at DESC LIMIT 1) v ON true WHERE f.chain_id = $1", [CHAIN_ID]),
+    one("SELECT count(*)::int AS n, min(updated_at)::text AS first, max(updated_at)::text AS last FROM nav_rounds"),
+    one("SELECT count(*)::int AS n FROM confirmed_records"),
+    one("SELECT count(DISTINCT entry_id)::int AS n FROM calendar_entries"),
+    one("SELECT count(*)::int AS n, count(DISTINCT lower(token_address))::int AS tokens FROM dex_pools WHERE chain_id = $1", [CHAIN_ID]),
+    one("SELECT count(*)::int AS n, count(*) FILTER (WHERE outcome = 'ok')::int AS ok, max(finished_at)::text AS last_at, (SELECT outcome FROM runs ORDER BY started_at DESC LIMIT 1) AS last_outcome FROM runs")
+  ]);
+  let payments = null;
+  let payments_unavailable_reason;
+  try {
+    payments = await countPayments(rpc);
+  } catch {
+    payments_unavailable_reason = "onchain read failed; try again later";
+  }
+  return {
+    status: 200,
+    body: {
+      data: {
+        assets_tracked: assets.n,
+        nav_feeds: { total: feeds.n, independently_confirmed: feeds.confirmed },
+        nav_rounds_indexed: { count: rounds.n, first: rounds.first, last: rounds.last },
+        corporate_action_records_confirmed: records.n,
+        calendar_entries: calendar.n,
+        dex_pools_verified: { count: pools.n, tokens: pools.tokens },
+        research_runs: { total: runs.n, ok: runs.ok, last_finished_at: runs.last_at, last_outcome: runs.last_outcome },
+        x402_payments: payments,
+        ...payments_unavailable_reason ? { x402_payments_unavailable_reason: payments_unavailable_reason } : {},
+        confirmed_external_integrations: CONFIRMED_INTEGRATIONS
+      },
+      meta: { note: "Counts read from keldrin's database at request time (cached up to 10 min); payments counted onchain from USDC transfers. The founder's own test payments are included in `payments` and excluded from `external_paying_wallets`." }
+    }
+  };
+}
+async function overview(db2) {
+  const s = await snapshot(db2);
+  if (s.status !== 200) return s;
+  const b = s.body;
+  return { status: 200, body: { data: b.data, meta: { ...b.meta ?? {}, freshness: "cached up to 5 minutes; the paid snapshot (x402) and the per-stock routes are read live" } } };
+}
+
 // src/api/server.ts
 var ADDR3 = /^0x[0-9a-fA-F]{40}$/;
 function send(res, status, body, type = "application/json", cacheOverride) {
@@ -11404,6 +11477,7 @@ function rateLimited(client, now = Date.now()) {
   return h.n > RATE.limit ? Math.ceil((h.reset - now) / 1e3) : null;
 }
 var ok = (data, extra = {}) => ({ data, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, served: "independently_confirmed_records_only", ...extra } });
+var withMeta = (body) => ({ ...body, meta: { as_of: (/* @__PURE__ */ new Date()).toISOString(), schema_version: SCHEMA_VERSION, ...body.meta ?? {} } });
 var err3 = (code, message, hint) => ({ error: { code, message, ...hint ? { hint } : {} } });
 var OPENAPI = keldrin_v1_default;
 var LLMS_TXT = `# Keldrin
@@ -11422,6 +11496,8 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/snapshot \u2014 every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> \u2014 everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= \u2014 x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
+- GET /v1/overview \u2014 every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, cached up to 5 min; the paid snapshot is live)
+- GET /v1/stats \u2014 transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md \u2014 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md \u2014 the agent guide: when to use keldrin, how to read every field, safety and payment rules
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD \u2014 Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
@@ -11501,7 +11577,7 @@ async function handle(db2, req, res) {
       return send(res, out.status, out.body, void 0, "no-store");
     }
     if (p === "/mcp") return send(res, 405, err3("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), void 0, "no-store");
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
       if (contract && !ADDR3.test(contract)) return send(res, 400, err3("BAD_ADDRESS", "contract must be a 0x-prefixed 20-byte address"));
@@ -11518,6 +11594,14 @@ async function handle(db2, req, res) {
     }
     if (p === "/llms.txt") return send(res, 200, LLMS_TXT, "text/plain; charset=utf-8");
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
+    if (p === "/v1/stats") {
+      const out = await stats(db2);
+      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status === 200 ? "public, max-age=60, s-maxage=600, stale-while-revalidate=600" : "no-store");
+    }
+    if (p === "/v1/overview") {
+      const out = await overview(db2);
+      return send(res, out.status, out.status === 200 ? withMeta(out.body) : out.body, void 0, out.status === 200 ? "public, max-age=60, s-maxage=300, stale-while-revalidate=300" : "no-store");
+    }
     if (p === "/health") {
       try {
         await db2.query("SELECT 1");

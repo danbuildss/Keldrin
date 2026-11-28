@@ -10,6 +10,7 @@ import { marketNow } from "../lib/marketSession.ts";
 import { liveDex } from "./dex.ts";
 import { handleMcp } from "./mcp.ts";
 import { submitFeedback } from "./feedback.ts";
+import { overview, stats } from "./stats.ts";
 import { PAID, report, snapshot, triesLeft, trialUnavailable, trialUsedUp, useTry } from "./trial.ts";
 
 // Read-only API. Serves ONLY records whose latest review CONFIRMED the exact payload hash
@@ -40,6 +41,7 @@ export function rateLimited(client: string, now = Date.now()): number | null {
   return h.n > RATE.limit ? Math.ceil((h.reset - now) / 1000) : null;
 }
 const ok = (data: unknown, extra: Json = {}) => ({ data, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, served: "independently_confirmed_records_only", ...extra } });
+const withMeta = (body: Json) => ({ ...body, meta: { as_of: new Date().toISOString(), schema_version: SCHEMA_VERSION, ...((body.meta as Json) ?? {}) } });
 const err = (code: string, message: string, hint?: string) => ({ error: { code, message, ...(hint ? { hint } : {}) } });
 
 const OPENAPI = OPENAPI_DOC as unknown as Json;
@@ -60,6 +62,8 @@ Records state what is unknown instead of guessing. Informational only: not an or
 - GET /v1/snapshot — every stock with a verified Chainlink NAV feed in one answer: live NAV + freshness, main DEX price + gap vs NAV, next corporate action, plus the session. 3 free complete answers per client per day (shared with /v1/report), then HTTP 402 with the paid x402 link ($0.05 USDC on Base): https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-snapshot
 - GET /v1/report?token=<symbol or address> — everything about one token in one answer: corporate actions, market context, 30 daily NAV closes, DEX pools. Same 3 free tries, then $0.05 via x402: https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91/keldrin-report
 - Paid via x402 on our origin (forward to Bankr x402 Cloud, same terms): GET /api/snapshot and GET /api/report?token= — x402 v2, scheme exact, eip155:8453, USDC amount 50000 ($0.05), payTo 0x8AEE621035D93Deb3C0C1177fac252dC2dd501a0. Only a 2xx is charged; sign once, never re-sign automatically.
+- GET /v1/overview — every verified stock's NAV, freshness, DEX price and gap, next corporate action (free, cached up to 5 min; the paid snapshot is live)
+- GET /v1/stats — transparency counts from keldrin's records (assets, feeds, NAV rounds, confirmed records, pools, research runs) and x402 payments counted onchain
 - GET /start.md — 5-minute developer quick start (feeds, coverage, cURL)
 - GET /skill.md — the agent guide: when to use keldrin, how to read every field, safety and payment rules
 - GET /v1/assets/{contract}/nav/history?interval=daily|round&from=YYYY-MM-DD&to=YYYY-MM-DD — Chainlink NAV history with feed, phase and round id per point (re-readable onchain via getRoundData). Total-return NAV: already includes dividends and splits; never apply the multiplier again. Only independently verified feeds are served (503 NAV_NOT_VERIFIED otherwise); missing days are listed, never filled
@@ -146,7 +150,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");
@@ -166,6 +170,14 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     if (p === "/llms.txt") return send(res, 200, LLMS_TXT, "text/plain; charset=utf-8");
     if (p === "/openapi.json") return send(res, 200, OPENAPI);
 
+    if (p === "/v1/stats") {
+      const out = await stats(db);
+      return send(res, out.status, out.status === 200 ? withMeta(out.body as Json) : (out.body as Json), undefined, out.status === 200 ? "public, max-age=60, s-maxage=600, stale-while-revalidate=600" : "no-store");
+    }
+    if (p === "/v1/overview") {
+      const out = await overview(db);
+      return send(res, out.status, out.status === 200 ? withMeta(out.body as Json) : (out.body as Json), undefined, out.status === 200 ? "public, max-age=60, s-maxage=300, stale-while-revalidate=300" : "no-store");
+    }
     if (p === "/health") {
       try {
         await db.query("SELECT 1");
