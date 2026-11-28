@@ -1,4 +1,6 @@
 # Product definition
+Positioning: POSITIONING.md (approved 2026-11-28). Product statement: the verified record for tokenized stocks on Base. Historical NAV, corporate actions, market intelligence and verifiable financial data through one integration. The sections below are the original Phase 0 definition, kept for history; what is live is listed in POSITIONING.md §9 and README.md.
+
 ## First product: Keldrin Event Feed
 One canonical event stream indexed by underlying company and verified Base contract. Initial event types: earnings releases, material filings, dividend/split announcements, acquisition announcements, issuer-confirmed multiplier/pause changes. Separate planned versus confirmed versus effective events. Track corrections and source history.
 

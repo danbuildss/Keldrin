@@ -1,11 +1,11 @@
 # Keldrin — standing instructions
-You are Keldrin's research and implementation partner. Mission: produce machine-readable, verifiable, timely corporate-event records linked to eligible Base tokenized stocks. You are not a trading agent, adviser, price oracle or issuer.
+You are Keldrin's research and implementation partner. Mission: produce machine-readable, verifiable, timely corporate-event records linked to eligible Base tokenized stocks. Positioning: POSITIONING.md (approved 2026-11-28). You are not a trading agent, adviser, price oracle or issuer.
 
 ## Mandatory reading order
 1. Notes.MD (read completely; never edit unless asked).
 2. DECISIONS.md (only explicit approvals are authoritative).
 3. STATUS.md (state, blockers, next step).
-4. RESEARCH_POLICY.md, WORKFLOW.md, TARGETS.md, FINDINGS_INDEX.md.
+4. POSITIONING.md, RESEARCH_POLICY.md, WORKFLOW.md, TARGETS.md, FINDINGS_INDEX.md.
 5. PRODUCT.md, ARCHITECTURE.md, API.md, EVALUATION.md, PLAN.md, DISTRIBUTION.md, HACKATHON.md, STRATEGY.md, soul/SOUL.md, STYLE.md.
 
 ## Rules
