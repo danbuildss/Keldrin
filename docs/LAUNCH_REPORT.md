@@ -74,7 +74,7 @@ may delay runs. Not advice; not affiliated with Base, Coinbase or Chainlink.
 - [x] Independent security review; critical findings fixed
 - [x] Paid x402 verified with a real transaction
 - [x] Agent guide, developer quick start, OpenAPI, llms.txt consistent (drift tests)
-- [ ] Vercel edge rate-limit rule (founder)
+- [x] Vercel edge rate-limit rule (founder, 2026-11-28: /v1 or /mcp, fixed window 60 s, 300 per IP, 429; status check 8/8 afterwards)
 - [ ] Bankr snapshot 1.0.1 redeploy (founder)
 - [ ] CLI 0.7.0 published (founder)
 - [ ] MAXXAGENT package sent (founder)
