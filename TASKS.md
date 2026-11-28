@@ -68,5 +68,7 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T050 | P1 | Vercel Web Analytics (same-origin script) | BUILT on branch; founder enables Analytics in Vercel and closes PR #22 | public/index.html |
 | T051 | P1 | BankrBot/skills PR | PREPARED (integrations/bankr/skill); founder forks and opens it |
 | T052 | P1 | README in Breakra's style | DONE (old workspace note moved to docs/WORKSPACE.md) |
-| T053 | P1 | Review fixes for public pages (#26 follow-up) | BUILT on branch; needs merge | BACKEND_PROOF.md |
+| T053 | P1 | Review fixes for public pages (#26 follow-up) | DONE (#27 merged) | BACKEND_PROOF.md |
 | T040 | P1 | Separate verifier database role (nav_reviews / reviews not writable by the indexer) | OPEN (needs a founder-created login) | Independent review 2026-11-27 finding 6 |
+| T054 | P1 | x402 payment count on /transparency | OPEN: the public RPC refuses eth_getLogs ("request limit reached") from production, so the count shows "unavailable". Proposed: the research robot (Alchemy) counts payments and stores them; needs founder approval (new table + migration) | src/api/stats.ts |
+| T055 | P1 | Launch kit: thread, video script, form text | DRAFTED (docs/LAUNCH_KIT.md); founder posts | docs/LAUNCH_KIT.md |

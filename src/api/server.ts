@@ -46,8 +46,8 @@ const err = (code: string, message: string, hint?: string) => ({ error: { code, 
 
 const OPENAPI = OPENAPI_DOC as unknown as Json;
 
-export const LLMS_TXT = `# Keldrin
-> Verified corporate-action records for Coinbase tokenized stocks (B20) on Base (chain 8453).
+export const LLMS_TXT = `# keldrin
+> Intelligence for programmable equities. The verified record for Coinbase tokenized stocks (B20) on Base (chain 8453): historical NAV, corporate actions, market context and onchain DEX prices, each with its proof.
 Corporate-action records are derived from chain state and independently re-verified; values are exact integers (WAD = 1e18). NAV and DEX values are read onchain at request time from independently checked feeds and pools.
 Records state what is unknown instead of guessing. Informational only: not an oracle, not advice.
 
@@ -150,7 +150,7 @@ export async function handle(db: PGlite, req: IncomingMessage, res: ServerRespon
     }
     if (p === "/mcp") return send(res, 405, err("METHOD_NOT_ALLOWED", "MCP endpoint", "POST one JSON-RPC message (Streamable HTTP, stateless JSON responses; no SSE)"), undefined, "no-store");
 
-    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "Keldrin API", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
+    if (p === "/" || p === "/v1") return send(res, 200, ok({ name: "keldrin API", tagline: "Intelligence for programmable equities.", site: "/ (HTML, served statically on Vercel)", docs: "/llms.txt", openapi: "/openapi.json", endpoints: ["/v1/events", "/v1/changes", "/v1/calendar", "/v1/actions", "/v1/assets", "/v1/assets/{contract}/nav/history", "/v1/assets/{contract}/market-context", "/v1/assets/{contract}/corporate-actions", "/v1/assets/{contract}/dex", "/v1/market/session", "/v1/overview", "/v1/stats", "/v1/snapshot", "/v1/report?token=", "/mcp", "/health"] }));
 
     if (p === "/v1/events" || p === "/v1/changes") {
       const contract = url.searchParams.get("contract");

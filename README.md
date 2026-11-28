@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="keldrin: proof behind every stock on Base. Corporate actions, Chainlink NAV with round ids, freshness and onchain DEX prices." width="100%">
+  <img src="docs/assets/hero.svg" alt="keldrin: intelligence for programmable equities. The verified record for tokenized stocks on Base." width="100%">
 </p>
 
 <p align="center">
@@ -12,9 +12,10 @@
 </p>
 
 <p align="center">
-  keldrin is the verified record for Coinbase tokenized stocks on Base: what happened (dividends, splits, multiplier
-  changes), what a token is worth (Chainlink NAV, with the round id behind every point), how fresh that is, and where it
-  trades onchain. Every value names its source, and you can re-check it yourself.<br/>
+  <strong>Intelligence for programmable equities.</strong> keldrin is the verified record for Coinbase tokenized stocks
+  on Base: historical NAV (Chainlink, with the round id behind every point), corporate actions (dividends, splits,
+  multiplier changes), freshness and onchain DEX prices, through one integration. Every value names its source, and you
+  can re-check it yourself.<br/>
   <strong>Free API, MCP and CLI. One-call snapshots and reports at $0.05 USDC on Base via x402, charged only on a complete answer.</strong>
 </p>
 
@@ -31,10 +32,16 @@
 
 ## Vision
 
-Tokenized stocks are programmable, but the facts around them are scattered: corporate actions in SEC filings, multipliers
-onchain, NAV in Chainlink rounds, prices across DEX pools. Every app and agent rebuilds the same plumbing and guesses at
-the gaps. keldrin researches once, verifies independently, and serves the record to everyone, with "unknown" as a valid
-answer and never a guess. It is a record, not a trading signal, adviser or price oracle.
+**Research once. Verify independently. Serve many.**
+
+Tokenized stocks are programmable, but the facts around them are scattered: corporate actions in SEC filings,
+multipliers onchain, NAV in Chainlink rounds, prices across DEX pools. Every app and agent rebuilds the same plumbing
+and guesses at the gaps. keldrin collects and verifies that intelligence once and serves it to developers, apps and
+autonomous agents, with "unknown" as a valid answer and never a guess. Stop rebuilding financial data infrastructure.
+Integrate keldrin. Don't just trust the data: verify it.
+
+keldrin is not an exchange, trading agent, portfolio manager, lending protocol, adviser or execution-critical price
+oracle, and is not affiliated with Coinbase, Chainlink or Base. Positioning: [POSITIONING.md](POSITIONING.md).
 
 ## How it works
 
@@ -121,7 +128,7 @@ A first real payment settled on 2026-11-28 ([tx](https://basescan.org/tx/0x5c366
 - No request content is stored. The free-try counter keeps a salted hash of the client address for 2 days.
 - Facts with provenance, not investment advice. Not affiliated with Base, Coinbase or Chainlink.
 
-Live numbers, payments counted onchain and methodology: [Transparency](https://keldrin.vercel.app/transparency).
+Live numbers and methodology: [Transparency](https://keldrin.vercel.app/transparency).
 
 ## Docs
 

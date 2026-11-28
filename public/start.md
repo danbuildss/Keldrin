@@ -1,5 +1,7 @@
 # keldrin developer quick start (5 minutes)
 
+Stop rebuilding financial data infrastructure. Integrate keldrin: intelligence for programmable equities.
+
 Free, keyless, server-side friendly. Base URL: `https://keldrin.vercel.app`. Tokens are addressed by contract
 address (preferred) or exact symbol where noted. Full field guide: [/skill.md](https://keldrin.vercel.app/skill.md) ·
 contract: [/openapi.json](https://keldrin.vercel.app/openapi.json).
