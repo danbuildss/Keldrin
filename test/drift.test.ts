@@ -56,3 +56,11 @@ test("agents can find the guide and every documented route exists", () => {
   for (const t of ["get_snapshot", "get_report", "get_market_context", "get_dex_price"]) assert.ok(names.includes(t), t);
   for (const code of ["FREE_TRIES_USED", "INCOMPLETE", "UNKNOWN_ASSET", "AMBIGUOUS_SYMBOL", "NO_NAV_FEED"]) assert.ok(skill.includes(code), code);
 });
+
+test("server.json fits the MCP Registry schema limits (description and title at most 100 characters, remote URL)", () => {
+  const s = JSON.parse(read("server.json"));
+  assert.ok(s.description.length >= 1 && s.description.length <= 100, `description is ${s.description.length} chars`);
+  assert.ok(s.title.length <= 100);
+  assert.match(s.name, /^io\.github\.danbuildss\/[a-zA-Z0-9._-]+$/);
+  assert.equal(s.remotes[0].url, "https://keldrin.vercel.app/mcp");
+});
