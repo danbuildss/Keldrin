@@ -5,7 +5,7 @@
 const SITE = process.env.KELDRIN_SITE || "https://keldrin.vercel.app";
 const BANKR = "https://x402.bankr.bot/0xb98f0de777eea8c481b64e33d3e0066cea38fa91";
 const TERMS = { x402Version: 2, scheme: "exact", network: "eip155:8453", amount: "50000", asset: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", payTo: "0x8aee621035d93deb3c0c1177fac252dc2dd501a0" };
-const MAX_RUN_AGE_H = 8; // the research run is every 6 h
+const MAX_RUN_AGE_H = 12; // the research run is every 8 h (GitHub can delay it)
 const results = [];
 const check = async (name, fn) => {
   try {

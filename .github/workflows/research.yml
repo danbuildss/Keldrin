@@ -5,7 +5,7 @@ name: Keldrin research (scheduled)
 # freshness is shown by /health, not promised.
 on:
   schedule:
-    - cron: "23 1,7,13,19 * * *"
+    - cron: "23 2,10,18 * * *"
   workflow_dispatch:
     inputs:
       symbols:
