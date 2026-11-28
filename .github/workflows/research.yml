@@ -73,7 +73,7 @@ jobs:
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
-      - name: Re-check earnings releases against SEC filing headers (at most 600 per run)
+      - name: Re-check earnings releases against SEC filing headers (at most 1500 per run)
         if: ${{ !cancelled() }}
         run: node src/cli.ts earnings-verify --db=pg
         env:

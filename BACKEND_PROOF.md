@@ -208,3 +208,9 @@ Production at merge: /v1/stats returned x402_payments null (public RPC throttled
   - a Z suffix is required on acceptance times;
   - `is_amendment` is added, and the wording is honest ("re-checked against the filing's own headers").
   - Still open (not a correctness issue): failed CIK lookups are not cached, so unresolved tokens repeat 2 efts calls per run.
+- **First production run (2026-11-28, run 46124140712):** success. earnings-index: 435 tokens, 405 with releases, 3,355 releases, 30 not covered. earnings-verify: 600 CONFIRMED, 0 rejected. The run took 34 min, with 14 min of it spent on the earnings index.
+- **Cost fix:**
+  - Each company is re-read at most every 20 h (`earnings_scans`, migration 012 + grants 015 applied; role checks pass).
+  - Failed SEC company lookups are recorded too, so they are no longer retried every run.
+  - The verify cap is raised to 1,500 per run (600 took 3 min).
+  - Expected steady-state run: about 18 min, the same as before earnings.

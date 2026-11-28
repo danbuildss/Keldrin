@@ -52,7 +52,7 @@ export function judge(stored: { form: string; filed_date: string; accepted_at: s
 
 /** Reviews stored releases without a final (CONFIRMED or REJECTED) review, at most `limit` per run (the first backfill
  *  spreads over several runs). UNSURE ones (SEC page unreachable) are retried on later runs, up to 3 times. */
-export async function verifyEarnings(db: PGlite, limit = 600): Promise<Record<string, number>> {
+export async function verifyEarnings(db: PGlite, limit = 1500): Promise<Record<string, number>> {
   const rows = (await db.query<{ contract_address: string; cik: string; accession: string; form: string; filed_date: string; accepted_at: string }>(
     `SELECT e.contract_address, e.cik, e.accession, e.form, to_char(e.filed_date, 'YYYY-MM-DD') AS filed_date, to_char(e.accepted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS accepted_at
      FROM earnings_releases e WHERE e.chain_id = $1 AND NOT EXISTS (SELECT 1 FROM earnings_reviews r WHERE r.accession = e.accession AND lower(r.contract_address) = lower(e.contract_address) AND r.verdict IN ('CONFIRMED', 'REJECTED'))

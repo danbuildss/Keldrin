@@ -76,4 +76,4 @@ Phase 2 (2026-11-27): DONE — gate passed (BACKEND_PROOF.md). P2-01 SEC calenda
 | T057 | P0 | Coverage level + capabilities per token (ROADMAP 1.3) | BUILT 2026-11-28 (/v1/assets, MCP list_assets, Explorer) | src/api/coverage.ts |
 | T058 | P0 | Privacy and terms page (ROADMAP 1.1) | DONE: live at /legal, text approved by the founder 2026-11-28 | public/legal.html |
 | T059 | P1 | Phase 3 outreach and build-in-public drafts | DRAFTED 2026-11-28 (docs/outreach/PHASE3_DRAFTS.md); founder sends |
-| T060 | P1 | Reliable robot schedule via cron-job.org (founder creates token + 2 jobs; then GitHub schedules removed) | WAITING on founder |
+| T060 | P1 | Reliable robot schedule via cron-job.org (founder creates token + 2 jobs + optional overview warm-up job; then GitHub schedules removed) | WAITING on founder |

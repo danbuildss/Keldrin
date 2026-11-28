@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { openDb, upsertAsset } from "../src/db/db.ts";
-import { earningsReleases } from "../src/pipeline/earnings.ts";
+import { earningsReleases, indexEarnings } from "../src/pipeline/earnings.ts";
 import { judge, nyToUtc, parseHeaders } from "../src/verify/earningsVerify.ts";
 import { assetEarnings } from "../src/api/earnings.ts";
 
@@ -72,6 +72,20 @@ test("earnings API: serves only CONFIRMED releases and says why a token is not c
     assert.equal(out.body.data[0].sec_index_url, "https://www.sec.gov/Archives/edgar/data/1045810/x/0001045810-26-000088-index.htm");
     assert.equal(out.body.meta.not_yet_verified, 1);
     assert.equal(out.body.meta.company.cik, "0001045810");
+  } finally {
+    await db.close();
+  }
+});
+
+test("earnings index: a company read in the last 20 hours is skipped (no SEC request), so runs stay short", async () => {
+  const db = await openDb();
+  try {
+    const c = "0xb20000000000000000000078ee7ce2fE4908108C";
+    await upsertAsset(db, { chain_id: 8453, contract_address: c, symbol_registry: "NVDAc", symbol_onchain: "NVDAc", name: "NVIDIA", decimals_registry: 18, decimals_onchain: 18, isin_registry: null, isin_onchain: null, is_b20: true, multiplier_wad: "1000000000000000000", registry_multiplier_double: 1, first_mint_date: null, observed_block: "1", checks: [], identity_state: "verified" });
+    await db.query("INSERT INTO earnings_scans (scan_id, chain_id, contract_address, releases_found) VALUES ('s1', 8453, $1, 8)", [c]);
+    const r = await indexEarnings(db);
+    assert.equal(r.skipped_recent, 1);
+    assert.equal(r.tokens.length, 0, "nothing fetched from SEC");
   } finally {
     await db.close();
   }
