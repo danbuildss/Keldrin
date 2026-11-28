@@ -76,9 +76,9 @@ may delay runs. Not advice; not affiliated with Base, Coinbase or Chainlink.
 - [x] Agent guide, developer quick start, OpenAPI, llms.txt consistent (drift tests)
 - [x] Vercel edge rate-limit rule (founder, 2026-11-28: /v1 or /mcp, fixed window 60 s, 300 per IP, 429; status check 8/8 afterwards)
 - [x] Bankr snapshot 1.0.1 redeploy (founder, 2026-11-28, Bankr version 2; terms re-checked: 402, $0.05, payTo router)
-- [ ] CLI 0.7.0 published (founder)
-- [ ] MAXXAGENT package sent (founder)
-- [ ] Listings submitted (founder, after approval)
+- [x] CLI published (founder; 0.7.1 on npm 2026-11-28)
+- [x] MAXXAGENT package sent (founder, 2026-11-28)
+- [ ] Listings submitted (founder, after approval). MCP Registry done 2026-11-28 (0.7.1, active); BankrBot/skills PR #879 open; others in docs/LISTINGS.md
 - [ ] Stocks Maxxing: X post with demo video tagging @buildonbase + official form, before 2026-12-12 23:59 UTC (founder)
 
 ## 10. Stocks Maxxing readiness (rules re-read 2026-11-28)

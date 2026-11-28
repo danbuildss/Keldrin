@@ -170,3 +170,17 @@ Reviewer in a separate context; no blockers; 142/142 before fixes. Fixed on bran
 Nits fixed: playground no longer swaps a non-NAV token for NVDAc; keyboard focus and Enter on explorer rows; risk excludes provisional closes and says "last N returns"; v4 main pool links to Uniswap's pool page.
 Checked onchain: tx 0x5c3665…ab05 status 1; payer = payout wallet 0xb98f…fa91 (founder's test, correctly not external).
 Production at merge: /v1/stats returned x402_payments null (public RPC throttled; finding 3). Tests after fixes: 143 pass, 3 skipped (Postgres tests run in CI).
+
+## Phase 1 of the approved roadmap (2026-11-28)
+- **Risk** `/v1/assets/{c}/risk` and MCP `get_risk`:
+  - Computed from the same official, non-provisional daily closes as /nav/history.
+  - A window's figure is only computed from that full window (a 60-day value never comes from 30 days).
+  - Drawdown names its peak and trough round ids.
+  - Tests: closed-form volatility check, null-with-reason, drawdown and returns.
+- **Coverage level** per token: full, market, identity or unverified, plus capabilities. Derived from identity_state and the latest CONFIRMED NAV and DEX reviews. Tests cover the pure rules and the SQL on the real schema.
+- **x402 payment count:**
+  - The robot step `payments-index` (Alchemy) scans incrementally from the last scanned block to head − 30 and appends to `x402_payments` and `x402_payment_scans`. /v1/stats reads the table instead of scanning at request time.
+  - Migration 010 plus grants 013 applied to Supabase. Role checks: reader SELECT only; writer insert only, cannot delete; anon denied; RLS on.
+  - A read-only dry run found 3 payments (0xe5e2213c…, 0x102877aa…, 0x5c3665fc…), all paid by the payout wallet (founder tests).
+- **Privacy and terms** at /legal, linked from every footer and the feedback form. Its text awaits the founder's approval.
+- Tests: 149 pass, 3 skipped (the Postgres tests run in CI).
