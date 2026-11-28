@@ -7,6 +7,7 @@ import { marketContext, liveLatestRound, type DexReader, type RoundReader } from
 import { liveDex } from "./dex.ts";
 import { marketNow } from "../lib/marketSession.ts";
 import { CHAIN_ID } from "../config.ts";
+import { mapLimit } from "../lib/retry.ts";
 
 // Snapshot and report with 3 free tries (Phase 11, founder: "approve 3 free tries for snapshot and report").
 // GET /v1/snapshot and GET /v1/report?token=… answer exactly like the paid Bankr x402 endpoints (keldrin-snapshot,
@@ -99,13 +100,14 @@ export async function snapshot(db: PGlite, now = new Date(), readRound: RoundRea
   if (process.env.NAV_HISTORY_PUBLIC !== "true") return err(503, "NAV_NOT_ENABLED", "NAV data is not enabled on this server");
   const feeds = (await db.query<{ token_address: string }>("SELECT DISTINCT f.token_address FROM nav_feeds f JOIN assets a ON lower(a.contract_address)=lower(f.token_address) WHERE f.chain_id=$1", [CHAIN_ID])).rows;
   try {
-    const stocks = await withDeadline(Promise.all(feeds.map(async (f) => {
+    // at most 4 stocks in flight: the public RPC throttles a burst of ~40 reads
+    const stocks = await withDeadline(mapLimit(feeds, 4, async (f) => {
       const mc = await marketContext(db, f.token_address, now, readRound, readDex);
       if (mc.status !== 200) throw new Error("market context");
       const d = (mc.body as { data: Record<string, any> }).data;
       if (TRANSIENT.has(d.nav_unavailable_reason) || TRANSIENT.has(d.dex?.unavailable_reason)) throw new Error(`live read ${d.symbol}`);
       return { symbol: d.symbol as string, token: d.token, nav: d.nav, nav_unavailable_reason: d.nav_unavailable_reason ?? null, staleness: d.staleness, dex: d.dex, next_corporate_action: await nextAction(db, f.token_address) };
-    })), 10_000);
+    }), 12_000);
     const verified = stocks.filter((s) => !UNVERIFIED.has(s.nav_unavailable_reason)).sort((a, b) => a.symbol.localeCompare(b.symbol));
     return { status: 200, body: { data: { market: marketNow(Math.floor(now.getTime() / 1000)), count: verified.length, stocks: verified }, meta: { note: "Verified data with provenance, not advice. The NAV is Chainlink's last published total-return reference, not a live equity price." } } };
   } catch (e) {

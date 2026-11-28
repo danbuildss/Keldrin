@@ -1,6 +1,7 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from "viem";
 import { CHAIN_ID } from "../config.ts";
+import { retryOnce } from "../lib/retry.ts";
 
 // GET /v1/assets/{contract}/dex (Phase 8). Live DEX price of a tokenized stock on Base, read onchain at ONE pinned
 // block from Base's public RPC, over the pools Keldrin discovered and independently verified (dex_reviews CONFIRMED).
@@ -43,7 +44,8 @@ const firstWord = (hex: string) => BigInt("0x" + hex.slice(2, 66));
 
 type Call = { target: string; fn: string; args?: readonly unknown[]; raw?: boolean };
 export type Rpc = (method: string, params: unknown[]) => Promise<any>;
-export const publicRpc: Rpc = async (method, params) => {
+export const publicRpc: Rpc = (method, params) => retryOnce(() => rpcOnce(method, params));
+const rpcOnce: Rpc = async (method, params) => {
   const r = await fetch(DEX_RPC_URL, { method: "POST", signal: AbortSignal.timeout(6000), headers: { "content-type": "application/json", "user-agent": "Keldrin-API/0.6" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
   const j = (await r.json()) as { result?: unknown; error?: { message: string } };
   if (j.error || j.result === undefined) throw new Error("rpc_unavailable");
