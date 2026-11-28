@@ -10,7 +10,11 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .brand svg{width:22px;height:22px;color:var(--blue)}
 .links{display:flex;gap:22px;font-size:13px}
 .links a{text-decoration:none;color:#444}.links a:hover,.links a.on{color:var(--blue)}
-@media(max-width:760px){.links{gap:14px;font-size:12px}.links .hide-sm{display:none}}
+.menu{display:none;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.links .only-sm{display:none}
+@media(max-width:760px){.links{display:none}.menu{display:inline-flex}
+nav.open .links{display:flex;flex-direction:column;gap:0;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.06)}
+nav.open .links a{padding:14px 24px;border-top:1px solid var(--line);font-size:15px;color:var(--ink)}nav.open .links .only-sm{display:block}}
 .label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:8px}
 .label::before{content:"";width:7px;height:7px;background:var(--blue)}
 h1{font-size:clamp(34px,5vw,56px);letter-spacing:-.04em;font-weight:600;line-height:1;margin-top:14px}
@@ -52,7 +56,7 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding:18px 0 26px;font
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .rv{animation:fade .6s ease both}@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.rv{animation:none}}
-.note,.lead,#desc{overflow-wrap:anywhere}
+.note,.lead,#desc,#desc .mono{overflow-wrap:anywhere;word-break:break-word}
 .badge{display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;letter-spacing:-.02em;flex:none;vertical-align:middle}
 .sym{display:flex;align-items:center;gap:10px}
 .skel td{color:transparent;background:linear-gradient(90deg,var(--soft),#eef0f3,var(--soft));background-size:200% 100%;animation:sh 1.2s infinite}@keyframes sh{to{background-position:-200% 0}}

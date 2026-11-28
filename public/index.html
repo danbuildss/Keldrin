@@ -34,7 +34,11 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .brand svg{width:22px;height:22px}
 .links{display:flex;gap:26px;font-size:13px;color:#444}
 .links a:hover{color:var(--blue)}
-@media(max-width:760px){.links{display:none}}
+.only-sm{display:none}nav.open .only-sm{display:block}
+.menu{display:none;font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border:1px solid var(--line);background:#fff;cursor:pointer;color:#111}
+@media(max-width:760px){.links{display:none}.menu{display:inline-flex}nav .btn.primary{display:none}
+nav.open .links{display:flex;flex-direction:column;gap:0;position:absolute;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.06)}
+nav.open .links a{padding:14px 24px;border-top:1px solid var(--line);font-size:15px;color:#111}}
 /* hero */
 .hero{padding:72px 0 56px}
 .hero .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:end}
@@ -175,8 +179,9 @@ form.fb small{font-size:11px;color:var(--mute);line-height:1.45}
 
 <nav><div class="wrap">
   <a class="brand" href="/"><svg style="color:var(--blue)"><use href="#logo"/></svg>keldrin</a>
-  <div class="links"><a href="/explorer">Explorer</a><a href="/playground">Playground</a><a href="/transparency">Transparency</a><a href="/start.md">Docs</a><a href="#pricing">Pricing</a></div>
+  <div class="links" id="navlinks"><a href="/explorer">Explorer</a><a href="/playground">Playground</a><a href="/transparency">Transparency</a><a href="/start.md">Docs</a><a href="#pricing">Pricing</a><a href="/legal" class="only-sm">Privacy and terms</a></div>
   <a class="btn primary" href="#pricing">Try it free ▸</a>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="navlinks">Menu</button>
 </div></nav>
 
 <header class="hero"><div class="wrap grid">
@@ -318,6 +323,14 @@ form.fb small{font-size:11px;color:var(--mute);line-height:1.45}
 </div></footer>
 
 <script>
+// phone menu: the nav links fold into a Menu button below 760px wide
+(() => {
+  const nav = document.querySelector("nav"), btn = nav.querySelector(".menu");
+  const set = (open) => { nav.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); btn.textContent = open ? "Close" : "Menu"; };
+  btn.addEventListener("click", () => set(!nav.classList.contains("open")));
+  nav.querySelectorAll(".links a").forEach((a) => a.addEventListener("click", () => set(false)));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+})();
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const $ = (s) => document.querySelector(s);

@@ -61,7 +61,10 @@ async function stock(q) {
   const a = assets.ok ? assets.body.data.find((x) => x.symbol === q || x.contract_address.toLowerCase() === q.toLowerCase()) : null;
   if (!a) { main.innerHTML = `<section><a href="/explorer">← Explorer</a><p class="lead">No tracked token "${esc(q)}".</p></section>`; return; }
   const c = a.contract_address;
-  const [mc, hist, ca, dex, rk, er] = await Promise.all([getJson(`/v1/assets/${c}/market-context`), getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), getJson(`/v1/assets/${c}/dex`), getJson(`/v1/assets/${c}/risk`), getJson(`/v1/assets/${c}/earnings`)]);
+  // only ask for what this token has (coverage from /v1/assets): no NAV feed, no NAV/risk/market-context requests
+  const cap = a.capabilities || {};
+  const none = Promise.resolve({ ok: false, status: 0, body: null });
+  const [mc, hist, ca, dex, rk, er] = await Promise.all([cap.market_context === false ? none : getJson(`/v1/assets/${c}/market-context`), cap.nav_history === false ? none : getJson(`/v1/assets/${c}/nav/history?interval=daily&from=2026-01-01`), getJson(`/v1/assets/${c}/corporate-actions`), cap.dex_price === false ? none : getJson(`/v1/assets/${c}/dex`), cap.risk === false ? none : getJson(`/v1/assets/${c}/risk`), getJson(`/v1/assets/${c}/earnings`)]);
   const ctx = mc.ok ? mc.body.data : null, hasNav = hist.ok;
   const closes = hasNav ? hist.body.data.map((x) => ({ d: x.session_day, v: Number(x.nav) })) : [];
   const actions = ca.ok ? ca.body.data : [];
