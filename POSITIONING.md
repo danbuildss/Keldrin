@@ -131,7 +131,7 @@ Keldrin provides the intelligence infrastructure that financial products can bui
 | Primary headline | Intelligence for programmable equities. |
 | Supporting headline | The verified record for tokenized stocks on Base. |
 | Supporting description | Historical NAV, corporate actions, market intelligence and verifiable financial data through one integration. |
-| Developer | Stop rebuilding financial data infrastructure. Integrate Keldrin. |
+| Developer | Stop rebuilding financial data infrastructure. Integrate keldrin. |
 | Trust | Don't just trust the data. Verify it. |
 | Agent | Verified financial intelligence, accessible to autonomous agents. |
 

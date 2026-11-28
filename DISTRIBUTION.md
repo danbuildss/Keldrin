@@ -1,5 +1,5 @@
 # Distribution — draft only
-Messaging follows POSITIONING.md §12 (developer: "Stop rebuilding financial data infrastructure. Integrate Keldrin."; trust: "Don't just trust the data. Verify it."; agent: "Verified financial intelligence, accessible to autonomous agents.") and the transparency rules in §15.
+Messaging follows POSITIONING.md §12 (developer: "Stop rebuilding financial data infrastructure. Integrate keldrin."; trust: "Don't just trust the data. Verify it."; agent: "Verified financial intelligence, accessible to autonomous agents.") and the transparency rules in §15.
 
 Primary acquisition: teams building Base stock applications. Discover public projects, inspect their stated needs and docs, identify a concrete integration use case. Ask developers about required event fields, latency and missing coverage. No auto DMs/comments/mentions, spam or unsolicited bulk contact. Founder approves every external action. Follow Orric's voice and Soundshuman approach only with approved samples/skill; do not copy personal credentials or private data.
 
