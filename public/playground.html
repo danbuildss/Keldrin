@@ -17,10 +17,10 @@
 <section class="rv"><span class="label">API playground</span><h1>Try the API. No key.</h1>
 <p class="lead">Pick an endpoint, run it, and see exactly what your app or agent would get: the real response, status and timing, plus code to copy. Requests go from your browser straight to keldrin's free routes.</p></section>
 <section class="panel" style="padding-top:18px">
-  <form id="f" style="display:grid;gap:10px">
+  <form id="f" style="display:grid;gap:10px;grid-template-columns:minmax(0,1fr)">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <select id="ep" style="flex:2;min-width:220px"></select>
-      <select id="tok" style="flex:1;min-width:120px"></select>
+      <select id="ep" style="flex:2 1 220px;min-width:0;max-width:100%"></select>
+      <select id="tok" style="flex:1 1 120px;min-width:0;max-width:100%"></select>
       <input id="from" type="date" style="flex:1;min-width:140px" title="from (NAV history)">
       <button class="btn primary" id="run">Run ▶</button>
     </div>
