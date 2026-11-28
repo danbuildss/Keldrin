@@ -1,4 +1,4 @@
-# keldrin roadmap (proposed 2026-11-28; becomes binding only when the founder approves it)
+# keldrin roadmap (approved by the founder 2026-11-28: "approve roadmap"; each build step still needs its own approval)
 
 **Direction:** keldrin becomes the verified NAV and corporate-action record for tokenized equities across issuers.
 Coinbase on Base is live; Robinhood comes next, then Ondo. keldrin is not another registry, supply tracker or price
