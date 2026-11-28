@@ -56,3 +56,4 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .badge{display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;letter-spacing:-.02em;flex:none;vertical-align:middle}
 .sym{display:flex;align-items:center;gap:10px}
 .skel td{color:transparent;background:linear-gradient(90deg,var(--soft),#eef0f3,var(--soft));background-size:200% 100%;animation:sh 1.2s infinite}@keyframes sh{to{background-position:-200% 0}}
+.badge.logo{background:#fff;border:1px solid var(--line)}

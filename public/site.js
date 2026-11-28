@@ -1,11 +1,14 @@
 // Shared helpers for keldrin's product pages. Every number shown comes from a live API response; nothing is hard-coded.
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const $ = (s) => document.querySelector(s);
-// Ticker badge: the stock's letters on a brand tint, generated from the symbol. No third-party company logos
-// (trademarks; keldrin is not affiliated with the issuers).
+// Stock image: the company's logo where an open-source copy exists (public/logos, Simple Icons, CC0 data;
+// trademarks of their owners, shown only to identify the company), otherwise a ticker badge on brand colours.
+const LOGOS = new Set(["AAPL", "ANT", "CRCL", "GOOGL", "INTC", "META", "NVDA", "SPCX", "TSLA"]);
 const TINTS = [["#0000FF", "#FFFFFF"], ["#D1D7FF", "#0000FF"], ["#111111", "#FFFFFF"], ["#E8EBFF", "#111111"]];
 export function badge(symbol, size = 32) {
-  const t = String(symbol ?? "").replace(/c$/, "").slice(0, 4).toUpperCase();
+  const base = String(symbol ?? "").replace(/c$/, "").toUpperCase();
+  if (LOGOS.has(base)) return `<span class="badge logo" aria-hidden="true" style="width:${size}px;height:${size}px"><img src="/logos/${base}.svg" alt="" width="${Math.round(size * 0.6)}" height="${Math.round(size * 0.6)}" loading="lazy"></span>`;
+  const t = base.slice(0, 4);
   let h = 0; for (const ch of t) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   const [bg, fg] = TINTS[h % TINTS.length];
   const fs = Math.round(size * (t.length > 3 ? 0.3 : 0.36));
