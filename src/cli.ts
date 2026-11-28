@@ -252,6 +252,19 @@ async function supabaseCmd(sub: string) {
   }
 }
 
+
+/** ROADMAP 1.5: the independent verifier writes reviews through its own login (KELDRIN_VERIFIER_URL, role
+ *  keldrin_verifier: read research tables, append reviews only). Until that secret exists it uses the writer login. */
+async function openVerifierDb() {
+  if (DB_DIR === "pg" && process.env.KELDRIN_VERIFIER_URL) {
+    const { openPgWriter } = await import("./db/pg.ts");
+    console.log("verifier: using its own login (keldrin_verifier)");
+    return openPgWriter(process.env.KELDRIN_VERIFIER_URL) as unknown as Awaited<ReturnType<typeof openDb>>;
+  }
+  if (DB_DIR === "pg") console.log("verifier: KELDRIN_VERIFIER_URL not set; using the writer login");
+  return openDb(DB_DIR);
+}
+
 /** Phase 5: index Chainlink NAV rounds for every feed-backed token (or --symbols), append-only. */
 async function navIndexCmd() {
   const db = await openDb(DB_DIR);
@@ -272,7 +285,7 @@ async function navIndexCmd() {
 
 /** Phase 5: independent re-verification of stored NAV rounds per feed (random sample + phase ends). */
 async function navVerifyCmd() {
-  const db = await openDb(DB_DIR);
+  const db = await openVerifierDb();
   const only = flag("symbols")?.split(",");
   const feeds = (await db.query<{ feed_address: string; symbol: string }>("SELECT DISTINCT feed_address, symbol FROM nav_feeds ORDER BY symbol")).rows.filter((f) => !only || only.includes(f.symbol));
   const tally: Record<string, number> = {};
@@ -319,7 +332,7 @@ async function earningsIndexCmd() {
 
 /** Phase 6.2: independently re-check stored releases against SEC filing headers on www.sec.gov. */
 async function earningsVerifyCmd() {
-  const db = await openDb(DB_DIR);
+  const db = await openVerifierDb();
   const tally = await verifyEarnings(db, Number(flag("limit") ?? 1500));
   console.log(`earnings-verify: ${JSON.stringify(tally)}`);
   await db.close();
@@ -328,7 +341,7 @@ async function earningsVerifyCmd() {
 
 /** Phase 8: independently re-derive every stored pool (public RPC) and record a review per token. */
 async function dexVerifyCmd() {
-  const db = await openDb(DB_DIR);
+  const db = await openVerifierDb();
   const only = flag("symbols")?.split(",");
   const toks = (await db.query<{ token_address: string; symbol: string }>("SELECT DISTINCT p.token_address, f.symbol FROM dex_pools p JOIN nav_feeds f ON lower(f.token_address)=lower(p.token_address) ORDER BY f.symbol")).rows.filter((x) => !only || only.includes(x.symbol));
   const tally: Record<string, number> = {};
