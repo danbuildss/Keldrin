@@ -21,7 +21,14 @@ may change."
 | Judging criteria: "included on the Quest Page" | **Not published on the page we read**; weighted equally unless stated. Check again before submitting |
 | Build-in-public award: $6,000, community vote; share the journey on X tagging @buildonbase | Weekly progress posts help (Phase 3 shiplog) |
 
-## 2. Which track (founder decides)
+## 2. Track: Agentic Stock Finance (founder's choice, 2026-11-28)
+
+The founder picked **Agentic Stock Finance** and thinks keldrin also fits Programmable Stock Markets. The rules
+allow one project in several tracks only if the Quest Page allows it, and the page doesn't say so. Even then, a
+project can win in only one. **If the Submission Form lets you tick more than one track, tick both. If it allows
+one, keep Agentic Stock Finance.** For this track the demo must lead with an agent using keldrin (script below).
+
+Earlier options considered:
 
 - **Programmable Stock Markets** ($23,000, 4 partners): "net-new stock market primitives, e.g. … market
   infrastructure". **Recommended.** keldrin is market infrastructure: the verified data layer other products
@@ -76,17 +83,16 @@ repository, deployed to production with an independent review at each phase.
 **Users:** say "none confirmed yet; one builder team (MAXXAGENT) agreed to test", and only if that is still true
 on the day. Add their feedback only with their permission.
 
-## 4. Demo video (Loom, about 90 s; record during US market hours)
+## 4. Demo video for Agentic Stock Finance (Loom, about 90 s; record during US market hours)
 
 | Time | Screen | Say |
 |---|---|---|
-| 0–8 s | Home page | "keldrin: intelligence for programmable equities. The verified record for tokenized stocks on Base." |
-| 8–20 s | Explorer list (logos, NAV, DEX, gap, freshness) | "Every Coinbase stock with a verified Chainlink feed: NAV, onchain DEX price, the gap and how fresh it is. 435 tokens tracked; each says what's verified for it." |
-| 20–38 s | NVDAc page: chart, risk, corporate actions, proof links | "Every point is an official Chainlink round, with its id. Risk comes from official closes. Dividends link to the SEC filing and the onchain transaction." |
-| 38–48 s | Terminal: `npx keldrin verify-nav NVDAc` | "Don't trust us, verify: one command re-reads our numbers from Base." |
-| 48–62 s | Playground: risk endpoint, run, copy code | "Free API, no key: pick an endpoint, run it, copy the code." |
-| 62–78 s | Claude with the keldrin MCP: "Is NVDAc's NAV fresh, and how volatile has it been?" | "Agents connect over MCP, or pay five cents via x402 for a full snapshot in one call." |
-| 78–90 s | Transparency, then the URL | "And we publish our own numbers. keldrin. Research once, verify independently, serve many." |
+| 0–8 s | Home page | "keldrin: intelligence for programmable equities, built for agents. The verified record for tokenized stocks on Base." |
+| 8–30 s | Claude (or any MCP agent) with keldrin connected. Ask: "Is NVDAc's NAV fresh right now, how volatile has it been, and is there a dividend coming?" | "The agent calls keldrin's MCP tools (market context, risk, corporate actions) and answers with the Chainlink round id, the volatility from official closes and the SEC-linked dividend. If something is unknown, it says so." |
+| 30–45 s | The agent asks for a full snapshot; the 402 appears with the x402 terms | "For everything in one call, agents pay five cents in USDC on Base via x402 on Bankr, and are charged only for a complete answer." |
+| 45–60 s | Explorer: NVDAc page with chart, risk, corporate actions, proof links | "Humans see the same record: every point is an official round, every dividend links its filing and transaction." |
+| 60–72 s | Terminal: `npx keldrin verify-nav NVDAc` | "Agents shouldn't trust blindly either: one command re-reads our numbers from Base." |
+| 72–90 s | Transparency, then the URL and /skill.md | "Any agent can start from one file, keldrin.vercel.app/skill.md. Research once, verify independently, serve many." |
 
 ## 5. Before submitting (checklist)
 

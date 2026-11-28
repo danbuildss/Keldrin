@@ -1,5 +1,6 @@
 name: Keldrin research (scheduled)
-# Phase 4 (founder approved 2026-11-27): every 6 hours plus manual dispatch. Writes to Supabase only through
+# Phase 4 (founder approved 2026-11-27): scheduled 3 times a day (02:23, 10:23, 18:23 UTC) plus manual dispatch.
+# Observed 2026-11-28: GitHub ran 1 of the first 2 scheduled slots, 3 h 41 min late, and skipped the other. Writes to Supabase only through
 # the least-privilege `keldrin_writer` login (append + asset upsert; no delete, no DDL).
 # Disabled unless the repository variable RESEARCH_ENABLED is "true". GitHub cron can be delayed or skipped:
 # freshness is shown by /health, not promised.
