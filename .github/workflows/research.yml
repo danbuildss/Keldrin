@@ -55,6 +55,7 @@ jobs:
           SYMBOLS: ${{ inputs.symbols }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          KELDRIN_VERIFIER_URL: ${{ secrets.KELDRIN_VERIFIER_URL }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       - name: Discover and independently verify DEX pools
@@ -63,6 +64,7 @@ jobs:
           SYMBOLS: ${{ inputs.symbols }}
           BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
           BASE_RPC_BEARER: ${{ secrets.BASE_RPC_BEARER }}
+          KELDRIN_VERIFIER_URL: ${{ secrets.KELDRIN_VERIFIER_URL }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       - name: Earnings releases (SEC 8-K item 2.02)
@@ -78,6 +80,7 @@ jobs:
         run: node src/cli.ts earnings-verify --db=pg
         env:
           SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}
+          KELDRIN_VERIFIER_URL: ${{ secrets.KELDRIN_VERIFIER_URL }}
           KELDRIN_WRITER_URL: ${{ secrets.KELDRIN_WRITER_URL }}
           DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
       - name: Count keldrin's x402 payments onchain (incremental)

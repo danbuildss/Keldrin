@@ -214,3 +214,12 @@ Production at merge: /v1/stats returned x402_payments null (public RPC throttled
   - Failed SEC company lookups are recorded too, so they are no longer retried every run.
   - The verify cap is raised to 1,500 per run (600 took 3 min).
   - Expected steady-state run: about 18 min, the same as before earnings.
+
+## Verifier login and link previews (2026-11-28, founder: "I approve, do what is left")
+- **Verifier login.** Role `keldrin_verifier` created (supabase/016, applied; NOLOGIN until the founder sets a password).
+  - What it can do: read the research tables, and append to nav_reviews, dex_reviews and earnings_reviews only.
+  - Checked with SET ROLE: reading nav_rounds works (36,696 rows); appending a review works (rolled back).
+  - Denied (permission denied): writing records, deleting nav_rounds, updating a review, reading feedback.
+  - `nav-verify`, `dex-verify` and `earnings-verify` use `KELDRIN_VERIFIER_URL` when that secret exists, and otherwise log that they fall back to the writer login.
+- **Link previews.** Every page has og:image (public/og.png, 1200×630, brand colours) plus a Twitter large-image card.
+- **PR #22** (the superseded Vercel analytics PR) closed.
